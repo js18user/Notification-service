@@ -1,1 +1,1 @@
-# mailing-service
+# mailing service
