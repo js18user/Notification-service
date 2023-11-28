@@ -64,3 +64,7 @@ List and functions of the presented scripts:
 - create_tables.sql  it is a SQL file with query
 - requirements.txt no comments
 
+This task is self-documented:
+- http://127.0.0.1:8000/docs
+- http://127.0.0.1:8000/redoc
+- http://127.0.0.1:8000    for WEB UI(admin panel)
