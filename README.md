@@ -96,3 +96,17 @@ deleting the mailing list
 
 •
 processing active mailings and sending messages to clients
+
+Mailing logic
+•
+After creating a new mailing, if the current time is greater than the start time and less than the end time, all clients that match the filter values specified in this mailing must be selected from the directory and sending to all these clients must be started.
+
+•
+If a mailing is created with a start time in the future, the sending should start automatically when this time arrives without additional actions on the part of the system user.
+
+•
+As messages are sent, statistics should be collected (see the description of the “message” entity above) for each message for subsequent generation of reports.
+
+•
+An external service that receives sent messages may take a long time to process the request, respond with incorrect data, or not accept requests at all for some time. It is necessary to implement correct handling of such errors. Problems with the external service should not affect the stability of the developed mailing service.
+
