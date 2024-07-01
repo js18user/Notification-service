@@ -66,8 +66,8 @@ List and functions of the presented scripts:
 - requirements.txt no comments
 
 This task is self-documented:
-- docker build -t m:m -f Dockerfile.txt .
-- docker run -d -p 80:80 m:m
+- >docker build -t m:m -f Dockerfile.txt .
+- >docker run -d -p 80:80 m:m
 
 - http://127.0.0.1:80/docs
 - http://127.0.0.1:80/redoc
