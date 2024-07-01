@@ -6,6 +6,7 @@
         <title>admin</title>
         <!-- <link href="data1.css" type="text/css" />  -->
         <style>
+
     .container {
        margin: 0 auto;
        width: 100%;
@@ -216,7 +217,9 @@ input    {
             color: FireBrick;
             margin-bottom: 50px;
 }
-        </style>
+
+         </style>
+
     </head>
 
     <body>
@@ -362,7 +365,7 @@ async function getDistribution(distribution, list_number) {
 
 // Getting a Single Distribution with message's statistic
 async function getDistributionStatistic(id_number) {
-    var response = await fetch(`/admin/statistic?ids=${id_number}`, {
+    var response = await fetch(`/admin/statistic?id=${id_number}`, {
         method: "GET",
         headers: headers,
     });
