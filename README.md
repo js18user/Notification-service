@@ -64,6 +64,7 @@ List and functions of the presented scripts:
 - data.html This is a WebUI interface.
 - create_tables.sql  it is a SQL file with query
 - requirements.txt no comments
+- urls.py  no comments
 
 This task is self-documented:
 - >docker build -t m:m -f Dockerfile.txt .
