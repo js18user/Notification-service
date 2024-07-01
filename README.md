@@ -1,17 +1,18 @@
 # Notification service 
 The software stack for implementing the task is as follows:
-- Python 3.10.9 
+- Python 3.12.4 
 - Fastapi
 - Pydantic
 - Asyncio
 - Async/await
 - Asyncpg
 - SQL
-- Postgresql 14.5  DBaaS  or Localhost
+- Postgresql 15  DBaaS  or Localhost
 - JS
 - CSS
 - HTML
 - Logging
+- aio_pika
 
 Statement of the problem (Technical specifications for programming)
 It is necessary to develop a mailing management service.
@@ -59,12 +60,15 @@ Mailing logic:
 
 List and functions of the presented scripts:
 
-- main.py  it is the main program to perform a task.
+- m.py  it is the main program to perform a task.
 - data.html This is a WebUI interface.
 - create_tables.sql  it is a SQL file with query
 - requirements.txt no comments
 
 This task is self-documented:
-- http://127.0.0.1:8000/docs
-- http://127.0.0.1:8000/redoc
-- http://127.0.0.1:8000    for WEB UI(admin panel)
+- http://127.0.0.1:80/docs
+- http://127.0.0.1:80/redoc
+- http://127.0.0.1:80    for WEB UI(admin panel)
+
+  docker build -t m:m -f Dockerfile.txt .
+  docker run -d -p 80:80 m:m
