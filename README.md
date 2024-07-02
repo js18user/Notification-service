@@ -67,8 +67,8 @@ List and functions of the presented scripts:
 - urls.py  no comments
 
 This task is self-documented:
-- >docker build -t m:m -f Dockerfile.txt .
-- >docker run -d -p 80:80 m:m
+- >docker build -t sends:v3 -f Dockerfile.txt .
+- >docker run -d -p 80:80 sends:v3
 
 - http://127.0.0.1:80/docs
 - http://127.0.0.1:80/redoc
