@@ -11,7 +11,9 @@ from enum import Enum
 from functools import wraps
 from typing import Union, Optional
 
-from fastapi import FastAPI, Depends, BackgroundTasks, Query, Response, HTTPException
+from fastapi import FastAPI, Depends, BackgroundTasks, Query, Response, HTTPException, Request
+from starlette.middleware.base import BaseHTTPMiddleware
+
 from fastapi.responses import FileResponse
 from fastapi_asyncpg import configure_asyncpg
 from aio_pika import exceptions
@@ -42,6 +44,19 @@ class Ind:
     interval: timedelta = datetime.now() - datetime.utcnow()
     ine: timedelta = parse(f'1:0:0') - parse(f'0:0:0')
     restart: int = 1
+
+class MyMiddleware:
+    def __init__(
+            self,
+            some_attribute: str,
+    ):
+        self.some_attribute = some_attribute
+
+    async def __call__(self, request: Request, call_next, ) -> None:
+        start_time = time.time()
+        response = await call_next(request)
+        print("\033[91mexecution time: {} sec".format(time.time() - start_time))
+        return response
 
 
 class Status(str, Enum):
@@ -301,7 +316,7 @@ try:
         contact = await cnt(url_rabbitmq, )
         async with contact.channel() as session:
 
-            for dict_message in list_messages:
+            for lm_index, dict_message in enumerate(list_messages):
                 match dict_message['status']:
                     case Status.expired.value:
                         pass
@@ -311,9 +326,9 @@ try:
         await contact.close()
         return
 
-    async def create_queue_messages(db, ld) -> list:
+    async def create_queue_messages(db, ld):
         lm: list = list()
-        for distribution in ld:
+        for ld_index, distribution in enumerate(ld):
 
             lc: list = await select(db,
                                     table=Table.client.value,
@@ -324,7 +339,7 @@ try:
                                                  ).dict(),
                                     )
             lms: list = list()
-            for client in lc:
+            for lc_index, client in enumerate(lc):
                 if await realtime(distribution['end_date'], client['timezone']) < datetime.now():
                     status = Status.expired.value
                 else:
@@ -352,7 +367,7 @@ try:
         return lm
 
 
-    async def m_restart(db, ) -> list:
+    async def m_restart(db, ):
 
         restart_status: dict = {1: "'formed', 'queue', 'failure'", 0: "'failure'"}
         logging.info(f"Restart_status: {restart_status[ind.restart]}")
@@ -373,7 +388,7 @@ try:
         return lm
 
 
-    async def seek(db, ) -> list:
+    async def seek(db, ):
         return await db.fetch(
             "SELECT d.*, "
             "COUNT(m.status) AS com, "
@@ -398,7 +413,12 @@ try:
     app = FastAPI(
         title="API documentation",
         description="A set of Api for completing the task is presented",
+        swagger_ui_parameters={"syntaxHighlight.theme": "obsidian"},
     )
+
+    my_middleware = MyMiddleware(some_attribute="")
+    app.add_middleware(BaseHTTPMiddleware, dispatch=my_middleware)
+
     conn = db_connect()
 
 
