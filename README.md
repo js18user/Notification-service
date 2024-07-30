@@ -11,7 +11,7 @@ The software stack for implementing the task is as follows:
 - JS
 - CSS
 - HTML
-- Logging
+- Logging/loguru
 - aio_pika
 
 Statement of the problem (Technical specifications for programming)
@@ -67,7 +67,7 @@ List and functions of the presented scripts:
 - urls.py  no comments
 
 This task is self-documented:
-- >docker build -t sends:v3 -f Dockerfile.txt .
+- >docker build -t sends:v3 -f Dockerfile .
 - >docker run -d -p 80:80 sends:v3
 
 - http://127.0.0.1:80/docs
