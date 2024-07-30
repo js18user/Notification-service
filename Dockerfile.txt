@@ -4,9 +4,9 @@ FROM python:3.12-slim
 
 LABEL maintainer="Jurij <js18.user@gmail.com>"
 
-ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONDONTWRITEBYTECODE=1
 
-ENV PYTHONUNBUFFERED 1
+ENV PYTHON UNBUFFERED=1
 
 COPY requirements.txt .
 
@@ -20,8 +20,8 @@ COPY create_tables.sql .
 
 COPY urls.py .
 
-COPY m.py .
+COPY mod.py .
 
-CMD ["m.py" ]
+CMD ["mod.py" ]
 
 ENTRYPOINT ["python"]
