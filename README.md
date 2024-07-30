@@ -65,6 +65,7 @@ List and functions of the presented scripts:
 - create_tables.sql  it is a SQL file with query
 - requirements.txt no comments
 - urls.py  no comments
+- Dockerfile  no comment
 
 This task is self-documented:
 - >docker build -t sends:v3 -f Dockerfile .
@@ -74,3 +75,4 @@ This task is self-documented:
 - http://127.0.0.1:80/redoc
 - http://127.0.0.1:80    for WEB UI(admin panel)
 
+The database and Rabbitmq are relevant, you can work
