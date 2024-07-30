@@ -60,7 +60,7 @@ Mailing logic:
 
 List and functions of the presented scripts:
 
-- m.py  it is the main program to perform a task.
+- mod.py  it is the main program to perform a task.
 - data.html This is a WebUI interface.
 - create_tables.sql  it is a SQL file with query
 - requirements.txt no comments
