@@ -23,3 +23,18 @@ name: str = 'fintech'
 password: str = 'aa4401'
 port: int = 5432
 host: str = 'localhost'
+
+query_many: str = f"INSERT INTO message (start_date,status,id_distribution,id_client) VALUES ($1,$2,$3,$4);"
+url_tws: str = "postgresql://gen_user:Aaa4401%26%26@77.73.132.189:5432/default_db"
+url_twp: str = "postgresql://gen_user:Bv(i%3D%26r5ILjTid@147.45.239.120:5432/default_db"
+db_user_tws: str = "gen_user"
+db_name_tws: str = "default_db"
+db_password_tws: str = "Aaa4401%26%26"
+db_port_tws: int = 5432
+db_host_tws: str = "77.73.132.189"
+
+db_user_twp: str = "gen_user"
+db_name_twp: str = "default_db"
+db_password_twp: str = "Bv(i%3D%26r5ILjTid"
+db_port_twp: int = 5432
+db_host_twp: str = "147.45.239.120"
