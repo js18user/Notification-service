@@ -42,7 +42,7 @@ from dataclasses import dataclass
 class Ind:
     name: str = 'for background task'
     interval: timedelta = datetime.now() - datetime.now(tzs.utc).replace(tzinfo=None)
-    ine: timedelta = parse(f'1:0:0') - parse(f'0:0:0')
+    ine = timedelta(hours=1, )
     restart: int = 1
 
 
