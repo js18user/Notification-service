@@ -92,7 +92,6 @@ button:active  {color:yellow; text-decoration:underline;}
                         margin-top: 0px;
                     margin-bottom: 20px;
                     border-bottom: 1px solid #eee;
-
 }
 
 .scroll-table table {
@@ -315,7 +314,7 @@ async function getDistributions() {
         await getDistribution(distributions[0], 0);
 
         var rows = document.querySelector(tbd);
-        distributions.forEach(distribution => rows.append(row(distribution)));
+        for (distribution of distributions) { rows.append(row(distribution)) };
         document.getElementById("distributionId").value = "";
     }
 }
@@ -424,7 +423,7 @@ async function createDistribution(
             if (response.ok === true) {
                 var distribution = await response.json();
                 await getDistribution(distribution[0], 0);
-                console.log(distribution[0]);
+                // console.log(distribution[0]);
                 document.getElementById("distributionId").value = "";
                 await displayOnError("Created distribution ID=" + distribution[0]['id'] +
                     " " + await response.status + " " + await response.statusText +
@@ -459,7 +458,7 @@ async function editDistribution(id, start_date, end_date, teg, mob, text) {
     if (response.ok === true) {
         var listDistributionStatistic = await getDistributionStatistic(id);
         document.querySelector(`tr[data-rowid="${listDistributionStatistic[0].id}"]`).
-        replaceWith(row(listDistributionStatistic[0]));
+            replaceWith(row(listDistributionStatistic[0]));
         await displayOnError("Updated distribution ID=" + id +
             " " + await response.status + " " + await response.statusText +
             " Press the UpdateGlobal button to monitor the status of messages");
@@ -530,7 +529,8 @@ async function updateGlobal() {
             await getDistribution(distributions[0], 0);
 
             var rows = document.querySelector(tbd);
-            distributions.forEach(distribution => rows.append(row(distribution)));
+            for (distribution of distributions) {rows.append(row(distribution))};
+            // distributions.forEach(distribution => rows.append(row(distribution)));
             document.getElementById("distributionId").value = "";
             await displayOnError("All updated");
         }
@@ -559,36 +559,31 @@ function row(distribution) {
     var showFormed = document.createElement("button");
     showFormed.append("Formed ");
     showFormed.append(distribution.formed);
-    showFormed.addEventListener("click", async() => await showMessages(distribution,
-        distribution.id,  "formed"));
+    showFormed.addEventListener("click", async() => await showMessages(distribution, distribution.id,  "formed"));
     linksTd.append(showFormed);
 
     var showQueue = document.createElement("button");
     showQueue.append("Queue ");
     showQueue.append(distribution.queue);
-    showQueue.addEventListener("click", async() => await showMessages(distribution,
-        distribution.id, "queue"));
+    showQueue.addEventListener("click", async() => await showMessages(distribution, distribution.id, "queue"));
     linksTd.append(showQueue);
 
     var showSent = document.createElement("button");
     showSent.append("Sent ");
     showSent.append(distribution.sent);
-    showSent.addEventListener("click", async() => await showMessages(distribution,
-        distribution.id, "sent"));
+    showSent.addEventListener("click", async() => await showMessages(distribution, distribution.id, "sent"));
     linksTd.append(showSent);
 
     var showFailure = document.createElement("button");
     showFailure.append("Failure ");
     showFailure.append(distribution.failure);
-    showFailure.addEventListener("click", async() => await showMessages(distribution,
-        distribution.id, "failure"));
+    showFailure.addEventListener("click", async() => await showMessages(distribution, distribution.id, "failure"));
     linksTd.append(showFailure);
 
     var showExpired = document.createElement("button");
     showExpired.append("Expired ");
     showExpired.append(distribution.expired);
-    showExpired.addEventListener("click", async() => await showMessages(distribution,
-        distribution.id,  "expired"));
+    showExpired.addEventListener("click", async() => await showMessages(distribution, distribution.id,  "expired"));
     linksTd.append(showExpired);
 
     var editLink = document.createElement("button");
@@ -600,8 +595,7 @@ function row(distribution) {
     var removeLink = document.createElement("button");
     removeLink.setAttribute('class', 'deleteDistribution');
     removeLink.append("Delete");
-    removeLink.addEventListener("click", async () => await deleteDistribution(distribution,
-    distribution.id));
+    removeLink.addEventListener("click", async () => await deleteDistribution(distribution, distribution.id));
     linksTd.append(removeLink);
 
     tr.appendChild(linksTd);
@@ -670,10 +664,10 @@ function rowMessage(message) {
 }
 
 // Reset all
-document.getElementById("resetBtn").addEventListener("click", () =>  reset());
+document.getElementById("resetBtn").addEventListener("click", async () =>  reset());
 
 // UpdateGlobal
-document.getElementById("updateGlBtn").addEventListener("click", () =>  updateGlobal());
+document.getElementById("updateGlBtn").addEventListener("click", async () =>  updateGlobal());
 
 // Submitting the form for further use
 document.getElementById("saveBtn").addEventListener("click", async () => {
@@ -752,7 +746,7 @@ async function displayMessage(distribution, status) {
    divCom.appendChild(divBody);
 
    var rows = document.createElement(tbd);
-   messages.forEach(message => rows.append(rowMessage(message)));
+   for(message of messages) { rows.append(rowMessage(message)) };
    divBody.appendChild(rows)
 }
 //   start working
