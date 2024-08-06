@@ -76,3 +76,6 @@ This task is self-documented:
 - http://127.0.0.1:80    for WEB UI(admin panel)
 
 The database and Rabbitmq are relevant, you can work
+
+This is an alternative way to run the script:   (Docker.Hub from my public repo)
+docker run -p 80:80 js18user/mod:mod
