@@ -14,7 +14,7 @@ from typing import Union, Optional
 
 from fastapi import FastAPI, Depends, BackgroundTasks, Query, Response, HTTPException, Request
 from starlette.middleware.base import BaseHTTPMiddleware
-
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi_asyncpg import configure_asyncpg
 from asyncpg import exceptions as asyncpg_exception
@@ -23,7 +23,6 @@ from aio_pika import DeliveryMode
 from aio_pika import Message as Msg
 from aio_pika import connect as cnt
 from dateutil.parser import parse
-
 from loguru import logger as logging
 from pydantic import BaseModel, Field
 
@@ -369,6 +368,7 @@ try:
 
             lms.append(tuple(mode))
         return lms
+    
 
     async def create_queue_messages(db, ld):
         for ld_index, distribution in enumerate(ld):
@@ -409,14 +409,14 @@ try:
             "COUNT(m.status) FILTER (WHERE  m.status = 'formed') AS formed, "
             "COUNT(m.status) FILTER (WHERE  m.status = 'failure') AS failure, "
             "COUNT(m.status) FILTER (WHERE  m.status = 'expired') AS expired "
-            "FROM Distribution AS d JOIN Message as m  "
+            "FROM distribution AS d JOIN message AS m  "
             "ON ( m.id_Distribution=d.id ) "
             "GROUP BY ( d.id   )  "
             "ORDER BY ( d.id ) DESC; "
         )
 
 
-    """ ........................................   Let's go....    .............................."""
+    """    Begin    """
 
     locale.setlocale(locale.LC_ALL, "")
 
@@ -427,10 +427,26 @@ try:
         description="A set of Api for completing the task is presented",
         swagger_ui_parameters={"syntaxHighlight.theme": "obsidian"},
     )
-
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost",
+                       "http://localhost:80",
+                       "https://localhost:80/docs",
+                       "https://localhost:80/docs",
+                       "http://localhost:80/client",
+                       "http://localhost:80/distributiom",
+                       "http://localhost:80/message",
+                       "http://localhost:80/admin",
+                       "http://localhost:80/admin/statistic",
+                       "http://localhost:80/admin/message",
+                       "http://localhost:80/admin/message/status",
+                       ],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     my_middleware = MyMiddleware(some_attribute="")
     app.add_middleware(BaseHTTPMiddleware, dispatch=my_middleware)
-
     conn = db_connect()
 
     @conn.on_init
@@ -464,10 +480,9 @@ try:
                            model=model,
                            )
 
-        if bool(row) is False:
-            response.status_code = 400
-        else:
-            pass
+        match len(row) == 0:
+            case True: response.status_code = 400
+            case _: pass
         return row
 
 
