@@ -78,4 +78,4 @@ This task is self-documented:
 The database and Rabbitmq are relevant, you can work
 
 This is an alternative way to run the script:   (Docker.Hub from my public repo)
-docker run -p 80:80 js18user/mod:mod
+- docker run -p 80:80 js18user/mod:mod
