@@ -12,6 +12,9 @@ from enum import Enum
 from functools import wraps
 from typing import Union, Optional
 
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi import FastAPI, Depends, BackgroundTasks, Query, Response, HTTPException, Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
@@ -33,7 +36,7 @@ from urls import db_name_twp as name
 from urls import db_password_twp as password
 from urls import query_many
 
-from urls import url_rabbitmq as url_rabbitmq
+from urls import url_rabbit_google as url_rabbitmq
 from dataclasses import dataclass
 
 
@@ -42,7 +45,6 @@ class Ind:
     name: str = 'for background task'
     interval: timedelta = datetime.now() - datetime.now(tzs.utc).replace(tzinfo=None)
     ine = timedelta(hours=1, )
-    restart: int = 1
 
 
 class MyMiddleware:
@@ -51,7 +53,7 @@ class MyMiddleware:
 
     async def __call__(self, request: Request, call_next, ) -> None:
         start_time, response = time.time(), await call_next(request)
-        print(f"{"\033[91m"}endpoint execution time:{(time.time() - start_time): .3f} sec")
+        print(f"{"\033[91m"}endpoint execution time:{1000*(time.time() - start_time): .0f} m.sec")
         return response
 
 
@@ -284,36 +286,37 @@ try:
         async with db.transaction():
             return await db.fetch(sql, *params, )
 
+    @timing_decorator
     async def update_ids(db, tds, status, ):
         async with db.transaction():
             return await db.execute(f"UPDATE message SET status = '{status}' WHERE id in {tds} ;")
 
 
     async def send_message(db, session, index: int, dict_message: dict, rss: dict, ):
-        d_mess = D(dict_message)
+
         match index:
             case 0:
                 await update(db, table=Table.message.value,
-                             model=Message(id=d_mess.id).dict(),
+                             model=Message(id=dict_message['id']).dict(),
                              adu=MessageUpdate(status=Status.queue.value,
                                                start_date=datetime.now()
                                                ).dict(),
                              )
             case _:
-                d_mess.status = Status.queue.value
-        pause: int = (d_mess.start_date.timestamp().__sub__(datetime.now().timestamp()))
+                dict_message['status'] = Status.queue.value
+        pause: int = (dict_message['start_date'].timestamp().__sub__(datetime.now().timestamp()))
         match pause < 0:
             case True: pause = 0
             case _: pass
         await asyncio.sleep(pause, )
-        d_mess.status = Status.sent.value
+        dict_message['status'] = Status.sent.value
         try:
-            await send_pika(session, d_mess)
+            await send_pika(session, dict_message)
         except exceptions as error:
-            rss[2].append(d_mess.id)
+            rss[2].append(dict_message['id'])
             logging.info(f"There are problem with aio_pika{skip} Error: {error}")
         else:
-            rss[1].append(d_mess.id)
+            rss[1].append(dict_message['id'])
         finally:
             pass
         return rss
@@ -335,7 +338,6 @@ try:
             for lm_index, dict_message in enumerate(list_messages):
                 await send_message(db, session, lm_index, dict(dict_message), rss, )
         await contact.close()
-
         match len(rss[1]) > 0:
             case True:
                 await update_ids(db=db, tds=tuple(rss[1]), status=Status.sent.value, )
@@ -348,11 +350,11 @@ try:
         print(f"control: {rss[0]}  {len(rss[1])}  {len(rss[2])}")
         return
 
-
+    @timing_decorator
     async def crms(lc: list, distribution: dict, ) -> list:
         """ to create with concurrent.futures.ThreadPoolExecutor() in future """
         lms = []
-        for lc_index, client in enumerate(lc):
+        for index_cl, client in enumerate(lc):
             match (await realtime(distribution['end_date'], client['timezone']) < datetime.now()):
                 case True:
                     status = Status.expired.value
@@ -369,7 +371,7 @@ try:
             lms.append(tuple(mode))
         return lms
     
-
+    @timing_decorator
     async def create_queue_messages(db, ld):
         for ld_index, distribution in enumerate(ld):
 
@@ -447,6 +449,15 @@ try:
     )
     my_middleware = MyMiddleware(some_attribute="")
     app.add_middleware(BaseHTTPMiddleware, dispatch=my_middleware)
+
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler():
+        return JSONResponse(status_code=400,
+                            content=jsonable_encoder([]),
+                            )
+
+
     conn = db_connect()
 
     @conn.on_init
