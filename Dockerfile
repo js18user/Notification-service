@@ -22,6 +22,8 @@ COPY urls.py .
 
 COPY mod.py .
 
+EXPOSE 80
+
 CMD ["mod.py" ]
 
 ENTRYPOINT ["python"]
