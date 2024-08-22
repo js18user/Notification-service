@@ -71,11 +71,12 @@ This task is self-documented:
 - >docker build -t sends:v3 -f Dockerfile .
 - >docker run -d -p 80:80 sends:v3
 
-- http://127.0.0.1:80/docs
+- http://127.0.0.1:80/docs       forAPI documentation Swagger
 - http://127.0.0.1:80/redoc
 - http://127.0.0.1:80    for WEB UI(admin panel)
 
 The database and Rabbitmq are relevant, you can work
 
-This is an alternative way to run the script:   (Docker.Hub from my public repo)
-- docker run -p 80:80 js18user/mod:mod
+This is an alternative way to run the script:
+- js18user-notification-service-39be.twc1.net      for WEB UI(admin panel)
+- js18user-notification-service-39be.twc1.net       forAPI documentation Swagger 
