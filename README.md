@@ -78,5 +78,5 @@ This task is self-documented:
 The database and Rabbitmq are relevant, you can work
 
 This is an alternative way to run the script:
-- js18user-notification-service-39be.twc1.net      for WEB UI(admin panel)
-- js18user-notification-service-39be.twc1.net       forAPI documentation Swagger 
+- ##js18user-notification-service-39be.twc1.net      for WEB UI(admin panel)
+- ##js18user-notification-service-39be.twc1.net       forAPI documentation Swagger 
