@@ -6,20 +6,28 @@ import locale
 import time
 
 import orjson as json
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 from datetime import timezone as tzs
-
 from enum import Enum
 from functools import wraps
-from typing import Union, Optional
+from typing import Union
+from typing import Optional
 
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from fastapi import FastAPI, Depends, BackgroundTasks, Query, Response, HTTPException, Request
+from fastapi.responses import FileResponse
+from fastapi import FastAPI
+from fastapi import Request
+from fastapi import HTTPException
+from fastapi import Response
+from fastapi import Query
+from fastapi import BackgroundTasks
+from fastapi import Depends
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+
 from fastapi_asyncpg import configure_asyncpg
 from asyncpg import exceptions as asyncpg_exception
 from aio_pika import exceptions
@@ -28,15 +36,14 @@ from aio_pika import Message as Msg
 from aio_pika import connect as cnt
 from dateutil.parser import parse
 from loguru import logger as logging
-from pydantic import BaseModel, Field
-
+from pydantic import BaseModel
+from pydantic import Field
 from urls import db_host_twp as host
 from urls import db_port_twp as port
 from urls import db_user_twp as user
 from urls import db_name_twp as name
 from urls import db_password_twp as password
 from urls import query_many
-
 from urls import url_rabbit_google as url_rabbitmq
 from dataclasses import dataclass
 
@@ -389,35 +396,35 @@ try:
         return
 
     async def m_restart(db, ):
-        restart_status: dict = {1: "'formed', 'queue', 'failure'", 0: "'failure'"}
         return await db.fetch(
-             "SELECT d.text, "
-             "d.interval, "
-             "c.phone, "
-             "m.start_date, "
-             "m.status, "
-             "m.id_distribution, "
-             "m.id "
-             "FROM client AS c, message AS m, distribution AS d "
-             "WHERE ( m.status IN ({query_status}) "    
-             "AND d.id = m.id_distribution  "
-             "AND c.id = m.id_client ) "
-             "ORDER BY m.start_date ; ".format(query_status=restart_status[1]))
+             f"SELECT d.text, "
+             f"d.interval, "
+             f"c.phone, "
+             f"m.start_date, "
+             f"m.status, "
+             f"m.id_distribution, "
+             f"m.id "
+             f"FROM client AS c, message AS m, distribution AS d "
+             f"WHERE ( m.status IN ('formed', 'queue', 'failure') "    
+             f"AND d.id = m.id_distribution  "
+             f"AND c.id = m.id_client ) "
+             f"ORDER BY m.start_date ; "
+        )
 
 
     async def seek(db, ):
         return await db.fetch(
-            "SELECT d.*, "
-            "COUNT(m.status) AS com, "
-            "COUNT(m.status) FILTER (WHERE  m.status = 'sent') AS sent, "
-            "COUNT(m.status) FILTER (WHERE  m.status = 'queue') AS queue, "
-            "COUNT(m.status) FILTER (WHERE  m.status = 'formed') AS formed, "
-            "COUNT(m.status) FILTER (WHERE  m.status = 'failure') AS failure, "
-            "COUNT(m.status) FILTER (WHERE  m.status = 'expired') AS expired "
-            "FROM distribution AS d JOIN message AS m  "
-            "ON ( m.id_Distribution=d.id ) "
-            "GROUP BY ( d.id   )  "
-            "ORDER BY ( d.id ) DESC; "
+            f"SELECT d.*, "
+            f"COUNT(m.status) AS com, "
+            f"COUNT(m.status) FILTER (WHERE  m.status = 'sent') AS sent, "
+            f"COUNT(m.status) FILTER (WHERE  m.status = 'queue') AS queue, "
+            f"COUNT(m.status) FILTER (WHERE  m.status = 'formed') AS formed, "
+            f"COUNT(m.status) FILTER (WHERE  m.status = 'failure') AS failure, "
+            f"COUNT(m.status) FILTER (WHERE  m.status = 'expired') AS expired "
+            f"FROM distribution AS d JOIN message AS m  "
+            f"ON ( m.id_Distribution=d.id ) "
+            f"GROUP BY ( d.id   )  "
+            f"ORDER BY ( d.id ) DESC; "
         )
 
 
@@ -428,23 +435,23 @@ try:
     ind, skip = Ind(), '\n'
 
     app = FastAPI(
-        title="API documentation",
-        description="A set of Api for completing the task is presented",
-        swagger_ui_parameters={"syntaxHighlight.theme": "obsidian"},
+        title=f"API documentation",
+        description=f"A set of Api for completing the task is presented",
+        swagger_ui_parameters={f"syntaxHighlight.theme": f"obsidian"},
     )
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost",
-                       "http://localhost:80",
-                       "https://localhost:80/docs",
-                       "https://localhost:80/docs",
-                       "http://localhost:80/client",
-                       "http://localhost:80/distributiom",
-                       "http://localhost:80/message",
-                       "http://localhost:80/admin",
-                       "http://localhost:80/admin/statistic",
-                       "http://localhost:80/admin/message",
-                       "http://localhost:80/admin/message/status",
+        allow_origins=[f"http://localhost",
+                       f"http://localhost:80",
+                       f"https://localhost:80/docs",
+                       f"https://localhost:80/docs",
+                       f"http://localhost:80/client",
+                       f"http://localhost:80/distributiom",
+                       f"http://localhost:80/message",
+                       f"http://localhost:80/admin",
+                       f"http://localhost:80/admin/statistic",
+                       f"http://localhost:80/admin/message",
+                       f"http://localhost:80/admin/message/status",
                        ],
         allow_credentials=True,
         allow_methods=["*"],
@@ -465,7 +472,7 @@ try:
 
     @conn.on_init
     async def initial_db(db):
-        with open('create_tables.sql', 'r') as sql:
+        with open(f'create_tables.sql', f'r') as sql:
             return await db.execute(sql.read(), )
 
 
@@ -701,15 +708,15 @@ try:
                                         id: int = Query(ge=0, ),
                                         ):
         return await db.fetch(
-                 "SELECT d.*, COUNT(m.status) AS com, "   
-                 "COUNT(m.status) FILTER (WHERE  m.status = 'sent') AS sent, "
-                 "COUNT(m.status) FILTER (WHERE  m.status = 'queue') AS queue, "
-                 "COUNT(m.status) FILTER (WHERE  m.status = 'formed') AS formed, "
-                 "COUNT(m.status) FILTER (WHERE  m.status = 'failure') AS failure, "
-                 "COUNT(m.status) FILTER (WHERE  m.status = 'expired') AS expired "
-                 "FROM Distribution AS d JOIN Message as m  "
-                 "ON ( d.id={id} AND m.id_Distribution={id} ) "
-                 "GROUP BY ( d.id   )  ".format(id=id),
+                 f"SELECT d.*, COUNT(m.status) AS com, "   
+                 f"COUNT(m.status) FILTER (WHERE  m.status = 'sent') AS sent, "
+                 f"COUNT(m.status) FILTER (WHERE  m.status = 'queue') AS queue, "
+                 f"COUNT(m.status) FILTER (WHERE  m.status = 'formed') AS formed, "
+                 f"COUNT(m.status) FILTER (WHERE  m.status = 'failure') AS failure, "
+                 f"COUNT(m.status) FILTER (WHERE  m.status = 'expired') AS expired "
+                 f"FROM Distribution AS d JOIN Message as m  "
+                 f"ON ( d.id={id} AND m.id_Distribution={id} ) "
+                 f"GROUP BY ( d.id   )  "
         )
 
 
@@ -718,13 +725,13 @@ try:
                               id_distribution: int = Query(ge=0, ),
                               ):
         return await db.fetch(
-                 "SELECT m.*, "
-                 "c.timezone, "
-                 "c.phone "
-                 "FROM message AS m, client as c "
-                 "WHERE (m.id_distribution={id} AND "
-                 "c.id=m.id_client ) "
-                 "ORDER BY  m.start_date, c.timezone, c.phone, m.status ;".format(id=id_distribution),
+                 f"SELECT m.*, "
+                 f"c.timezone, "
+                 f"c.phone "
+                 f"FROM message AS m, client as c "
+                 f"WHERE (m.id_distribution={id_distribution} AND "
+                 f"c.id=m.id_client ) "
+                 f"ORDER BY  m.start_date, c.timezone, c.phone, m.status ;"
         )
 
 
@@ -734,16 +741,14 @@ try:
                                      status: str = Query(),
                                      ):
         return await db.fetch(
-                 "SELECT m.*, "
-                 "c.timezone AS timezone, "
-                 "c.phone AS phone "
-                 "FROM message AS m, client as c "
-                 "WHERE (m.id_distribution={id} AND "
-                 "m.status='{status}' AND "
-                 "c.id=m.id_client ) "
-                 "ORDER BY m.start_date, c.timezone, c.phone ;".format(id=id_distribution,
-                                                                       status=status,
-                                                                       ),
+                 f"SELECT m.*, "
+                 f"c.timezone AS timezone, "
+                 f"c.phone AS phone "
+                 f"FROM message AS m, client as c "
+                 f"WHERE (m.id_distribution={id_distribution} AND "
+                 f"m.status='{status}' AND "
+                 f"c.id=m.id_client ) "
+                 f"ORDER BY m.start_date, c.timezone, c.phone ;"
         )
 
 
