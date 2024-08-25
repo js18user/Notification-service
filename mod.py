@@ -8,6 +8,7 @@ import time
 import orjson as json
 from datetime import datetime, timedelta
 from datetime import timezone as tzs
+
 from enum import Enum
 from functools import wraps
 from typing import Union, Optional
@@ -53,7 +54,8 @@ class MyMiddleware:
 
     async def __call__(self, request: Request, call_next, ) -> None:
         start_time, response = time.time(), await call_next(request)
-        print(f"{"\033[91m"}endpoint execution time:{1000*(time.time() - start_time): .0f} m.sec")
+        print(f"{"\033[91m"}endpoint execution time:{1000*(time.time() - start_time): .0f} m.sec  "
+              f"{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}")
         return response
 
 
@@ -338,6 +340,7 @@ try:
             for lm_index, dict_message in enumerate(list_messages):
                 await send_message(db, session, lm_index, dict(dict_message), rss, )
         await contact.close()
+        list_messages.clear()
         match len(rss[1]) > 0:
             case True:
                 await update_ids(db=db, tds=tuple(rss[1]), status=Status.sent.value, )
