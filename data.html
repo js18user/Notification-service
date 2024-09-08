@@ -223,57 +223,57 @@ input    {
 
     <body>
       <nav class="container">
-        <div id="content" class="errorMessage"></div>
+        <div id="content" class="errorMessage" translate="no"></div>
 
         <div class="begin">
             <input type="hidden" id="distributionId">
             <input type="hidden" id="messageId">
             <p>
-                <label for="distributionStart_date">Start date:</label>
-                <input id="distributionStart_date" required type="datetime-local">
+                <label for="distributionStart_date" translate="no">Start date:</label>
+                <input id="distributionStart_date" required type="datetime-local" spellcheck="true">
             </p>
             <p>
-                 <label for="distributionEnd_date">End date:&nbsp;</label>
-                <input id="distributionEnd_date" required type="datetime-local">
+                 <label for="distributionEnd_date" translate="no">End date:&nbsp;</label>
+                <input id="distributionEnd_date" required type="datetime-local" spellcheck="true">
             </p>
             <p>
-                <label for="distributionTeg">Teg:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                <label for="distributionTeg" translate="no">Teg:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                 <input id="distributionTeg" required type="text">
             </p>
             <p>
-                <label for="distributionMob">Mob &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;</label>
-                <input  id="distributionMob" type="number"  min="901" max="999" required>
+                <label for="distributionMob" translate="no">Mob &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;</label>
+                <input  id="distributionMob" type="number" spellcheck="true" min="901" max="999" required>
             </p>
             <p>
-                <label for="distributionText">Text:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                <label for="distributionText" translate="no">Text:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                 <input id="distributionText" required type="text">
             </p>
              <p>
-                 <button id="saveBtn">Save</button>
-                 <button id="resetBtn">Reset</button>
-                 <button id="selectBtn">Select</button>
-                 <button id="deleteBtn">Delete</button>
-                 <button id="updateGlBtn">UpdateGlobal</button>
+                 <button id="saveBtn" translate="no">Save</button>
+                 <button id="resetBtn" translate="no">Reset</button>
+                 <button id="selectBtn" translate="no">Select</button>
+                 <button id="deleteBtn" translate="no">Delete</button>
+                 <button id="updateGlBtn" translate="no">UpdateGlobal</button>
             </p>
         </div>
         <div class="scroll-table">
             <table>
                 <thead>
                     <tr>
-                        <th>|............................................................... MESSAGES ....................................................|
+                        <th translate="no">|............................................................... MESSAGES ....................................................|
                             |...... DISTRIBUTIONS .....|
                         </th>
-                        <th>&nbsp;&nbsp;ID&nbsp;</th>
-                        <th>&nbsp;&nbsp;&nbsp;START DATE&nbsp;&nbsp;&nbsp;&nbsp;</th>
-                        <th>&nbsp; END DATE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-                        <th> TEG &nbsp;</th>
-                        <th>mb</th>
-                        <th>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; TEXT &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</th>
+                        <th translate="no">&nbsp;&nbsp;ID&nbsp;</th>
+                        <th translate="no">&nbsp;&nbsp;&nbsp;START DATE&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                        <th translate="no">&nbsp; END DATE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                        <th translate="no"> TEG &nbsp;</th>
+                        <th translate="no">mb</th>
+                        <th translate="no">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; TEXT &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</th>
                     </tr>
                 </thead>
             </table>
 
-            <div class="scroll-table-body">
+            <div class="scroll-table-body" translate="no">
                 <table id="tableId">
                     <tbody id="tbodyId">
                     </tbody>
@@ -507,7 +507,7 @@ async function reset() {
     document.getElementById("distributionId").value = "" ;
     document.getElementById("distributionStart_date").value = "";
     document.getElementById("distributionEnd_date").value = "";
-    document.getElementById("distributionTeg").value = "control";
+    document.getElementById("distributionTeg").value = "control ";
     document.getElementById("distributionMob").value = "906";
     document.getElementById("distributionText").value = "";
     await displayOnError("Ready for CREATE a new Distribution" +
