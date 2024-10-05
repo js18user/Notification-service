@@ -1,51 +1,52 @@
 # -*- coding: utf-8 -*-
 """ script by js18user  """
-import uvicorn
 import asyncio
 import locale
 import time
-
-import orjson as json
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone as tzs
 from enum import Enum
 from functools import wraps
-from typing import Union
+from typing import List
 from typing import Optional
+from typing import Union
 
-from fastapi.encoders import jsonable_encoder
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
-from fastapi.responses import FileResponse
-from fastapi import FastAPI
-from fastapi import Request
-from fastapi import HTTPException
-from fastapi import Response
-from fastapi import Query
-from fastapi import BackgroundTasks
-from fastapi import Depends
-from starlette.middleware.base import BaseHTTPMiddleware
-from fastapi.middleware.cors import CORSMiddleware
-
-from fastapi_asyncpg import configure_asyncpg
-from asyncpg import exceptions as asyncpg_exception
-from aio_pika import exceptions
+import orjson as json
+import uvicorn
 from aio_pika import DeliveryMode
 from aio_pika import Message as Msg
 from aio_pika import connect as cnt
+from aio_pika import exceptions
+from asyncpg import exceptions as asyncpg_exception
 from dateutil.parser import parse
+from fastapi import BackgroundTasks
+from fastapi import Depends
+from fastapi import FastAPI
+from fastapi import HTTPException
+from fastapi import Query
+from fastapi import Request
+from fastapi import Response
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.responses import JSONResponse
+from fastapi_asyncpg import configure_asyncpg
 from loguru import logger as logging
+from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 from pydantic import Field
+from pydantic.dataclasses import dataclass
+from starlette.middleware.base import BaseHTTPMiddleware
+
 from urls import db_host_twp as host
-from urls import db_port_twp as port
-from urls import db_user_twp as user
 from urls import db_name_twp as name
 from urls import db_password_twp as password
+from urls import db_port_twp as port
+from urls import db_user_twp as user
 from urls import query_many
 from urls import url_rabbit_google as url_rabbitmq
-from dataclasses import dataclass
 
 
 @dataclass
@@ -112,7 +113,7 @@ class ClientUpdate(BaseModel, ):
     mob: int = Field(default=None, ge=900, le=999, )
     teg: str = Field(default=None, min_length=1, )
     timezone: int = Field(default=None, ge=-11, le=11)
-
+    
 
 class ClientInsert(BaseModel):
     phone: int = Field(ge=70000000000, le=79999999999, )
@@ -203,15 +204,13 @@ try:
 
 
     async def parsedate(model, ):
-        match  model.get('start_date'):
-            case None:
-                pass
+        match  model.get('start_date') is None:
+            case True: pass
             case _:
                 model['start_date'] = parse(model['start_date'], ignoretz=True)
 
-        match model.get('end_date'):
-            case None:
-                pass
+        match model.get('end_date') is None:
+            case True: pass
             case _:
                 model['end_date'] = parse(model['end_date'], ignoretz=True)
         return model
@@ -303,8 +302,8 @@ try:
 
     async def send_message(db, session, index: int, dict_message: dict, rss: dict, ):
 
-        match index:
-            case 0:
+        match index == 0:
+            case True:
                 await update(db, table=Table.message.value,
                              model=Message(id=dict_message['id']).dict(),
                              adu=MessageUpdate(status=Status.queue.value,
@@ -361,7 +360,7 @@ try:
         return
 
     @timing_decorator
-    async def crms(lc: list, distribution: dict, ) -> list:
+    async def crms(lc: List[dict], distribution: dict, ) -> list:
         """ to create with concurrent.futures.ThreadPoolExecutor() in future """
         lms = []
         for index_cl, client in enumerate(lc):
@@ -442,16 +441,17 @@ try:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[f"http://localhost",
-                       f"http://localhost:80",
-                       f"https://localhost:80/docs",
-                       f"https://localhost:80/docs",
-                       f"http://localhost:80/client",
-                       f"http://localhost:80/distributiom",
-                       f"http://localhost:80/message",
-                       f"http://localhost:80/admin",
-                       f"http://localhost:80/admin/statistic",
-                       f"http://localhost:80/admin/message",
-                       f"http://localhost:80/admin/message/status",
+                       f"http://localhost:8000",
+                       f"http://localhost:8000/metrics",
+                       f"https://localhost:8000/docs",
+                       f"https://localhost:8000/docs",
+                       f"http://localhost:8000/client",
+                       f"http://localhost:8000/distributiom",
+                       f"http://localhost:8000/message",
+                       f"http://localhost:8000/admin",
+                       f"http://localhost:8000/admin/statistic",
+                       f"http://localhost:8000/admin/message",
+                       f"http://localhost:8000/admin/message/status",
                        ],
         allow_credentials=True,
         allow_methods=["*"],
@@ -466,6 +466,14 @@ try:
         return JSONResponse(status_code=400,
                             content=jsonable_encoder([]),
                             )
+
+
+    @app.on_event("startup")
+    async def _startup():
+        Instrumentator().instrument(app, metric_namespace="js18user", metric_subsystem="mss", ).expose(
+                                    app,
+                                    # should_gzip=True,
+        )
 
 
     conn = db_connect()
@@ -514,10 +522,8 @@ try:
                             ):
         row = await insert(db, table=Table.client.value, model=json.loads(client.json()), )
         match len(row) == 1:
-            case True:
-                response.status_code = 200
-            case _:
-                pass
+            case True: response.status_code = 200
+            case _: pass
         return row
 
 
@@ -527,11 +533,9 @@ try:
                             db=Depends(conn.connection),
                             ):
         row = await delete(db, table=Table.client.value, model=json.loads(client.json()), )
-        match len(row):
-            case 0:
-                response.status_code = 400
-            case _:
-                pass
+        match len(row) == 0:
+            case True: response.status_code = 400
+            case _: pass
         return row
 
 
@@ -546,10 +550,8 @@ try:
                            adu=json.loads(upd.json()),
                            )
         match len(row) == 0:
-            case True:
-                response.status_code = 400
-            case _:
-                pass
+            case True: response.status_code = 400
+            case _: pass
         return row
 
 
@@ -576,17 +578,14 @@ try:
                   None
                   ):
                 model = Distribution().dict()
-            case _:
-                model = json.loads(distribution.json())
+            case _: model = json.loads(distribution.json())
         row = await select(db,
                            table=Table.distribution.value,
                            model=model,
                            )
         match len(row) == 0:
-            case True:
-                response.status_code = 400
-            case _:
-                pass
+            case True: response.status_code = 400
+            case _: pass
         return row
 
 
@@ -603,8 +602,8 @@ try:
                                    table=Table.distribution.value,
                                    model=model,
                                    )
-                match len(row):
-                    case 1:
+                match len(row) == 1:
+                    case True:
                         response.status_code = 200
                         background_tasks.add_task(create_queue, db, row, )
                         return row
@@ -623,11 +622,9 @@ try:
                            table=Table.distribution.value,
                            model=await parsedate(json.loads(distribution.json())),
                            )
-        match len(row):
-            case 0:
-                response.status_code = 400
-            case _:
-                pass
+        match len(row) == 0:
+            case True: response.status_code = 400
+            case _: pass
         return row
 
 
@@ -646,8 +643,8 @@ try:
                            model=await parsedate(json.loads(distribution.json()), ),
                            adu=adu,
                            )
-        match len(row):
-            case 0: return []
+        match len(row) == 0:
+            case True: return []
             case _:
                 response.status_code = 200
                 background_tasks.add_task(
@@ -773,7 +770,6 @@ finally:
 
 
 if __name__ == "__main__":
-
     try:
         uvicorn.run('mod:app', host='0.0.0.0', port=80, )  # reload=True, )
     except KeyboardInterrupt:
