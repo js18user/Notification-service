@@ -20,6 +20,8 @@ COPY create_tables.sql .
 
 COPY urls.py .
 
+COPY prometheus.yml .
+
 COPY mod.py .
 
 EXPOSE 80
