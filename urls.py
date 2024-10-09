@@ -25,6 +25,8 @@ port: int = 5432
 host: str = f'localhost'
 
 query_many: str = f"INSERT INTO message (start_date,status,id_distribution,id_client) VALUES ($1,$2,$3,$4);"
+query_ratio: str = (f"SELECT SUM( heap_blks_hit ) / ( SUM(heap_blks_hit ) + SUM( heap_blks_read) ) as ratio "
+                    f"FROM pg_statio_user_tables ; ")
 
 url_twp: str = f"postgresql://gen_user:Bv(i%3D%26r5ILjTid@147.45.239.120:5432/default_db"
 db_user_twp: str = f"gen_user"
