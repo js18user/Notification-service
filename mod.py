@@ -46,6 +46,7 @@ from urls import db_password_twp as password
 from urls import db_port_twp as port
 from urls import db_user_twp as user
 from urls import query_many
+from urls import query_ratio
 from urls import url_rabbit_google as url_rabbitmq
 
 
@@ -459,7 +460,7 @@ try:
     )
     my_middleware = MyMiddleware(some_attribute="")
     app.add_middleware(BaseHTTPMiddleware, dispatch=my_middleware)
-
+    Instrumentator().instrument(app).expose(app)
 
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler():
@@ -467,14 +468,14 @@ try:
                             content=jsonable_encoder([]),
                             )
 
-
+    """
     @app.on_event("startup")
     async def _startup():
-        Instrumentator().instrument(app, metric_namespace="js18user", metric_subsystem="mss", ).expose(
-                                    app,
-                                    # should_gzip=True,
-        )
-
+        Instrumentator().instrument(app,
+                                    metric_namespace="js18user",
+                                    metric_subsystem="mss",
+                                    ).expose(app, should_gzip=True, )
+    """
 
     conn = db_connect()
 
@@ -693,6 +694,11 @@ try:
     @app.get("/")
     async def main():
         return FileResponse("data.html")
+
+
+    @app.get('/admin/ratio', status_code=200, description="", )
+    async def select_ratio(db=Depends(conn.connection), ):
+        return await db.fetch(query_ratio, )
 
 
     @app.get('/admin/distribution', status_code=200, description="", )
