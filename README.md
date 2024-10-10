@@ -77,8 +77,9 @@ This task is self-documented:
 
 The database and Rabbitmq are relevant, you can work
 
-This is an alternative way to run the script:
+This is an alternative way For a quick start:
 - https://js18user-notification-service-7dae.twc1.net              for WEB UI(admin panel)
 - https://js18user-notification-service-7dae.twc1.net/docs         forAPI documentation Swagger
+- https://js18user-notification-service-7dae.twc1.net/metrics      
 
 Write me for help: @js18user  telegram 
