@@ -201,7 +201,7 @@ try:
 
 
     async def realtime(dt, zone, ):
-        return dt - ind.ine*zone + ind.interval - ind.ine
+        return dt - ind.ine*zone + ind.interval  #  - ind.ine
 
 
     async def parsedate(model, ):
