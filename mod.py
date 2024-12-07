@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """ script by js18user  """
-import asyncio
+
 import locale
-import time
+import uvicorn
+from time import time as t
+import orjson as json
+from asyncio import sleep as sl
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone as tzs
 from enum import Enum
 from functools import wraps
-from typing import List
 from typing import Optional
 from typing import Union
-
-import orjson as json
-import uvicorn
+from collections.abc import Sequence
 from aio_pika import DeliveryMode
 from aio_pika import Message as Msg
 from aio_pika import connect as cnt
@@ -38,8 +38,6 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 from pydantic import Field
 from pydantic.dataclasses import dataclass
-from starlette.middleware.base import BaseHTTPMiddleware
-
 from urls import db_host_twp as host
 from urls import db_name_twp as name
 from urls import db_password_twp as password
@@ -52,20 +50,8 @@ from urls import url_rabbit_google as url_rabbitmq
 
 @dataclass
 class Ind:
-    name: str = 'for background task'
     interval: timedelta = datetime.now() - datetime.now(tzs.utc).replace(tzinfo=None)
     ine = timedelta(hours=1, )
-
-
-class MyMiddleware:
-    def __init__(self, some_attribute: str, ):
-        self.some_attribute = some_attribute
-
-    async def __call__(self, request: Request, call_next, ) -> None:
-        start_time, response = time.time(), await call_next(request)
-        print(f"{"\033[91m"}endpoint execution time:{1000*(time.time() - start_time): .0f} m.sec  "
-              f"{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}")
-        return response
 
 
 class D(dict):
@@ -114,7 +100,7 @@ class ClientUpdate(BaseModel, ):
     mob: int = Field(default=None, ge=900, le=999, )
     teg: str = Field(default=None, min_length=1, )
     timezone: int = Field(default=None, ge=-11, le=11)
-    
+
 
 class ClientInsert(BaseModel):
     phone: int = Field(ge=70000000000, le=79999999999, )
@@ -173,9 +159,8 @@ class DistributionInsert(BaseModel):
 def timing_decorator(func_async):
     @wraps(func_async)
     async def wrapper(*args, **kwargs):
-        start_time = time.time()
-        result = await func_async(*args, **kwargs)
-        print(f"Function {func_async.__name__} took {int((time.time() - start_time)*1000)} m.sec")
+        start_time, result = t(), await func_async(*args, **kwargs)
+        print(f"Function {func_async.__name__} took {int((t() - start_time)*1000)} m.sec")
         return result
     return wrapper
 
@@ -200,20 +185,19 @@ try:
         )
 
 
-    async def realtime(dt, zone, ):
-        return dt - ind.ine*zone + ind.interval  #  - ind.ine
+    async def realtime(dt, zone: int, ):
+        return dt - ind.ine*zone + ind.interval  # - ind.ine
 
-
-    async def parsedate(model, ):
+    async def parsedate(model: dict, ) -> dict:
         match  model.get('start_date') is None:
             case True: pass
             case _:
-                model['start_date'] = parse(model['start_date'], ignoretz=True)
+                model['start_date']: datetime = parse(model['start_date'], ignoretz=True)
 
         match model.get('end_date') is None:
             case True: pass
             case _:
-                model['end_date'] = parse(model['end_date'], ignoretz=True)
+                model['end_date']: datetime = parse(model['end_date'], ignoretz=True)
         return model
 
 
@@ -256,15 +240,16 @@ try:
 
 
     def query_select(table, model, fields="*", ):
-        match model.get('id') is None:
+        match model.get('id') is not None:
             case True:
+                return f"SELECT {fields} FROM {table}  WHERE id = {model.get('id')};"
+            case _:
                 where = " and ".join(
                     ["%s='%s'" % (item, model[item]) for item in model.keys() if (model[item] is not None)])
 
                 match where == "":
                     case True: return f"SELECT {fields} FROM {table} ;"
                     case _: return f"SELECT {fields} FROM {table} WHERE ({where}) ;"
-            case _: return f"SELECT {fields} FROM {table}  WHERE id = {model.get('id')};"
 
 
     def query_insert(table, model, fields="*", ):
@@ -280,6 +265,7 @@ try:
     async def insert(db, table, model, ):
         async with db.transaction():
             return await db.fetch(query_insert(table, model), *list(model.values()), )
+
 
     async def select(db, table, model, args=None, fields="*", ):
         return await db.fetch(query_select(table, model, fields, ), *(args or []), )
@@ -301,8 +287,12 @@ try:
             return await db.execute(f"UPDATE message SET status = '{status}' WHERE id in {tds} ;")
 
 
-    async def send_message(db, session, index: int, dict_message: dict, rss: dict, ):
-
+    async def send_message(db,
+                           session,
+                           index: int,
+                           dict_message: dict,
+                           rss: dict,
+                           ) -> dict:
         match index == 0:
             case True:
                 await update(db, table=Table.message.value,
@@ -316,8 +306,9 @@ try:
         pause: int = (dict_message['start_date'].timestamp().__sub__(datetime.now().timestamp()))
         match pause < 0:
             case True: pause = 0
-            case _: pass
-        await asyncio.sleep(pause, )
+            case _:
+                pass
+        await sl(pause, )
         dict_message['status'] = Status.sent.value
         try:
             await send_pika(session, dict_message)
@@ -331,38 +322,42 @@ try:
         return rss
 
 
-    async def create_queue(db, list_distributions, ):
+    async def create_queue(db,
+                           list_distributions: Sequence[dict],
+                           ) -> None:
         await create_queue_messages(db, list_distributions, )
         await create_queue_release(db, list_messages=await m_restart(db, ), )
         return
 
 
-    async def create_queue_release(db, list_messages, ):
-        """ Where is None: current operation; Where is True: restart operation """
+    async def create_queue_release(db,
+                                   list_messages: Sequence[dict],
+                                   ) -> None:
 
         rss: dict = {0: len(list_messages), 1: [], 2: [], }
-
         contact = await cnt(url_rabbitmq, )
         async with contact.channel() as session:
             for lm_index, dict_message in enumerate(list_messages):
                 await send_message(db, session, lm_index, dict(dict_message), rss, )
         await contact.close()
-        list_messages.clear()
         match len(rss[1]) > 0:
             case True:
                 await update_ids(db=db, tds=tuple(rss[1]), status=Status.sent.value, )
-            case _: pass
+            case _:
+                pass
 
         match len(rss[2]) > 0:
             case True:
                 await update_ids(db=db, tds=tuple(rss[2]), status=Status.failure.value, )
-            case _: pass
+            case _:
+                pass
         print(f"control: {rss[0]}  {len(rss[1])}  {len(rss[2])}")
         return
 
-    @timing_decorator
-    async def crms(lc: List[dict], distribution: dict, ) -> list:
-        """ to create with concurrent.futures.ThreadPoolExecutor() in future """
+
+    async def crms(lc: Sequence[dict],
+                   distribution: dict,
+                   ) -> Sequence[tuple]:
         lms = []
         for index_cl, client in enumerate(lc):
             match (await realtime(distribution['end_date'], client['timezone']) < datetime.now()):
@@ -377,25 +372,26 @@ try:
                                   id_distribution=distribution['id'],
                                   id_client=client['id'],
                                   ).dict()).values()
-
             lms.append(tuple(mode))
         return lms
-    
+
     @timing_decorator
-    async def create_queue_messages(db, ld):
+    async def create_queue_messages(db,
+                                    ld: Sequence[dict],
+                                    ) -> None:
         for ld_index, distribution in enumerate(ld):
-
+            list_clients: Sequence[dict] = await select(db,
+                                                        table=Table.client.value,
+                                                        fields='id,timezone,phone',
+                                                        model=Client(mob=distribution['mob'],
+                                                                     teg=distribution['teg'], ).dict()
+                                                        )
             async with db.transaction():
-                await db.executemany(query_many, await crms(await select(db,
-                                                                         table=Table.client.value,
-                                                                         fields='id,timezone,phone',
-                                                                         model=Client(mob=distribution['mob'],
-                                                                                      teg=distribution['teg'], ).dict(),
-                                                                         ), distribution, ))
-
+                await db.executemany(query_many, await crms(list_clients, distribution, ))
         return
 
-    async def m_restart(db, ):
+
+    async def m_restart(db, ) -> Sequence[dict]:
         return await db.fetch(
              f"SELECT d.text, "
              f"d.interval, "
@@ -412,7 +408,7 @@ try:
         )
 
 
-    async def seek(db, ):
+    async def seek(db, ) -> Sequence[dict]:
         return await db.fetch(
             f"SELECT d.*, "
             f"COUNT(m.status) AS com, "
@@ -427,11 +423,8 @@ try:
             f"ORDER BY ( d.id ) DESC; "
         )
 
-
     """    Begin    """
-
-    locale.setlocale(locale.LC_ALL, "")
-
+    locale.setlocale(locale.LC_ALL, "de")
     ind, skip = Ind(), '\n'
 
     app = FastAPI(
@@ -441,41 +434,26 @@ try:
     )
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[f"http://localhost",
-                       f"http://localhost:8000",
-                       f"http://localhost:8000/metrics",
-                       f"https://localhost:8000/docs",
-                       f"https://localhost:8000/docs",
-                       f"http://localhost:8000/client",
-                       f"http://localhost:8000/distributiom",
-                       f"http://localhost:8000/message",
-                       f"http://localhost:8000/admin",
-                       f"http://localhost:8000/admin/statistic",
-                       f"http://localhost:8000/admin/message",
-                       f"http://localhost:8000/admin/message/status",
-                       ],
-        allow_credentials=True,
-        allow_methods=["*"],
+        allow_methods=["GET", "PUT", "POST", "DELETE"],
         allow_headers=["*"],
+        allow_origins=["*"]
     )
-    my_middleware = MyMiddleware(some_attribute="")
-    app.add_middleware(BaseHTTPMiddleware, dispatch=my_middleware)
-    Instrumentator().instrument(app).expose(app)
+
+
+    @app.middleware("http")
+    async def time_crud(request: Request, call_next, ):
+        start_time, response = t(), await call_next(request)
+        print(f"{"\033[91m"}endpoint execution time:{1000*(t() - start_time): .0f} m.sec  "
+              f"{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}")
+        return response
+
 
     @app.exception_handler(RequestValidationError)
-    async def validation_exception_handler():
+    async def validation_exception_handler(request: Request, exc: RequestValidationError):
+        _, _ = exc, request
         return JSONResponse(status_code=400,
                             content=jsonable_encoder([]),
                             )
-
-    """
-    @app.on_event("startup")
-    async def _startup():
-        Instrumentator().instrument(app,
-                                    metric_namespace="js18user",
-                                    metric_subsystem="mss",
-                                    ).expose(app, should_gzip=True, )
-    """
 
     conn = db_connect()
 
@@ -484,6 +462,7 @@ try:
         with open(f'create_tables.sql', f'r') as sql:
             return await db.execute(sql.read(), )
 
+    Instrumentator().instrument(app).expose(app)
 
     @app.get('/client', status_code=200, description="", )
     async def client_select(response: Response,
@@ -493,26 +472,21 @@ try:
                             mob: int | None = Query(default=None, ge=900, le=999, ),
                             teg: str | None = Query(default=None, ),
                             timezone: int | None = Query(default=None, ),
-                            ):
-        client: Client = Client(id=id,
-                                phone=phone,
-                                mob=mob,
-                                teg=teg,
-                                timezone=timezone,
-                                )
-        match client:
-            case (client.id | client.phone | client.mob | client.teg | client.timezone,
-                  None):
-                model = Client().dict()
-            case _: model = json.loads(client.json())
-        row = await select(db,
-                           table=Table.client.value,
-                           model=model,
-                           )
-
-        match len(row) == 0:
-            case True: response.status_code = 400
-            case _: pass
+                            ) -> Sequence[dict]:
+        row: Sequence[dict] = await select(db,
+                                           table=Table.client.value,
+                                           model=json.loads(Client(id=id,
+                                                                   phone=phone,
+                                                                   mob=mob,
+                                                                   teg=teg,
+                                                                   timezone=timezone,
+                                                                   ).json()),
+                                           )
+        match any(row):
+            case True:
+                pass
+            case False:
+                response.status_code = 400
         return row
 
 
@@ -520,11 +494,13 @@ try:
     async def client_insert(response: Response,
                             client: ClientInsert,
                             db=Depends(conn.connection),
-                            ):
-        row = await insert(db, table=Table.client.value, model=json.loads(client.json()), )
+                            ) -> Sequence[dict]:
+        row: Sequence[dict] = await insert(db, table=Table.client.value, model=json.loads(client.json()), )
         match len(row) == 1:
-            case True: response.status_code = 200
-            case _: pass
+            case True:
+                response.status_code = 200
+            case _:
+                pass
         return row
 
 
@@ -532,11 +508,14 @@ try:
     async def client_delete(response: Response,
                             client: Client,
                             db=Depends(conn.connection),
-                            ):
-        row = await delete(db, table=Table.client.value, model=json.loads(client.json()), )
+                            ) -> Sequence[dict]:
+
+        row: Sequence[dict] = await delete(db, table=Table.client.value, model=json.loads(client.json()), )
         match len(row) == 0:
-            case True: response.status_code = 400
-            case _: pass
+            case True:
+                response.status_code = 400
+            case _:
+                pass
         return row
 
 
@@ -545,14 +524,17 @@ try:
                             client: Client,
                             upd: ClientUpdate,
                             db=Depends(conn.connection),
-                            ):
+                            ) -> Sequence[dict]:
+
         row = await update(db, table=Table.client.value,
                            model=json.loads(client.json()),
                            adu=json.loads(upd.json()),
                            )
         match len(row) == 0:
-            case True: response.status_code = 400
-            case _: pass
+            case True:
+                response.status_code = 400
+            case _:
+                pass
         return row
 
 
@@ -565,48 +547,41 @@ try:
                                   start_date: datetime | None = Query(default=None, ),
                                   end_date: datetime | None = Query(default=None, ),
                                   text: str | None = Query(default=None, ),
-                                  ):
-        distribution: Distribution = Distribution(id=id,
-                                                  mob=mob,
-                                                  teg=teg,
-                                                  start_date=start_date,
-                                                  end_date=end_date,
-                                                  text=text,
-                                                  )
-        match distribution:
-            case (distribution.id | distribution.mob | distribution.teg |
-                  distribution.start_date | distribution.end_date,
-                  None
-                  ):
-                model = Distribution().dict()
-            case _: model = json.loads(distribution.json())
-        row = await select(db,
-                           table=Table.distribution.value,
-                           model=model,
-                           )
-        match len(row) == 0:
-            case True: response.status_code = 400
-            case _: pass
+                                  ) -> Sequence[dict]:
+
+        row: Sequence[dict] = await select(db,
+                                           table=Table.distribution.value,
+                                           model=json.loads(Distribution(id=id,
+                                                                         mob=mob,
+                                                                         teg=teg,
+                                                                         start_date=start_date,
+                                                                         end_date=end_date,
+                                                                         text=text,
+                                                                         ).json()),
+                                           )
+        match any(row):
+            case True: pass
+            case False: response.status_code = 400
         return row
 
 
     @app.post('/distribution', status_code=400, description="", )
     async def distribution_insert(response: Response,
                                   distribution: DistributionInsert,
-                                  background_tasks: BackgroundTasks,
+                                  tasks: BackgroundTasks,
                                   db=Depends(conn.connection),
-                                  ):
-        model = await parsedate(json.loads(distribution.json()))
+                                  ) -> Sequence[dict]:
+        model: dict = await parsedate(json.loads(distribution.json()))
         match model['end_date'] > model['start_date'] and model['end_date'] > datetime.now():
             case True:
-                row = await insert(db,
-                                   table=Table.distribution.value,
-                                   model=model,
-                                   )
+                row: Sequence[dict] = await insert(db,
+                                                   table=Table.distribution.value,
+                                                   model=model,
+                                                   )
                 match len(row) == 1:
                     case True:
                         response.status_code = 200
-                        background_tasks.add_task(create_queue, db, row, )
+                        tasks.add_task(create_queue, db, row, )
                         return row
                     case _:
                         return []
@@ -624,8 +599,10 @@ try:
                            model=await parsedate(json.loads(distribution.json())),
                            )
         match len(row) == 0:
-            case True: response.status_code = 400
-            case _: pass
+            case True:
+                response.status_code = 400
+            case _:
+                pass
         return row
 
 
@@ -638,14 +615,17 @@ try:
                                    ):
         adu = await parsedate(json.loads(upd.json()), )
         match adu['end_date'] < datetime.now():
-            case True: return []
-            case _: pass
+            case True:
+                return []
+            case _:
+                pass
         row = await update(db, table=Table.distribution.value,
                            model=await parsedate(json.loads(distribution.json()), ),
                            adu=adu,
                            )
         match len(row) == 0:
-            case True: return []
+            case True:
+                return []
             case _:
                 response.status_code = 200
                 background_tasks.add_task(
@@ -675,8 +655,10 @@ try:
         match message:
             case (message.id | message.id_distribution | message.id_client | message.start_date | message.status,
                   None
-                  ): model = Message().dict()
-            case _: model = json.loads(message.json())
+                  ):
+                model = Message().dict()
+            case _:
+                model = json.loads(message.json())
         row = await select(db,
                            table=Table.message.value,
                            model=model,
@@ -685,7 +667,8 @@ try:
             case True:
                 response.status_code = 200
                 return row
-            case _: return []
+            case _:
+                return []
 
 
     """  next script for Web UI(admin)    """
