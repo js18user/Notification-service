@@ -11,11 +11,11 @@ redis_port: int = 12588
 redis_password: str = f'B7xPvO9hqt6Xpt2jfSxAa2PyWKOPEyW0'
 
 # Postgresql 15  on AWS
-db_user_aws: str = f'dyqbehwlykfjkc'
-db_name_aws: str = f'd15bctjh2dhvtv'
-db_password_aws: str = f'8d3c812ab523bc9ea17bcbc6a5f20c4353a54db81479cf15a1fd083113a6bb1e'
+db_user_aws: str = f'u5d2osso4ste0g'
+db_name_aws: str = f'd3hc7n6us4d3no'
+db_password_aws: str = f'p94bca2313004c8089b6cfcd9ec536c2a00e6212b58c63059e26298791dce5972'
 db_port_aws: int = 5432
-db_host_aws: str = f'ec2-54-195-24-35.eu-west-1.compute.amazonaws.com'
+db_host_aws: str = f'cbu5eice9b7g15.cluster-czz5s0kz4scl.eu-west-1.rds.amazonaws.com'
 
 # Postgresql 15  on Local machine
 user: str = f'postgres'
@@ -25,8 +25,10 @@ port: int = 5432
 host: str = f'localhost'
 
 query_many: str = f"INSERT INTO message (start_date,status,id_distribution,id_client) VALUES ($1,$2,$3,$4);"
+
 query_ratio: str = (f"SELECT SUM( heap_blks_hit ) / ( SUM(heap_blks_hit ) + SUM( heap_blks_read) ) as ratio "
-                    f"FROM pg_statio_user_tables ; ")
+                    f"FROM pg_statio_user_tables ; "
+)
 
 url_twp: str = f"postgresql://gen_user:Bv(i%3D%26r5ILjTid@147.45.239.120:5432/default_db"
 db_user_twp: str = f"gen_user"
