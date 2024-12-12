@@ -679,6 +679,11 @@ try:
         return FileResponse("data.html")
 
 
+    @app.get('/admin/speed', status_code=200, description="", )
+    async def still_speed_api():
+        return []
+
+
     @app.get('/admin/ratio', status_code=200, description="", )
     async def select_ratio(db=Depends(conn.connection), ):
         return await db.fetch(query_ratio, )
