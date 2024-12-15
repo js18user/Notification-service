@@ -32,7 +32,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.responses import JSONResponse
-from fastapi_asyncpg import configure_asyncpg
+from asyncpg_pool import configure_asyncpg
 from loguru import logger as logging
 from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
@@ -87,7 +87,7 @@ class Table(str, Enum):
     restart = 'restart'
 
 
-class Client(BaseModel, title="The description of the item", ):
+class Client(BaseModel, ):
     id: int = Field(default=None, ge=0, )
     phone: int = Field(default=None, ge=70000000000, le=79999999999, )
     mob: int = Field(default=None, ge=900, le=999, )
@@ -262,21 +262,21 @@ try:
         )
 
 
-    async def insert(db, table, model, ):
+    async def insert(db, table, model, ) -> Sequence[dict]:
         async with db.transaction():
             return await db.fetch(query_insert(table, model), *list(model.values()), )
 
 
-    async def select(db, table, model, args=None, fields="*", ):
+    async def select(db, table, model, args=None, fields="*", ) -> Sequence[dict]:
         return await db.fetch(query_select(table, model, fields, ), *(args or []), )
 
 
-    async def delete(db, table, model, args=None, fields='*', ):
+    async def delete(db, table, model, args=None, fields='*', ) -> Sequence[dict]:
         async with db.transaction():
             return await db.fetch(query_delete(table, model, fields), *(args or []), )
 
 
-    async def update(db, table, model, adu, ):
+    async def update(db, table, model, adu, ) -> Sequence[dict]:
         sql, params = query_update(table, model, adu, )
         async with db.transaction():
             return await db.fetch(sql, *params, )
@@ -434,9 +434,24 @@ try:
     )
     app.add_middleware(
         CORSMiddleware,
+        allow_origins=[f"http://localhost:8080",
+                       f"http://localhost:80/",
+                       f"http://localhost:800/metrics/",
+                       f"https://localhost:80/docs/",
+                       f"http://localhost:80/client/",
+                       f"http://localhost:80/distribution/",
+                       f"http://localhost:80/message/",
+                       f"http://localhost:80/admin/",
+                       f"http://localhost:80/admin/ratio/",
+                       f"http://localhost:80/admin/speed/",
+                       f"http://localhost:80/admin/statistic",
+                       f"http://localhost:80/admin/message/",
+                       f"http://localhost:8000/admin/message/status",
+                       ],
+        allow_credentials=False,
+        allow_headers=[],
         allow_methods=["GET", "PUT", "POST", "DELETE"],
-        allow_headers=["*"],
-        allow_origins=["*"]
+
     )
 
 
@@ -465,7 +480,7 @@ try:
     Instrumentator().instrument(app).expose(app)
 
     @app.get('/client', status_code=200, description="", )
-    async def client_select(response: Response,
+    async def client_select(
                             db=Depends(conn.connection),
                             id: Optional[int] = Query(default=None, ge=0, ),
                             phone: int | None = Query(default=None, ),
@@ -473,21 +488,15 @@ try:
                             teg: str | None = Query(default=None, ),
                             timezone: int | None = Query(default=None, ),
                             ) -> Sequence[dict]:
-        row: Sequence[dict] = await select(db,
-                                           table=Table.client.value,
-                                           model=json.loads(Client(id=id,
-                                                                   phone=phone,
-                                                                   mob=mob,
-                                                                   teg=teg,
-                                                                   timezone=timezone,
-                                                                   ).json()),
-                                           )
-        match any(row):
-            case True:
-                pass
-            case False:
-                response.status_code = 400
-        return row
+        return await select(db,
+                            table=Table.client.value,
+                            model=json.loads(Client(id=id,
+                                                    phone=phone,
+                                                    mob=mob,
+                                                    teg=teg,
+                                                    timezone=timezone,
+                                                    ).json()),
+                            )
 
 
     @app.post('/client', status_code=400, description="", )
@@ -539,7 +548,7 @@ try:
 
 
     @app.get('/distribution', status_code=200, description="", )
-    async def distribution_select(response: Response,
+    async def distribution_select(  # response: Response,
                                   db=Depends(conn.connection, ),
                                   id: int | None = Query(default=None, ge=0, ),
                                   mob: int | None = Query(default=None, ge=900, le=999, ),
@@ -549,20 +558,16 @@ try:
                                   text: str | None = Query(default=None, ),
                                   ) -> Sequence[dict]:
 
-        row: Sequence[dict] = await select(db,
-                                           table=Table.distribution.value,
-                                           model=json.loads(Distribution(id=id,
-                                                                         mob=mob,
-                                                                         teg=teg,
-                                                                         start_date=start_date,
-                                                                         end_date=end_date,
-                                                                         text=text,
-                                                                         ).json()),
-                                           )
-        match any(row):
-            case True: pass
-            case False: response.status_code = 400
-        return row
+        return await select(db,
+                            table=Table.distribution.value,
+                            model=json.loads(Distribution(id=id,
+                                                          mob=mob,
+                                                          teg=teg,
+                                                          start_date=start_date,
+                                                          end_date=end_date,
+                                                          text=text,
+                                                          ).json()),
+                            )
 
 
     @app.post('/distribution', status_code=400, description="", )
@@ -637,38 +642,24 @@ try:
 
 
     @app.get('/message', status_code=400, description="", )
-    async def select_message(response: Response,
+    async def select_message(
                              db=Depends(conn.connection),
                              id: int | None = Query(default=None, ge=0, ),
                              id_distribution: int | None = Query(default=None, ge=0, ),
                              id_client: int | None = Query(default=None, ge=0, ),
                              status: Status | None = Query(default=None, ),
                              start_date: datetime | None = Query(default=None, ),
-                             ):
-
-        message = Message(id=id,
-                          id_distribution=id_distribution,
-                          id_client=id_client,
-                          start_date=start_date,
-                          status=status,
-                          )
-        match message:
-            case (message.id | message.id_distribution | message.id_client | message.start_date | message.status,
-                  None
-                  ):
-                model = Message().dict()
-            case _:
-                model = json.loads(message.json())
-        row = await select(db,
-                           table=Table.message.value,
-                           model=model,
-                           )
-        match len(row) >= 1:
-            case True:
-                response.status_code = 200
-                return row
-            case _:
-                return []
+                             ) -> Sequence[dict]:
+        return await select(db,
+                            table=Table.message.value,
+                            model=json.loads(Message(
+                                                     id=id,
+                                                     id_distribution=id_distribution,
+                                                     id_client=id_client,
+                                                     start_date=start_date,
+                                                     status=status,
+                                                     )).json(),
+                            )
 
 
     """  next script for Web UI(admin)    """
@@ -680,7 +671,7 @@ try:
 
 
     @app.get('/admin/speed', status_code=200, description="", )
-    async def still_speed_api():
+    async def speed_api():
         return []
 
 
