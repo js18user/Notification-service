@@ -70,7 +70,7 @@ List and functions of the presented scripts:
 
 This task is self-documented.
 
-- docker run -d -p 80:80 js18user/smp:mode
+- docker run -p 80:80 js18user/smp:mode
 - 
 - http://127.0.0.1:80/docs       forAPI documentation Swagger
 - http://127.0.0.1:80/metrics
