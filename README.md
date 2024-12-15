@@ -61,23 +61,25 @@ Mailing logic:
 List and functions of the presented scripts:
 
 - mod.py  it is the main program to perform a task.
+- asyncpg_pool.py
 - data.html This is a WebUI interface.
 - create_tables.sql  it is a SQL file with query
 - requirements.txt no comments
 - urls.py  no comments
 - Dockerfile  no comment
 
-This task is self-documented:
-- >docker build -t sends:v3 -f Dockerfile .
-- >docker run -d -p 80:80 sends:v3
+This task is self-documented.
 
+- docker run -d -p 80:80 js18user/smp:mode
+- 
 - http://127.0.0.1:80/docs       forAPI documentation Swagger
-- http://127.0.0.1:80/redoc
+- http://127.0.0.1:80/metrics
 - http://127.0.0.1:80    for WEB UI(admin panel)
 
 The database and Rabbitmq are relevant, you can work
 
 This is an alternative way For a quick start:
+
 - https://js18user-notification-service-7dae.twc1.net              for WEB UI(admin panel)
 - https://js18user-notification-service-7dae.twc1.net/docs         forAPI documentation Swagger
 - https://js18user-notification-service-7dae.twc1.net/metrics      
