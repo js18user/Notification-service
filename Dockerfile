@@ -20,6 +20,8 @@ COPY create_tables.sql .
 
 COPY urls.py .
 
+COPY asyncpg_pool.py .
+
 COPY mod.py .
 
 EXPOSE 80
