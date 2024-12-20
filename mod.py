@@ -450,7 +450,7 @@ try:
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request: Request, exc: RequestValidationError):
         _ = exc
-        print(request.url)
+        print(f"RequestValidationError  {request.url}")
         return JSONResponse(status_code=400,
                             content=jsonable_encoder([]),
                             )
@@ -458,7 +458,7 @@ try:
     @app.exception_handler(StarletteHTTPException)
     async def http_exception_handler(request: Request, exc):
         _ = exc
-        print(request.url)
+        print(f"StarletteHTTPException  {request.url}")
         return JSONResponse(status_code=400,
                             content=jsonable_encoder([]),
                             )
@@ -466,7 +466,7 @@ try:
 
     @app.exception_handler(UnicornException)
     async def unicorn_exception_handler(request: Request, exc: UnicornException):
-        print(request.url)
+        print(f"UnicornException  {request.url}")
         return JSONResponse(
             status_code=418,
             content={"message": f"Attention! Error with Uvicorn: {exc.uny}"},
@@ -482,7 +482,7 @@ try:
     Instrumentator().instrument(app).expose(app)
 
     @app.get('/client', status_code=200, description="", )
-    async def client_select(request: Request,
+    async def client_select(
                             db=Depends(conn.connection),
                             id: Optional[int] = Query(default=None, ge=0, ),
                             phone: int | None = Query(default=None, ),
@@ -490,7 +490,6 @@ try:
                             teg: str | None = Query(default=None, ),
                             timezone: int | None = Query(default=None, ),
                             ) -> Sequence[dict]:
-        print(request.url)
         return await select(db,
                             table=Table.client.value,
                             model=json.loads(Client(id=id,
@@ -503,11 +502,9 @@ try:
 
     @app.post('/client', status_code=400, description="", )
     async def client_insert(response: Response,
-                            request: Request,
                             client: ClientInsert,
                             db=Depends(conn.connection),
                             ) -> Sequence[dict]:
-        print(request.url)
         row: Sequence[dict] = await insert(db, table=Table.client.value, model=json.loads(client.json()), )
         match len(row) == 1:
             case True:
@@ -518,11 +515,9 @@ try:
 
     @app.delete('/client', status_code=200, description="", )
     async def client_delete(response: Response,
-                            request: Request,
                             client: Client,
                             db=Depends(conn.connection),
                             ) -> Sequence[dict]:
-        print(request.url)
         row: Sequence[dict] = await delete(db, table=Table.client.value, model=json.loads(client.json()), )
         match len(row) == 0:
             case True:
@@ -533,12 +528,10 @@ try:
 
     @app.put('/client', status_code=200, description="", )
     async def client_update(response: Response,
-                            request: Request,
                             client: Client,
                             upd: ClientUpdate,
                             db=Depends(conn.connection),
                             ) -> Sequence[dict]:
-        print(request.url)
         row = await update(db, table=Table.client.value,
                            model=json.loads(client.json()),
                            adu=json.loads(upd.json()),
@@ -551,7 +544,7 @@ try:
         return row
 
     @app.get('/distribution', status_code=200, description="", )
-    async def distribution_select(request: Request,
+    async def distribution_select(
                                   db=Depends(conn.connection, ),
                                   id: int | None = Query(default=None, ge=0, ),
                                   mob: int | None = Query(default=None, ge=900, le=999, ),
@@ -560,7 +553,6 @@ try:
                                   end_date: datetime | None = Query(default=None, ),
                                   text: str | None = Query(default=None, ),
                                   ) -> Sequence[dict]:
-        print(request.url)
         return await select(db,
                             table=Table.distribution.value,
                             model=json.loads(Distribution(id=id,
@@ -574,12 +566,10 @@ try:
 
     @app.post('/distribution', status_code=400, description="", )
     async def distribution_insert(response: Response,
-                                  request: Request,
                                   distribution: DistributionInsert,
                                   tasks: BackgroundTasks,
                                   db=Depends(conn.connection),
                                   ) -> Sequence[dict]:
-        print(request.url)
         model: dict = await parsedate(json.loads(distribution.json()))
         match model['end_date'] > model['start_date'] and model['end_date'] > datetime.now():
             case True:
@@ -599,11 +589,9 @@ try:
 
     @app.delete('/distribution', status_code=200, description="", )
     async def delete_distributions(response: Response,
-                                   request: Request,
                                    distribution: Distribution,
                                    db=Depends(conn.connection),
                                    ):
-        print(request.url)
         row = await delete(db,
                            table=Table.distribution.value,
                            model=await parsedate(json.loads(distribution.json())),
@@ -617,13 +605,11 @@ try:
 
     @app.put('/distribution', status_code=400, description="", )
     async def update_distributions(response: Response,
-                                   request: Request,
                                    distribution: Distribution,
                                    upd: DistributionUpdate,
                                    background_tasks: BackgroundTasks,
                                    db=Depends(conn.connection),
                                    ):
-        print(request.url)
         adu = await parsedate(json.loads(upd.json()), )
         match adu['end_date'] < datetime.now():
             case True:
@@ -647,7 +633,7 @@ try:
                 return row
 
     @app.get('/message', status_code=400, description="", )
-    async def select_message(request: Request,
+    async def select_message(
                              db=Depends(conn.connection),
                              id: int | None = Query(default=None, ge=0, ),
                              id_distribution: int | None = Query(default=None, ge=0, ),
@@ -655,7 +641,6 @@ try:
                              status: Status | None = Query(default=None, ),
                              start_date: datetime | None = Query(default=None, ),
                              ) -> Sequence[dict]:
-        print(request.url)
         return await select(db,
                             table=Table.message.value,
                             model=json.loads(Message(
@@ -670,32 +655,28 @@ try:
     """  next script for Web UI(admin)    """
 
     @app.get("/")
-    async def main(request: Request):
-        print(request.url)
+    async def main():
         return FileResponse("data.html")
 
     @app.get('/admin/speed', status_code=200, description="Speed Api", )
-    async def speed_api(request: Request, ):
-        return {"User url": request.url}
+    async def speed_api():
+        return []
 
     @app.get('/admin/ratio', status_code=200, description="", )
-    async def select_ratio(request: Request,
+    async def select_ratio(
                            db=Depends(conn.connection),
                            ):
-        print(request.url)
         return await db.fetch(query_ratio, )
 
     @app.get('/admin/distribution', status_code=200, description="", )
-    async def select_distributions(request: Request, db=Depends(conn.connection), ):
-        print(request.url)
+    async def select_distributions(db=Depends(conn.connection), ):
         return await seek(db, )
 
     @app.get("/admin/statistic", status_code=200, description="", )
-    async def select_distribution_by_id(request: Request,
+    async def select_distribution_by_id(
                                         db=Depends(conn.connection),
                                         id: int = Query(ge=0, ),
                                         ):
-        print(request.url)
         return await db.fetch(
                               f"SELECT d.*,COUNT(m.status) AS com,"   
                               f"COUNT(m.status) FILTER (WHERE m.status='sent') AS sent,"
@@ -709,11 +690,10 @@ try:
         )
 
     @app.get('/admin/message', status_code=200, description="", )
-    async def select_messages(request: Request,
+    async def select_messages(
                               db=Depends(conn.connection),
                               id_distribution: int = Query(ge=0, ),
                               ):
-        print(request.url)
         return await db.fetch(
                               f"SELECT m.*,"
                               f"c.timezone,"
@@ -725,12 +705,11 @@ try:
         )
 
     @app.get('/admin/message/status', status_code=200, description="", )
-    async def select_messages_status(request: Request,
+    async def select_messages_status(
                                      db=Depends(conn.connection),
                                      id_distribution: int = Query(ge=0, ),
                                      status: str = Query(),
                                      ):
-        print(request.url)
         return await db.fetch(
                               f"SELECT m.*, "
                               f"c.timezone AS timezone, "
