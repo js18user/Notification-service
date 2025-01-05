@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """ script by js18user  """
-
-import locale
 import uvicorn
+
+from locale import setlocale, LC_ALL
 from time import time as t
-import orjson as json
 from asyncio import sleep as sl
 from datetime import datetime
 from datetime import timedelta
@@ -47,6 +46,7 @@ from urls import db_user_twp as user
 from urls import query_many
 from urls import query_ratio
 from urls import url_rabbit_google as url_rabbitmq
+json = __import__('orjson')
 
 
 @dataclass
@@ -69,6 +69,10 @@ class D(dict):
 class UnicornException(Exception):
     def __init__(self, uny: str):
         self.uny = uny
+
+
+class BaseExc(Exception):
+    pass
 
 
 class Status(str, Enum):
@@ -226,29 +230,28 @@ try:
         return sql, params
 
     def query_delete(table, model, fields='*', ):
-        match model.get('id') is None:
-            case True:
-                return "DELETE FROM {table} WHERE {where} RETURNING {fields};".format(
-                    table=table,
-                    fields=fields,
-                    where=(" and ".join(["%s='%s'" % (item, model[item])
-                                        for item in model.keys()
-                                        if (model[item] is not None)
-                                         ])),
-                )
-            case _: return f"DELETE FROM {table} WHERE id={model.get('id')} RETURNING {fields};"
+        if model.get('id'):
+            return f"DELETE FROM {table} WHERE id={model.get('id')} RETURNING {fields};"
+        else:
+            return "DELETE FROM {table} WHERE {where} RETURNING {fields};".format(
+                table=table,
+                fields=fields,
+                where=(" and ".join(["%s='%s'" % (item, model[item])
+                                    for item in model.keys()
+                                    if model[item]
+                                     ])),
+            )
 
     def query_select(table, model, fields="*", ):
-        match model.get('id') is not None:
-            case True:
-                return f"SELECT {fields} FROM {table} WHERE id={model.get('id')};"
-            case _:
-                where = " and ".join(
-                    ["%s='%s'" % (item, model[item]) for item in model.keys() if (model[item] is not None)])
+        if model.get('id'):
+            return f"SELECT {fields} FROM {table} WHERE id={model.get('id')};"
+        else:
+            where = " and ".join(
+                ["%s='%s'" % (item, model[item]) for item in model.keys() if (model[item] is not None)])
 
-                match where == "":
-                    case True: return f"SELECT {fields} FROM {table};"
-                    case _: return f"SELECT {fields} FROM {table} WHERE ({where});"
+            match where == "":
+                case True: return f"SELECT {fields} FROM {table};"
+                case _: return f"SELECT {fields} FROM {table} WHERE ({where});"
 
     def query_insert(table, model, fields="*", ):
         length_model = len(model.values())
@@ -348,6 +351,38 @@ try:
                    distribution: dict,
                    ) -> Sequence[tuple]:
         lms = []
+        for _, client in enumerate(lc):
+            match (await realtime(distribution['end_date'], client['timezone']) < datetime.now()):
+                case True:
+                    status = Status.expired.value
+                case _:
+                    status = Status.formed.value
+
+            mode = (MessageInsert(status=status,
+                                  start_date=parse(str(await realtime(distribution['start_date'],
+                                                                      client['timezone']))),
+                                  id_distribution=distribution['id'],
+                                  id_client=client['id'],
+                                  ).dict()).values()
+            lms.append(tuple(mode))
+        return lms
+
+
+    async def crew(lc: Sequence[dict],
+                   distribution: dict,
+                   ) -> Sequence[tuple]:
+        lms = []
+
+        people = [
+            {"name": "Alice", "age": 25},
+            {"name": "Bob", "age": 15},
+            {"name": "Charlie", "age": 30}
+        ]
+
+        # Filter adults using a lambda function
+        adults = list(tuple(filter(lambda person: person["age"] >= 18, people)))
+        print(adults)
+
         for index_cl, client in enumerate(lc):
             match (await realtime(distribution['end_date'], client['timezone']) < datetime.now()):
                 case True:
@@ -368,7 +403,7 @@ try:
     async def create_queue_messages(db,
                                     ld: Sequence[dict],
                                     ) -> None:
-        for ld_index, distribution in enumerate(ld):
+        for _, distribution in enumerate(ld):
             list_clients: Sequence[dict] = await select(db,
                                                         table=Table.client.value,
                                                         fields='id,timezone,phone',
@@ -411,7 +446,7 @@ try:
         )
 
     """    Begin    """
-    locale.setlocale(locale.LC_ALL, "de")
+    setlocale(LC_ALL, "de")
     ind, skip = Ind(), '\n'
 
     app = FastAPI(
@@ -583,7 +618,7 @@ try:
                         tasks.add_task(create_queue, db, row, )
                         return row
                     case _:
-                        return []
+                        pass
             case _:
                 return []
 
@@ -721,7 +756,7 @@ try:
                               f"ORDER BY m.start_date, c.timezone, c.phone;"
         )
 
-except (Exception,  ValueError, TypeError, ) as e:
+except (BaseExc,  ValueError, TypeError, ) as e:
     logging.info(f"Basis error: {e}")
     pass
 except HTTPException as e:
@@ -738,6 +773,6 @@ finally:
 
 if __name__ == "__main__":
     try:
-        uvicorn.run('mod:app', host='0.0.0.0', port=80, )  # reload=True, )
+        uvicorn.run('mod:app', host='0.0.0.0', port=80, )  # reload=True, log_level=True, )
     except KeyboardInterrupt:
         exit()
