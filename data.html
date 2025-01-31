@@ -3,16 +3,17 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta name="author" content="js18user">
-        <link rel="icon" href="https://www.w3.org/2008/site/images/favicon.ico" crossorigin>
+        <link rel="icon" href="https:///www.w3.org/2008/site/images/favicon.ico" crossorigin>
+        <!-- meta name="viewport" content="width=device-width" -->
         <title>admin</title>
-        
+
         <style>
 
 .container {
-    margin: 0 auto;
-    width: 100%;
-    max-width: 1920px;
-    padding: 0 0px;
+   margin: 0 auto;
+   width: 100%;
+   max-width: 1920px;
+   padding: 0 0px;
 }
 .main {
     display: none;
@@ -222,69 +223,77 @@ input    {
 
     </head>
 
-    <body>
+    <body translate="no">
       <nav class="container">
-        <div id="content" class="errorMessage" translate="no"></div>
+        <div id="content" class="errorMessage"></div>
 
         <div class="begin">
             <input type="hidden" id="distributionId">
             <input type="hidden" id="messageId">
             <p>
-                <label for="distributionStart_date" translate="no">Start date:</label>
+                <label for="distributionStart_date">Start date:</label>
                 <input id="distributionStart_date" required type="datetime-local" spellcheck="true">
             </p>
             <p>
-                 <label for="distributionEnd_date" translate="no">End date:&nbsp;</label>
+                 <label for="distributionEnd_date">End date:&nbsp;</label>
                 <input id="distributionEnd_date" required type="datetime-local" spellcheck="true">
             </p>
             <p>
-                <label for="distributionTeg" translate="no">Teg:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                <input id="distributionTeg" required type="text">
+                <label for="distributionTeg">Teg:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                <input id="distributionTeg" required type="text" list="list" >
+                <datalist id="list">
+                    <option value="control"></option>
+                    <option value="control"></option>
+                </datalist>
             </p>
             <p>
-                <label for="distributionMob" translate="no">Mob &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;</label>
+                <label for="distributionMob">Mob &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;</label>
                 <input  id="distributionMob" type="number" spellcheck="true" min="901" max="999" required>
             </p>
             <p>
-                <label for="distributionText" translate="no">Text:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                <label for="distributionText">Text:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                 <input id="distributionText" required type="text">
             </p>
              <p>
-                 <button id="saveBtn" translate="no">Save</button>
-                 <button id="resetBtn" translate="no">Reset</button>
-                 <button id="selectBtn" translate="no">Select</button>
-                 <button id="deleteBtn" translate="no">Delete</button>
-                 <button id="updateGlBtn" translate="no">UpdateGlobal</button>
+                 <button id="saveBtn">Save</button>
+                 <button id="resetBtn">Reset</button>
+                 <button id="selectBtn">Select</button>
+                 <button id="deleteBtn">Delete</button>
+                 <button id="updateGlBtn">UpdateGlobal</button>
             </p>
         </div>
         <div class="scroll-table">
             <table>
                 <thead>
                     <tr>
-                        <th translate="no">|............................................................... MESSAGES ....................................................|
+                        <th>|............................................................... MESSAGES ....................................................|
                             |...... DISTRIBUTIONS .....|
                         </th>
-                        <th translate="no">&nbsp;&nbsp;ID&nbsp;</th>
-                        <th translate="no">&nbsp;&nbsp;&nbsp;START DATE&nbsp;&nbsp;&nbsp;&nbsp;</th>
-                        <th translate="no">&nbsp; END DATE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-                        <th translate="no"> TEG &nbsp;</th>
-                        <th translate="no">mb</th>
-                        <th translate="no">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; TEXT &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</th>
+                        <th>&nbsp;&nbsp;ID&nbsp;</th>
+                        <th>&nbsp;&nbsp;&nbsp;START DATE&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                        <th>&nbsp; END DATE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                        <th> TEG &nbsp;</th>
+                        <th>mb</th>
+                        <th>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; TEXT &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</th>
                     </tr>
                 </thead>
             </table>
 
-            <div class="scroll-table-body" translate="no">
+            <div class="scroll-table-body">
                 <table id="tableId">
-                    <tbody id="tbodyId">
-                    </tbody>
+                    <tbody id="sId"></tbody>
+
                 </table>
             </div>
         </div>
         <div id="footer"></div>
-        <script>
-//
-var tbd = "tbody";
+
+        <!-- <script type="text/javascript" src="data.js"></script>  -->
+
+      </nav>
+    <script>
+"use strict";
+// let tbd = "tbody";
 var messageInfo = "... life is difficult ... very. Must repeat...";
 var headers = { "Accept": "application/json",  "Content-Type": "application/json" };
 var MessageError = document.querySelector("div");
@@ -301,7 +310,7 @@ async function displayOnError(error) {
 // Clearing table rows
 async function removeTableBody()
     {
-        tableId.replaceChild(document.createElement(tbd), tableId.tBodies[0]);
+        tableId.replaceChild(document.createElement('tbody'), tableId.tBodies[0]);
 }
 
 // Receiving all distributions lists with message statistics
@@ -314,8 +323,8 @@ async function getDistributions() {
         var distributions = await response.json();
         await getDistribution(distributions[0], 0);
 
-        var rows = document.querySelector(tbd);
-        for (distribution of distributions) { rows.append(row(distribution)) };
+        var rows = document.querySelector("tbody");
+        for (let distribution of distributions) { rows.append(row(distribution)) };
         document.getElementById("distributionId").value = "";
     }
 }
@@ -334,17 +343,15 @@ async function getDistributions() {
     });
     if (response.ok === true) {
         var messages = await response.json();
-   //     await displayOnError(status + " message list");
-
     }
-    else { await displayOnError(
-                                response.status + " " +
+    else {
+           await displayOnError(
+                                response.Status + " " +
                                 response.statusText + "  " +
                                 messageInfo);
                                 }
-    return messages;
-}
-
+           return messages;
+    }
 
 // Getting a Single Distribution
 async function getDistribution(distribution, list_number) {
@@ -355,7 +362,8 @@ async function getDistribution(distribution, list_number) {
     document.getElementById("distributionMob").value = distribution.mob;
     document.getElementById("distributionText").value = distribution.text;
     var skip = ".";
-    await displayOnError("Ready for Update distribution ID=" + distribution.id +
+
+    await displayOnError("Ready for Update distribution.ID=" + distribution.id +
         ".   Change the attributes and click Save button. "  +
         "  For Update others distributions click Update button by match. " +
         "  For Create a new Distribution click Reset button. " +
@@ -525,12 +533,12 @@ async function updateGlobal() {
     });
     if (response.ok === true)
         {
-            distributions = await response.json();
+            let distributions = await response.json();
             await removeTableBody();
             await getDistribution(distributions[0], 0);
 
-            var rows = document.querySelector(tbd);
-            for (distribution of distributions) {rows.append(row(distribution))};
+            var rows = document.querySelector("tbody");
+            for (let distribution of distributions) {rows.append(row(distribution))};
             // distributions.forEach(distribution => rows.append(row(distribution)));
             document.getElementById("distributionId").value = "";
             await displayOnError("All updated");
@@ -693,7 +701,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 // Create window for messages
 async function displayMessage(distribution, status) {
 
-    messages = await getMessages(distribution, status);
+    let messages = await getMessages(distribution, status);
     var html = document.querySelector('html');
 
     var windowRight = document.createElement('div');
@@ -746,16 +754,14 @@ async function displayMessage(distribution, status) {
    divBody.setAttribute('class', "scroll-table-body");
    divCom.appendChild(divBody);
 
-   var rows = document.createElement(tbd);
-   for(message of messages) { rows.append(rowMessage(message)) };
+   var rows = document.createElement('tbody');
+   for(let message of messages) { rows.append(rowMessage(message)) };
    divBody.appendChild(rows)
 }
 //   start working
 getDistributions();
 
-        </script>
-        <!--        <script src="javascript.js"></script> 404 not found ?? -->
-      </nav>
+    </script>
     </body>
 
 </html>
