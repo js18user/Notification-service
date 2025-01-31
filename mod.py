@@ -43,6 +43,7 @@ from urls import db_name_twp as name
 from urls import db_password_twp as password
 from urls import db_port_twp as port
 from urls import db_user_twp as user
+from urls import url_azure
 from urls import query_many
 from urls import query_ratio
 from urls import url_rabbit_google as url_rabbitmq
@@ -185,6 +186,10 @@ try:
             host=host, ),
         )
 
+    def db_connects():
+        return configure_asyncpg(app, url_azure, )
+
+
     async def send_pika(channel, mess):
         await channel.default_exchange.publish(
             Msg(mess.__str__().encode(),
@@ -289,16 +294,14 @@ try:
                            dict_message: dict,
                            rss: dict,
                            ) -> dict:
-        match index == 0:
-            case True:
-                await update(db, table=Table.message.value,
-                             model=Message(id=dict_message['id']).dict(),
-                             adu=MessageUpdate(status=Status.queue.value,
-                                               start_date=datetime.now()
-                                               ).dict(),
-                             )
-            case _:
-                dict_message['status'] = Status.queue.value
+        if index == 0:
+            await update(db, table=Table.message.value,
+                         model=Message(id=dict_message['id']).dict(),
+                         adu=MessageUpdate(status=Status.queue.value,
+                                           start_date=datetime.now()
+                                           ).dict(),
+                         )
+        dict_message['status'] = Status.queue.value
         pause: int = (dict_message['start_date'].timestamp().__sub__(datetime.now().timestamp()))
         match pause < 0:
             case True: pause = 0
@@ -450,26 +453,16 @@ try:
     ind, skip = Ind(), '\n'
 
     app = FastAPI(
+        debug=False,
+        reload=False,
+        workers=3,
+        access_log=False,
         title=f"API documentation",
         description=f"A set of Api for completing the task is presented",
         swagger_ui_parameters={f"syntaxHighlight.theme": f"obsidian"},
     )
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[f"http://localhost:8080",
-                       f"http://localhost:80/",
-                       f"http://localhost:800/metrics/",
-                       f"https://localhost:80/docs/",
-                       f"http://localhost:80/client/",
-                       f"http://localhost:80/distribution/",
-                       f"http://localhost:80/message/",
-                       f"http://localhost:80/admin/",
-                       f"http://localhost:80/admin/ratio/",
-                       f"http://localhost:80/admin/speed/",
-                       f"http://localhost:80/admin/statistic",
-                       f"http://localhost:80/admin/message/",
-                       f"http://localhost:8000/admin/message/status",
-                       ],
         allow_credentials=False,
         allow_headers=[],
         allow_methods=["GET", "PUT", "POST", "DELETE"],
@@ -507,7 +500,7 @@ try:
             content={"message": f"Attention! Error with Uvicorn: {exc.uny}"},
         )
 
-    conn = db_connect()
+    conn = db_connects()
 
     @conn.on_init
     async def initial_db(db):
@@ -515,6 +508,21 @@ try:
             return await db.execute(sql.read(), )
 
     Instrumentator().instrument(app).expose(app)
+
+
+    @app.delete('/client', status_code=200, description="", )
+    async def client_delete(response: Response,
+                            client: Client,
+                            db=Depends(conn.connection),
+                            ) -> Sequence[dict]:
+        row: Sequence[dict] = await delete(db, table=Table.client.value, model=json.loads(client.json()), )
+        match len(row) == 0:
+            case True:
+                response.status_code = 400
+            case _:
+                pass
+        return row
+
 
     @app.get('/client', status_code=200, description="", )
     async def client_select(
@@ -773,6 +781,6 @@ finally:
 
 if __name__ == "__main__":
     try:
-        uvicorn.run('mod:app', host='0.0.0.0', port=80, )  # reload=True, log_level=True, )
+        uvicorn.run('mod:app', host='0.0.0.0', port=80, )  # reload=True, )  # log_level=True, )
     except KeyboardInterrupt:
         exit()
