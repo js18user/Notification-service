@@ -34,7 +34,6 @@ from fastapi.responses import FileResponse
 from fastapi.responses import JSONResponse
 from asyncpg_pool import configure_asyncpg
 from loguru import logger as logging
-from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 from pydantic import Field
 from pydantic.dataclasses import dataclass
@@ -43,7 +42,6 @@ from urls import db_name_twp as name
 from urls import db_password_twp as password
 from urls import db_port_twp as port
 from urls import db_user_twp as user
-from urls import url_azure
 from urls import query_many
 from urls import query_ratio
 from urls import url_rabbit_google as url_rabbitmq
@@ -185,9 +183,6 @@ try:
             port=port,
             host=host, ),
         )
-
-    def db_connects():
-        return configure_asyncpg(app, url_azure, )
 
 
     async def send_pika(channel, mess):
@@ -500,14 +495,12 @@ try:
             content={"message": f"Attention! Error with Uvicorn: {exc.uny}"},
         )
 
-    conn = db_connects()
+    conn = db_connect()
 
     @conn.on_init
     async def initial_db(db):
         with open(f'create_tables.sql', f'r') as sql:
             return await db.execute(sql.read(), )
-
-    Instrumentator().instrument(app).expose(app)
 
 
     @app.delete('/client', status_code=200, description="", )
