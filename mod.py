@@ -511,7 +511,7 @@ try:
             content={"message": f"Attention! Error with Uvicorn: {exc.uny}"},
         )
 
-    conn = db_connects()
+    conn = db_connect()
 
     @conn.on_init
     async def initial_db(db):
