@@ -2,17 +2,17 @@
 """ script by js18user  """
 import uvicorn
 
-from locale import setlocale, LC_ALL
-from time import time as t
 from asyncio import sleep as sl
+from collections.abc import Sequence
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone as tzs
 from enum import Enum
 from functools import wraps
+from locale import setlocale, LC_ALL
+from time import time as t
 from typing import Optional
 from typing import Union
-from collections.abc import Sequence
 from aio_pika import DeliveryMode
 from aio_pika import Message as Msg
 from aio_pika import connect as cnt
@@ -28,15 +28,17 @@ from fastapi import Request
 from fastapi import Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
-from starlette.exceptions import HTTPException as StarletteHTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.responses import JSONResponse
-from asyncpg_pool import configure_asyncpg
 from loguru import logger as logging
+from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 from pydantic import Field
 from pydantic.dataclasses import dataclass
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware.cors import CORSMiddleware
+
+from asyncpg_pool import configure_asyncpg
 from urls import db_host_twp as host
 from urls import db_name_twp as name
 from urls import db_password_twp as password
@@ -44,7 +46,9 @@ from urls import db_port_twp as port
 from urls import db_user_twp as user
 from urls import query_many
 from urls import query_ratio
+from urls import url_azure
 from urls import url_rabbit_google as url_rabbitmq
+
 json = __import__('orjson')
 
 
@@ -174,6 +178,15 @@ def timing_decorator(func_async):
     return wrapper
 
 
+def timing_decorators(func_async):
+    @wraps(func_async)
+    def wrapper(*args, **kwargs):
+        start_time, result = t(), func_async(*args, **kwargs)
+        print(f"Function {func_async.__name__} took {int((t() - start_time)*1000)} m.sec")
+        return result
+    return wrapper
+
+
 try:
     def db_connect():
         return configure_asyncpg(app, 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
@@ -183,6 +196,9 @@ try:
             port=port,
             host=host, ),
         )
+
+    def db_connects():
+        return configure_asyncpg(app, url_azure, )
 
 
     async def send_pika(channel, mess):
@@ -495,12 +511,14 @@ try:
             content={"message": f"Attention! Error with Uvicorn: {exc.uny}"},
         )
 
-    conn = db_connect()
+    conn = db_connects()
 
     @conn.on_init
     async def initial_db(db):
         with open(f'create_tables.sql', f'r') as sql:
             return await db.execute(sql.read(), )
+
+    Instrumentator().instrument(app).expose(app)
 
 
     @app.delete('/client', status_code=200, description="", )
@@ -774,6 +792,6 @@ finally:
 
 if __name__ == "__main__":
     try:
-        uvicorn.run('mod:app', host='0.0.0.0', port=80, )  # reload=True, )  # log_level=True, )
+        uvicorn.run('mod:app', host='0.0.0.0', port=80, )  # reload=True, )
     except KeyboardInterrupt:
         exit()
