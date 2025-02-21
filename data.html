@@ -82,7 +82,7 @@ button{ border-radius: 18%;
 }
 
 button:visited {color:green; text-decoration:none;}
-button:hover   {color:red; text-decoration:underline; transform: scale(1.05);}
+button:hover   {color:red; text-decoration:underline; transform: scale(1.04);}
 button:active  {color:yellow; text-decoration:underline;}
 
 .begin {line-height: 50em;}
@@ -218,6 +218,9 @@ input    {
             color: FireBrick;
             margin-bottom: 50px;
 }
+html {
+  scroll-behavior: smooth;
+}
 
          </style>
 
@@ -304,6 +307,10 @@ async function displayOnError(error) {
     var messageError = document.querySelector("div");
     messageError.setAttribute('class', "errorMessage");
     document.getElementById('content').innerHTML = '';
+    // messageError.append(error);
+    const infor = "I want to understand who is so interested in my APIs... Write to me, comrade in Telegram! @js18user "
+    messageError.append(infor);
+    messageError.append("...... ");
     messageError.append(error);
 }
 
