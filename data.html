@@ -295,7 +295,7 @@ html {
 
       </nav>
     <script>
-"use strict";
+// "use strict";
 // let tbd = "tbody";
 var messageInfo = "... life is difficult ... very. Must repeat...";
 var headers = { "Accept": "application/json",  "Content-Type": "application/json" };
@@ -307,11 +307,11 @@ async function displayOnError(error) {
     var messageError = document.querySelector("div");
     messageError.setAttribute('class', "errorMessage");
     document.getElementById('content').innerHTML = '';
-    // messageError.append(error);
-    const infor = "I want to understand who is so interested in my APIs... Write to me, comrade in Telegram! @js18user "
-    messageError.append(infor);
-    messageError.append("...... ");
     messageError.append(error);
+    // const infor = "I want to understand who is so interested in my APIs... Write to me, comrade in Telegram! @js18user "
+    // messageError.append(infor);
+    // messageError.append("...... ");
+    // messageError.append(error);
 }
 
 // Clearing table rows
