@@ -31,7 +31,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse
 from fastapi.responses import JSONResponse
 from loguru import logger as logging
-# from prometheus_fastapi_instrumentator import Instrumentator
+from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 from pydantic import Field
 from pydantic.dataclasses import dataclass
@@ -178,12 +178,11 @@ def timing_decorator(func_async):
     return wrapper
 
 
-def timing_decorators(func_async):
-    @wraps(func_async)
+def timing_decorators(func):
     def wrapper(*args, **kwargs):
-        start_time, result = t(), func_async(*args, **kwargs)
-        print(f"Function {func_async.__name__} took {int((t() - start_time)*1000)} m.sec")
-        return result
+        start_time = t()
+        func(*args, **kwargs)
+        print(f"Function {func.__name__} took {int((t() - start_time)*1000)} m.sec")
     return wrapper
 
 
@@ -381,38 +380,6 @@ try:
             lms.append(tuple(mode))
         return lms
 
-
-    async def crew(lc: Sequence[dict],
-                   distribution: dict,
-                   ) -> Sequence[tuple]:
-        lms = []
-
-        people = [
-            {"name": "Alice", "age": 25},
-            {"name": "Bob", "age": 15},
-            {"name": "Charlie", "age": 30}
-        ]
-
-        # Filter adults using a lambda function
-        adults = list(tuple(filter(lambda person: person["age"] >= 18, people)))
-        print(adults)
-
-        for index_cl, client in enumerate(lc):
-            match (await realtime(distribution['end_date'], client['timezone']) < datetime.now()):
-                case True:
-                    status = Status.expired.value
-                case _:
-                    status = Status.formed.value
-
-            mode = (MessageInsert(status=status,
-                                  start_date=parse(str(await realtime(distribution['start_date'],
-                                                                      client['timezone']))),
-                                  id_distribution=distribution['id'],
-                                  id_client=client['id'],
-                                  ).dict()).values()
-            lms.append(tuple(mode))
-        return lms
-
     @timing_decorator
     async def create_queue_messages(db,
                                     ld: Sequence[dict],
@@ -518,21 +485,7 @@ try:
         with open(f'create_tables.sql', f'r') as sql:
             return await db.execute(sql.read(), )
 
-    # Instrumentator().instrument(app).expose(app)
-
-
-    @app.delete('/client', status_code=200, description="", )
-    async def client_delete(response: Response,
-                            client: Client,
-                            db=Depends(conn.connection),
-                            ) -> Sequence[dict]:
-        row: Sequence[dict] = await delete(db, table=Table.client.value, model=json.loads(client.json()), )
-        match len(row) == 0:
-            case True:
-                response.status_code = 400
-            case _:
-                pass
-        return row
+    Instrumentator().instrument(app).expose(app)
 
 
     @app.get('/client', status_code=200, description="", )
