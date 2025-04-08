@@ -4,7 +4,6 @@ import uvicorn
 
 from os import getpid
 from psutil import Process
-from gc import collect
 from asyncio import sleep as sl
 from collections.abc import Sequence
 from datetime import datetime
@@ -222,7 +221,7 @@ try:
         )
 
     async def realtime(dt, zone: int, ):
-        return dt - ind.ine*zone + ind.interval  # - ind.ine
+        return dt - ind.ine*zone + ind.interval - ind.ine
 
     async def parsedate(model: dict, ) -> dict:
         match  model.get('start_date') is None:
@@ -505,7 +504,6 @@ try:
     @app.on_event("shutdown")
     async def shutdown_event():
         print(f"Memory usage:  {Process(getpid()).memory_info().rss / (1024 * 1024):.1f} МB")
-        collect()
 
 
     @app.get('/client', status_code=200, description="", )
