@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """ script by js18user  """
 import uvicorn
-
+"""
 from os import getpid
 from psutil import Process
+"""
 from asyncio import sleep as sl
 from collections.abc import Sequence
 from datetime import datetime
@@ -500,10 +501,11 @@ try:
 
     Instrumentator().instrument(app).expose(app)
 
-
+    """
     @app.on_event("shutdown")
     async def shutdown_event():
         print(f"Memory usage:  {Process(getpid()).memory_info().rss / (1024 * 1024):.1f} МB")
+    """
 
 
     @app.get('/client', status_code=200, description="", )
