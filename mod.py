@@ -693,7 +693,8 @@ try:
     async def select_ratio(
                            db=Depends(conn.connection),
                            ):
-        return await db.fetch(query_ratio, )
+        async with db.transaction():                       
+            return await db.fetch(query_ratio, )
 
     @app.get('/admin/distribution', status_code=200, description="", )
     async def select_distributions(db=Depends(conn.connection), ):
