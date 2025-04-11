@@ -1,7 +1,6 @@
 name: msp
 
 services:
-
   web:
     build: .
     ports:
@@ -26,6 +25,3 @@ volumes:
       type: none
       device: ./prometheus_data
 
-networks:
-  default:
-    name: net_js18msp
