@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.12.4
+FROM python:3.12.8-alpine3.21
 
 LABEL maintainer="Jurij <js18.user@gmail.com>"
 
