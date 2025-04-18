@@ -393,7 +393,7 @@ try:
             lms.append(tuple(mode))
         return lms
 
-    @timing_decorator
+    #  @timing_decorator
     async def create_queue_messages(db,
                                     ld: Sequence[dict],
                                     ) -> None:
@@ -469,16 +469,16 @@ try:
 
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request: Request, exc: RequestValidationError):
-        _ = exc
-        print(f"RequestValidationError  {request.url}")
+        _, _ = request, exc
+        # print(f"RequestValidationError  {request.url}")
         return ORJSONResponse(status_code=400,
                               content=jsonable_encoder([]),
                               )
 
     @app.exception_handler(StarletteHTTPException)
     async def http_exception_handler(request: Request, exc):
-        _ = exc
-        print(f"StarletteHTTPException  {request.url}")
+        _, _ = request, exc
+        # print(f"StarletteHTTPException  {request.url}")
         return ORJSONResponse(status_code=400,
                               content=jsonable_encoder([]),
                               )
