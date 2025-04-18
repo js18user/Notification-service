@@ -659,7 +659,7 @@ try:
                                           )
                 return row
 
-    @app.get('/message', status_code=400, description="", )
+    @app.get('/message', status_code=200, description="", )
     async def select_message(
                              db=Depends(conn.connection),
                              id: int | None = Query(default=None, ge=0, ),
