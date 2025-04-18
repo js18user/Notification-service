@@ -676,7 +676,7 @@ try:
                                                      id_client=id_client,
                                                      start_date=start_date,
                                                      status=status,
-                                                     )).json(),
+                                                     ).json()),
                             )
 
     """  next script for Web UI(admin)    """
