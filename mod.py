@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """ script by js18user  """
-import uvicorn
-"""
+
+from uvicorn import run
 from os import getpid
 from psutil import Process
-"""
 from asyncio import sleep as sl
 from collections.abc import Sequence
 from datetime import datetime
@@ -40,7 +39,6 @@ from pydantic import Field
 from pydantic.dataclasses import dataclass
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.cors import CORSMiddleware
-
 from asyncpg_pool import configure_asyncpg
 from urls import db_host_twp as host
 from urls import db_name_twp as name
@@ -209,10 +207,6 @@ try:
             host=host, ),
         )
 
-    def db_connects():
-        return configure_asyncpg(app, url_azure, )
-
-
     async def send_pika(channel, mess):
         await channel.default_exchange.publish(
             Msg(mess.__str__().encode(),
@@ -295,7 +289,8 @@ try:
             return await db.fetch(query_insert(table, model), *list(model.values()), )
 
     async def select(db, table, model, args=None, fields="*", ) -> Sequence[dict]:
-        return await db.fetch(query_select(table, model, fields, ), *(args or []), )
+        async with db.transaction():
+            return await db.fetch(query_select(table, model, fields, ), *(args or []), )
 
     async def delete(db, table, model, args=None, fields='*', ) -> Sequence[dict]:
         async with db.transaction():
@@ -306,7 +301,7 @@ try:
         async with db.transaction():
             return await db.fetch(sql, *params, )
 
-    @timing_decorator
+    # @timing_decorator
     async def update_ids(db, tds, status, ):
         async with db.transaction():
             return await db.execute(f"UPDATE message SET status='{status}' WHERE id in {tds};")
@@ -393,7 +388,7 @@ try:
             lms.append(tuple(mode))
         return lms
 
-    #  @timing_decorator
+    # @timing_decorator
     async def create_queue_messages(db,
                                     ld: Sequence[dict],
                                     ) -> None:
@@ -409,35 +404,37 @@ try:
         return
 
     async def m_restart(db, ) -> Sequence[dict]:
-        return await db.fetch(
-             f"SELECT d.text, "
-             f"d.interval, "
-             f"c.phone, "
-             f"m.start_date, "
-             f"m.status, "
-             f"m.id_distribution, "
-             f"m.id "
-             f"FROM client AS c, message AS m, distribution AS d "
-             f"WHERE ( m.status IN ('formed', 'queue', 'failure') "    
-             f"AND d.id = m.id_distribution  "
-             f"AND c.id = m.id_client ) "
-             f"ORDER BY m.start_date ; "
-        )
+        async with db.transaction():
+            return await db.fetch(
+                 f"SELECT d.text, "
+                 f"d.interval, "
+                 f"c.phone, "
+                 f"m.start_date, "
+                 f"m.status, "
+                 f"m.id_distribution, "
+                 f"m.id "
+                 f"FROM client AS c, message AS m, distribution AS d "
+                 f"WHERE ( m.status IN ('formed', 'queue', 'failure') "    
+                 f"AND d.id = m.id_distribution  "
+                 f"AND c.id = m.id_client ) "
+                 f"ORDER BY m.start_date ; "
+            )
 
     async def seek(db, ) -> Sequence[dict]:
-        return await db.fetch(
-            f"SELECT d.*, "
-            f"COUNT(m.status) AS com, "
-            f"COUNT(m.status) FILTER (WHERE  m.status = 'sent') AS sent, "
-            f"COUNT(m.status) FILTER (WHERE  m.status = 'queue') AS queue, "
-            f"COUNT(m.status) FILTER (WHERE  m.status = 'formed') AS formed, "
-            f"COUNT(m.status) FILTER (WHERE  m.status = 'failure') AS failure, "
-            f"COUNT(m.status) FILTER (WHERE  m.status = 'expired') AS expired "
-            f"FROM distribution AS d JOIN message AS m  "
-            f"ON ( m.id_Distribution=d.id ) "
-            f"GROUP BY ( d.id   )  "
-            f"ORDER BY ( d.id ) DESC; "
-        )
+        async with db.transaction():
+            return await db.fetch(
+                f"SELECT d.*, "
+                f"COUNT(m.status) AS com, "
+                f"COUNT(m.status) FILTER (WHERE  m.status = 'sent') AS sent, "
+                f"COUNT(m.status) FILTER (WHERE  m.status = 'queue') AS queue, "
+                f"COUNT(m.status) FILTER (WHERE  m.status = 'formed') AS formed, "
+                f"COUNT(m.status) FILTER (WHERE  m.status = 'failure') AS failure, "
+                f"COUNT(m.status) FILTER (WHERE  m.status = 'expired') AS expired "
+                f"FROM distribution AS d JOIN message AS m  "
+                f"ON ( m.id_Distribution=d.id ) "
+                f"GROUP BY ( d.id   )  "
+                f"ORDER BY ( d.id ) DESC; "
+            )
 
     """    Begin    """
     setlocale(LC_ALL, "de")
@@ -492,7 +489,7 @@ try:
             content={"message": f"Attention! Error with Uvicorn: {exc.uny}"},
         )
 
-    conn = db_connects()
+    conn = configure_asyncpg(app, url_azure, )
 
     @conn.on_init
     async def initial_db(db):
@@ -500,13 +497,6 @@ try:
             return await db.execute(sql.read(), )
 
     Instrumentator().instrument(app).expose(app)
-
-    """
-    @app.on_event("shutdown")
-    async def shutdown_event():
-        print(f"Memory usage:  {Process(getpid()).memory_info().rss / (1024 * 1024):.1f} МB")
-    """
-
 
     @app.get('/client', status_code=200, description="", )
     async def client_select(
@@ -670,8 +660,7 @@ try:
                              ) -> Sequence[dict]:
         return await select(db,
                             table=Table.message.value,
-                            model=json.loads(Message(
-                                                     id=id,
+                            model=json.loads(Message(id=id,
                                                      id_distribution=id_distribution,
                                                      id_client=id_client,
                                                      start_date=start_date,
@@ -693,7 +682,7 @@ try:
     async def select_ratio(
                            db=Depends(conn.connection),
                            ):
-        async with db.transaction():                       
+        async with db.transaction():
             return await db.fetch(query_ratio, )
 
     @app.get('/admin/distribution', status_code=200, description="", )
@@ -705,32 +694,34 @@ try:
                                         db=Depends(conn.connection),
                                         id: int = Query(ge=0, ),
                                         ):
-        return await db.fetch(
-                              f"SELECT d.*,COUNT(m.status) AS com,"   
-                              f"COUNT(m.status) FILTER (WHERE m.status='sent') AS sent,"
-                              f"COUNT(m.status) FILTER (WHERE m.status='queue') AS queue,"
-                              f"COUNT(m.status) FILTER (WHERE m.status='formed') AS formed,"
-                              f"COUNT(m.status) FILTER (WHERE m.status='failure') AS failure,"
-                              f"COUNT(m.status) FILTER (WHERE m.status='expired') AS expired "
-                              f"FROM Distribution AS d JOIN Message as m  "
-                              f"ON ( d.id={id} AND m.id_Distribution={id}) "
-                              f"GROUP BY ( d.id  );"
-        )
+        async with db.transaction():
+            return await db.fetch(
+                                  f"SELECT d.*,COUNT(m.status) AS com,"   
+                                  f"COUNT(m.status) FILTER (WHERE m.status='sent') AS sent,"
+                                  f"COUNT(m.status) FILTER (WHERE m.status='queue') AS queue,"
+                                  f"COUNT(m.status) FILTER (WHERE m.status='formed') AS formed,"
+                                  f"COUNT(m.status) FILTER (WHERE m.status='failure') AS failure,"
+                                  f"COUNT(m.status) FILTER (WHERE m.status='expired') AS expired "
+                                  f"FROM Distribution AS d JOIN Message as m  "
+                                  f"ON ( d.id={id} AND m.id_Distribution={id}) "
+                                  f"GROUP BY ( d.id  );"
+            )
 
     @app.get('/admin/message', status_code=200, description="", )
     async def select_messages(
                               db=Depends(conn.connection),
                               id_distribution: int = Query(ge=0, ),
                               ):
-        return await db.fetch(
-                              f"SELECT m.*,"
-                              f"c.timezone,"
-                              f"c.phone "
-                              f"FROM message AS m, client as c "
-                              f"WHERE (m.id_distribution={id_distribution} AND "
-                              f"c.id=m.id_client) "
-                              f"ORDER BY m.start_date,c.timezone,c.phone,m.status;"
-        )
+        async with db.transaction():
+            return await db.fetch(
+                                  f"SELECT m.*,"
+                                  f"c.timezone,"
+                                  f"c.phone "
+                                  f"FROM message AS m, client as c "
+                                  f"WHERE (m.id_distribution={id_distribution} AND "
+                                  f"c.id=m.id_client) "
+                                  f"ORDER BY m.start_date,c.timezone,c.phone,m.status;"
+            )
 
     @app.get('/admin/message/status', status_code=200, description="", )
     async def select_messages_status(
@@ -738,16 +729,17 @@ try:
                                      id_distribution: int = Query(ge=0, ),
                                      status: str = Query(),
                                      ):
-        return await db.fetch(
-                              f"SELECT m.*, "
-                              f"c.timezone AS timezone, "
-                              f"c.phone AS phone "
-                              f"FROM message AS m, client as c "
-                              f"WHERE (m.id_distribution={id_distribution} AND "
-                              f"m.status='{status}' AND "
-                              f"c.id=m.id_client ) "
-                              f"ORDER BY m.start_date, c.timezone, c.phone;"
-        )
+        async with db.transaction():
+            return await db.fetch(
+                                  f"SELECT m.*, "
+                                  f"c.timezone AS timezone, "
+                                  f"c.phone AS phone "
+                                  f"FROM message AS m, client as c "
+                                  f"WHERE (m.id_distribution={id_distribution} AND "
+                                  f"m.status='{status}' AND "
+                                  f"c.id=m.id_client ) "
+                                  f"ORDER BY m.start_date, c.timezone, c.phone;"
+            )
 
 except (BaseExc,  ValueError, TypeError, ) as e:
     logging.info(f"Basis error: {e}")
@@ -766,6 +758,7 @@ finally:
 
 if __name__ == "__main__":
     try:
-        uvicorn.run('mod:app', host='0.0.0.0', port=80, )  # reload=True, )
+        run('mod:app', host='0.0.0.0', port=80, )  # reload=True, )
     except KeyboardInterrupt:
+        print(f"Memory usage:  {Process(getpid()).memory_info().rss / (1024 * 1024):.1f} МB")
         exit()
