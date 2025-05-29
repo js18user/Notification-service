@@ -14,6 +14,10 @@ RUN pip install --upgrade pip
 
 RUN pip install -r requirements.txt
 
+RUN adduser --disabled-password --gecos '' appuser
+
+USER appuser
+
 COPY data.html .
 
 COPY create_tables.sql .
