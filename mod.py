@@ -9,8 +9,6 @@ from datetime import timezone as tzs
 from enum import Enum
 from functools import wraps
 from locale import setlocale, LC_ALL
-# from sys import version as v
-# from os import cpu_count as cpu
 from time import time as t
 from typing import Optional
 from typing import Union
@@ -18,7 +16,7 @@ from aio_pika import DeliveryMode
 from aio_pika import Message as Msg
 from aio_pika import connect as cnt
 from aio_pika import exceptions
-from asyncpg import exceptions as asyncpg_exception
+# from asyncpg import exceptions as asyncpg_exception
 from dateutil.parser import parse
 from fastapi import BackgroundTasks
 from fastapi import Depends
@@ -323,7 +321,6 @@ try:
             return await db.execute(f"UPDATE message SET status='{status}' WHERE id in {tds};")
 
     async def send_message(db,
-                           session,
                            index: int,
                            dict_message: dict,
                            rss: dict,
@@ -340,16 +337,7 @@ try:
         if pause < 0: pause = 0
         await sl(pause, )
         dict_message['status'] = Status.sent.value
-        try:
-            # await send_pika(session, dict_message)
-            pass
-        except exceptions as error:
-            rss[2].append(dict_message['id'])
-            logging.info(f"There are problem with aio_pika{skip} Error: {error}")
-        else:
-            rss[1].append(dict_message['id'])
-        finally:
-            pass
+        rss[1].append(dict_message['id'])
         return rss
 
 
@@ -365,17 +353,14 @@ try:
                                    list_messages: Sequence[dict],
                                    ) -> None:
         rss: dict = {0: len(list_messages), 1: [], 2: [], }
+        for lm_index, dict_message in enumerate(list_messages):
+            await send_message(db, lm_index, dict(dict_message), rss, )
+        await update_ids(db=db, tds=tuple(rss[1]), status=Status.sent.value, )
+        print(f"control: {rss[0]}  {len(rss[1])}  {len(rss[2])}")
         contact = await cnt(url_rabbitmq, )
         async with contact.channel() as session:
-            for lm_index, dict_message in enumerate(list_messages):
-                await send_message(db, session, lm_index, dict(dict_message), rss, )
+            await send_pika(session, list_messages)
         await contact.close()
-        if rss[1]:
-            tds, status = tuple(rss[1]), Status.sent.value
-        if rss[2]:
-            tds, status = tuple(rss[2]), Status.failure.value
-        await update_ids(db=db, tds=tds, status=status, )
-        print(f"control: {rss[0]}  {len(rss[1])}  {len(rss[2])}")
         return
 
 
@@ -401,7 +386,6 @@ try:
 
         return lms
 
-    @timing_decorator
     async def crml(lc: Sequence[dict],
                    distribution: dict,
                    ) -> Sequence[tuple]:
@@ -770,23 +754,15 @@ try:
                 f"c.id=m.id_client ) "
                 f"ORDER BY m.start_date, c.timezone, c.phone;"
             )
+except:
+    logging.info(f"Basis error")
+finally: pass
 
-except (BaseExc, ValueError, TypeError,) as e:
-    logging.info(f"Basis error: {e}")
-    pass
-except HTTPException as e:
-    logging.info(f"HTTP error: {e}")
-    pass
-except exceptions as e:
-    logging.info(f"Rabbitmq error: {e}")
-    pass
-except asyncpg_exception as e:
-    logging.info(f"Asyncpg error: {e}")
-    pass
-finally:
-    pass
 
 if __name__ == "__main__":
+    from sys import version as v
+    from os import cpu_count as cpu
+    print(f" Python: {v} {skip} Number of CPUs in the system:  {cpu()}")
     try:
         run('mod:app', host='0.0.0.0', port=80, )  # reload=True, )
     except KeyboardInterrupt:
