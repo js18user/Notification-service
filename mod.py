@@ -760,9 +760,7 @@ finally: pass
 
 
 if __name__ == "__main__":
-    from sys import version as v
-    from os import cpu_count as cpu
-    print(f" Python: {v} {skip} Number of CPUs in the system:  {cpu()}")
+    
     try:
         run('mod:app', host='0.0.0.0', port=80, )  # reload=True, )
     except KeyboardInterrupt:
