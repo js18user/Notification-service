@@ -30,7 +30,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse
 from fastapi.responses import ORJSONResponse
 from loguru import logger as logging
-from prometheus_fastapi_instrumentator import Instrumentator
+#  from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 from pydantic import Field
 from pydantic.dataclasses import dataclass
@@ -514,7 +514,7 @@ try:
         with open(f'create_tables.sql', f'r') as sql:
             return await db.execute(sql.read(), )
 
-    Instrumentator().instrument(app).expose(app)
+    #  Instrumentator().instrument(app).expose(app)
 
     @app.get('/client', status_code=200, description="", )
     async def client_select(
