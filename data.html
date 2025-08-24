@@ -288,10 +288,10 @@ html {
         </div>
         <div id="footer"></div>
       </nav>
-      <script>
+      <!--script src="http://127.0.0.1:8000/v1.js"></script-->
+        <script>
 "use strict";
-
-// Outputting error messages
+// vizual error mess
 async function displayOnError(error) {
     let messageError = document.querySelector("div");
     messageError.setAttribute('class', "errorMessage");
@@ -339,7 +339,7 @@ async function getDistribution(distribution, list_number) {
     document.getElementById("distributionText").value = distribution.text;
 
     await displayOnError(
-        "Ready for Update distribution ID=" + distribution.id +
+        "Ready for Update distribution ID=" +distribution.id+
         ".   Change the attributes and click Save button. "  +
         "  For Update others distributions click Update button by match. " +
         "  For Create a new Distribution click Reset button. " +
@@ -364,20 +364,20 @@ async function createDistribution(
                                     distributionMob,
                                     distributionText
                                    )
-    {
+    {let one=1; let en=900;
         if (
-              distributionStart_date === "" ||
-              distributionEnd_date === "" ||
-              Date.now() > Date.parse(distributionStart_date) ||
-              Date.now() > Date.parse(distributionEnd_date) ||
-              Date.parse(distributionStart_date) > Date.parse(distributionEnd_date) ||
-              distributionTeg === "" ||
-              distributionText === "" ||
-              distributionTeg.length < 1 ||
-              distributionText.length < 1 ||
-              distributionMob === "" ||
-              distributionMob < 900  ||
-              distributionMob > 999
+              distributionStart_date===""||
+              distributionEnd_date===""||
+              Date.now()>Date.parse(distributionStart_date)||
+              Date.now()>Date.parse(distributionEnd_date)||
+              Date.parse(distributionStart_date)>Date.parse(distributionEnd_date)||
+              distributionTeg===""||
+              distributionText===""||
+              distributionTeg.length<one||
+              distributionText.length<one||
+              distributionMob===""||
+              distributionMob<en||
+              distributionMob>999
           )
           await displayOnError("Error --> ... life is hard... very hard. It must be repeated..." + Date());
         else {
@@ -477,10 +477,10 @@ async function updateGlobal() {
     });
     if (response.ok)
         {
-            let distributions = await response.json();
+            let distributions = await response.json(),
+                rows = document.querySelector(tbs);
             await removeTableBody();
             await getDistribution(distributions[0], 0);
-            let rows = document.querySelector(tbs);
             for await (let distribution of distributions) {rows.append(row(distribution))};
             document.getElementById("distributionId").value = "";
             await displayOnError("All updated");
@@ -491,39 +491,40 @@ async function updateGlobal() {
 // create distribution's string for table
 function row(distribution) {
     let trs = document.createElement("tr"),
-        linksTd = document.createElement("td");
+        linksTd = document.createElement("td"),
+        showCom = document.createElement("button"),
+        showFormed = document.createElement("button"),
+        showQueue = document.createElement("button"),
+        showSent = document.createElement("button"),
+        showFailure = document.createElement("button"),
+        showExpired = document.createElement("button"),
+        editLink = document.createElement("button"),
+        removeLink = document.createElement("button");
+
     trs.setAttribute("data-rowid",distribution.id);
 
-    let showCom = document.createElement("button");
     showCom.append("Com ", distribution.com);
-    showCom.addEventListener("click", async() => await showMessages(distribution, distribution.id, "com"));
+    showCom.addEventListener("click", async() => await showMessages(distribution,distribution.id,"com"));
 
-    let showFormed = document.createElement("button");
-    showFormed.append("Formed ", distribution.formed);
+    showFormed.append("Formed ",distribution.formed);
     showFormed.addEventListener("click", async() => await showMessages(distribution, distribution.id,  "formed"));
 
-    let showQueue = document.createElement("button");
-    showQueue.append("Queue ", distribution.queue);
-    showQueue.addEventListener("click", async() => await showMessages(distribution, distribution.id, "queue"));
+    showQueue.append("Queue ",distribution.queue);
+    showQueue.addEventListener("click", async() => await showMessages(distribution,distribution.id,"queue"));
 
-    let showSent = document.createElement("button");
-    showSent.append("Sent ", distribution.sent);
-    showSent.addEventListener("click", async() => await showMessages(distribution, distribution.id, "sent"));
+    showSent.append("Sent ",distribution.sent);
+    showSent.addEventListener("click", async() => await showMessages(distribution,distribution.id,"sent"));
 
-    let showFailure = document.createElement("button");
-    showFailure.append("Failure ", distribution.failure);
+    showFailure.append("Failure ",distribution.failure);
     showFailure.addEventListener("click", async() => await showMessages(distribution, distribution.id, "failure"));
 
-    let showExpired = document.createElement("button");
-    showExpired.append("Expired ", distribution.expired);
+    showExpired.append("Expired ",distribution.expired);
     showExpired.addEventListener("click", async() => await showMessages(distribution, distribution.id,  "expired"));
 
-    let editLink = document.createElement("button");
     editLink.setAttribute('class', 'updateDistribution');
     editLink.append("Update");
-    editLink.addEventListener("click", async() => await getDistribution(distribution, distribution.id));
+    editLink.addEventListener("click", async() => await getDistribution(distribution,distribution.id));
 
-    let removeLink = document.createElement("button");
     removeLink.setAttribute('class', 'deleteDistribution');
     removeLink.append("Delete");
     removeLink.addEventListener("click", async () => await deleteDistribution(distribution, distribution.id));
@@ -599,63 +600,50 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 // Create window for messages
 async function displayMessage(distribution, status) {
     let messages = await getMessages(distribution, status),
-        html = document.querySelector('html');
+        html = document.querySelector('html'),
+        windowRight = document.createElement('div'),
+        closeBtn = document.createElement('button'),
+        divCom = document.createElement('div'),
+        table = document.createElement('table'),
+        tHead = document.createElement('tHead'),
+        tr = document.createElement('tr'),
+        messageId = document.createElement('th'),
+        messageStart_date = document.createElement('th'),
+        messagePhone = document.createElement('th'),
+        messageTimezone = document.createElement('th'),
+        messageStatus = document.createElement('th'),
+        divBody = document.createElement('div'),
+        rows = document.createElement(tbs);
 
-    let windowRight = document.createElement('div');
     windowRight.setAttribute('class', 'wind');
     html.appendChild(windowRight);
-
-    let closeBtn = document.createElement('button');
     closeBtn.textContent = 'Close window';
     windowRight.appendChild(closeBtn);
-
     closeBtn.onclick = async function() {windowRight.parentNode.removeChild(windowRight);}
+    divCom.setAttribute('class', "scroll-table");
+    windowRight.appendChild(divCom);
+    divCom.appendChild(table);
+    table.appendChild(tHead);
+    tHead.appendChild(tr);
+    messageId.textContent = "(id)"
+    tr.appendChild(messageId);
+    messageStart_date.textContent = ".........Date operation.........";
+    tr.appendChild(messageStart_date);
+    messagePhone.textContent = "....Phone...."
+    tr.appendChild(messagePhone);
+    messageTimezone.textContent = "utc"
+    tr.appendChild(messageTimezone);
+    messageStatus.textContent = "Status"
+    tr.appendChild(messageStatus);
+    divBody.setAttribute('class', "scroll-table-body");
+    divCom.appendChild(divBody);
 
-   let divCom = document.createElement('div');
-   divCom.setAttribute('class', "scroll-table");
-   windowRight.appendChild(divCom);
-
-   let table = document.createElement('table');
-   divCom.appendChild(table);
-
-   let tHead = document.createElement('tHead');
-   table.appendChild(tHead);
-
-   let tr = document.createElement('tr');
-   tHead.appendChild(tr);
-
-   let messageId = document.createElement('th');
-   messageId.textContent = "(id)"
-   tr.appendChild(messageId);
-
-   let messageStart_date = document.createElement('th');
-   messageStart_date.textContent = ".........Date operation.........";
-   tr.appendChild(messageStart_date);
-
-   let messagePhone = document.createElement('th');
-   messagePhone.textContent = "....Phone...."
-   tr.appendChild(messagePhone);
-
-   let messageTimezone = document.createElement('th');
-   messageTimezone.textContent = "utc"
-   tr.appendChild(messageTimezone);
-
-   let messageStatus = document.createElement('th');
-   messageStatus.textContent = "Status"
-   tr.appendChild(messageStatus);
-
-   let divBody = document.createElement('div');
-   divBody.setAttribute('class', "scroll-table-body");
-   divCom.appendChild(divBody);
-
-   let rows = document.createElement(tbs);
    for await (let message of messages) { rows.append(rowMessage(message)) };
    divBody.appendChild(rows)
 }
 //   start working
 let tbs="TBody";
 getDistributions();
-
-      </script>
+        </script>
     </body>
 </html>
