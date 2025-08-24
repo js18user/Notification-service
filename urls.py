@@ -42,8 +42,9 @@ db_password_twp: str = f"Bv(i%3D%26r5ILjTid"
 db_port_twp: int = 5432
 db_host_twp: str = f"147.45.239.120"
 
-url_msp: str = f"postgresql://gen_user:Aaa4401%26%26@192.168.0.5:5432/default_db"
+url_msp: str = f"postgresql://gen_user:Aaa4401&&@192.168.0.5:5432/default_db"
 
 url_azure: str = f"postgresql://neondb_owner:npg_GoPNxHe0pzm4@ep-rapid-glitter-a9y5kqy5-pooler.gwc.azure.neon.tech/neondb?sslmode=require"
+
 
 
