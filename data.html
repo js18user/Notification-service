@@ -477,10 +477,10 @@ async function updateGlobal() {
     });
     if (response.ok)
         {
-            let distributions = await response.json(),
-                rows = document.querySelector(tbs);
+            let distributions = await response.json();
             await removeTableBody();
             await getDistribution(distributions[0], 0);
+            let rows = document.querySelector(tbs);
             for await (let distribution of distributions) {rows.append(row(distribution))};
             document.getElementById("distributionId").value = "";
             await displayOnError("All updated");
@@ -570,7 +570,7 @@ function rowMessage(message) {
     idTd.append(message.id);
     start_dateTd.append(message.start_date);
     phoneTd.append(message.phone);
-    timezoneTd.append("00", message.timezone)
+    timezoneTd.append("00", message.timezone);
     statusTd.append(message.status);
 
     trs.append(idTd, start_dateTd, phoneTd, timezoneTd, statusTd);
@@ -625,25 +625,26 @@ async function displayMessage(distribution, status) {
     divCom.appendChild(table);
     table.appendChild(tHead);
     tHead.appendChild(tr);
-    messageId.textContent = "(id)"
+    messageId.textContent = "(id)";
     tr.appendChild(messageId);
     messageStart_date.textContent = ".........Date operation.........";
     tr.appendChild(messageStart_date);
-    messagePhone.textContent = "....Phone...."
+    messagePhone.textContent = "....Phone....";
     tr.appendChild(messagePhone);
-    messageTimezone.textContent = "utc"
+    messageTimezone.textContent = "utc";
     tr.appendChild(messageTimezone);
-    messageStatus.textContent = "Status"
+    messageStatus.textContent = "Status";
     tr.appendChild(messageStatus);
     divBody.setAttribute('class', "scroll-table-body");
     divCom.appendChild(divBody);
 
    for await (let message of messages) { rows.append(rowMessage(message)) };
-   divBody.appendChild(rows)
+   divBody.appendChild(rows);
 }
 //   start working
 let tbs="TBody";
 getDistributions();
+
         </script>
     </body>
 </html>
