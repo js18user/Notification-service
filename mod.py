@@ -506,8 +506,8 @@ try:
             content={"message": f"Attention! Error with Uvicorn: {exc.uny}"},
         )
 
-    conn = configure_asyncpg(app, url_azure, )
-    # conn = configure_asyncpg(app, url_msp, )
+    # conn = configure_asyncpg(app, url_azure, )
+    conn = configure_asyncpg(app, url_msp, )
     # conn = db_connect()
 
 
