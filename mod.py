@@ -506,8 +506,8 @@ try:
             content={"message": f"Attention! Error with Uvicorn: {exc.uny}"},
         )
 
-    conn = configure_asyncpg(app, url_azure, )
-    # conn = configure_asyncpg(app, url_msp, )
+    # conn = configure_asyncpg(app, url_azure, )
+    conn = configure_asyncpg(app, "postgresql://gen_user:********@192.168.0.4:5432/default_db", )
     # conn = db_connect()
 
 
