@@ -47,7 +47,7 @@ from urls import query_ratio
 from urls import url_azure
 from urls import url_rabbit_google as url_rabbitmq
 from urls import user
-# from urls import url_msp
+from urls import url_msp
 json = __import__('orjson')
 # from contextlib import asynccontextmanager
 
@@ -507,7 +507,7 @@ try:
         )
 
     # conn = configure_asyncpg(app, url_azure, )
-    conn = configure_asyncpg(app, "postgresql://gen_user:********@192.168.0.4:5432/default_db", )
+    conn = configure_asyncpg(app, url_mcp, )
     # conn = db_connect()
 
 
