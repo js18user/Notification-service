@@ -44,7 +44,7 @@ from urls import password
 from urls import port
 from urls import query_many
 from urls import query_ratio
-from urls import url_azure
+# from urls import url_azure
 from urls import url_rabbit_google as url_rabbitmq
 from urls import user
 # from urls import url_msp
@@ -506,9 +506,9 @@ try:
             content={"message": f"Attention! Error with Uvicorn: {exc.uny}"},
         )
 
-    conn = configure_asyncpg(app, url_azure, )
+    # conn = configure_asyncpg(app, url_azure, )
     # conn = configure_asyncpg(app, url_mcp, )
-    # conn = db_connect()
+    conn = db_connect()
 
 
     @conn.on_init
