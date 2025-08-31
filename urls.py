@@ -28,7 +28,7 @@ host: str = f'localhost'
 # Postgresql 17  on Local net
 # psql 'postgresql://gen_user:Aaa4401%26%26@192.168.0.4:5432/default_db'
 user: str = f'gen_user'
-name: str = f'fintech'
+name: str = f'default_db'
 password: str = f'Aaa4401%26%26'
 port: int = 5432
 host: str = f"192.168.0.4"
@@ -53,6 +53,7 @@ db_host_twp: str = f"147.45.239.120"
 # url_msp: str = f"postgresql://gen_user:********@192.168.0.4:5432/default_db"
 
 # url_azure: str = f"postgresql://neondb_owner:npg_GoPNxHe0pzm4@ep-rapid-glitter-a9y5kqy5-pooler.gwc.azure.neon.tech/neondb?sslmode=require"
+
 
 
 
