@@ -53,7 +53,8 @@ db_host_twp: str = f"147.45.239.120"
 
 # url_msp: str = f"postgresql://gen_user:********@192.168.0.4:5432/default_db"
 
-# url_azure: str = f"postgresql://neondb_owner:npg_GoPNxHe0pzm4@ep-rapid-glitter-a9y5kqy5-pooler.gwc.azure.neon.tech/neondb?sslmode=require"
+url_azure: str = f"postgresql://neondb_owner:npg_GoPNxHe0pzm4@ep-rapid-glitter-a9y5kqy5-pooler.gwc.azure.neon.tech/neondb?sslmode=require"
+
 
 
 
