@@ -44,10 +44,10 @@ from urls import password
 from urls import port
 from urls import query_many
 from urls import query_ratio
-# from urls import url_azure
+from urls import url_azure
 from urls import url_rabbit_google as url_rabbitmq
 from urls import user
-from urls import urltw
+# from urls import urltw
 json = __import__('orjson')
 # from contextlib import asynccontextmanager
 
@@ -506,8 +506,8 @@ try:
             content={"message": f"Attention! Error with Uvicorn: {exc.uny}"},
         )
 
-    # conn = configure_asyncpg(app, url_azure, )
-    conn = configure_asyncpg(app, urltw, )
+    conn = configure_asyncpg(app, url_azure, )
+    # conn = configure_asyncpg(app, urltw, )
     # conn = db_connect()
 
 
