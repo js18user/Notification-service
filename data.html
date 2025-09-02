@@ -241,8 +241,8 @@ html {
                 <label for="distributionTeg">Teg:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                 <input id="distributionTeg" required type="text" list="list" >
                 <datalist id="list">
-                    <option value="control"></option>
-                    <option value="control"></option>
+                    <option value="message"></option>
+                    <option value="message"></option>
                 </datalist>
             </p>
             <p>
@@ -289,46 +289,48 @@ html {
         <div id="footer"></div>
       </nav>
       <!--script src="http://127.0.0.1:8000/v1.js"></script-->
-        <script>
+        <script async>
 "use strict";
 // vizual error mess
 async function displayOnError(error) {
     let messageError = document.querySelector("div");
     messageError.setAttribute('class', "errorMessage");
-    document.getElementById('content').innerHTML = '';
+    document.getElementById('content').textContent = '';
     messageError.append(error);
 }
-
 // Clearing table rows
 async function removeTableBody() {tableId.replaceChild(document.createElement(tbs), tableId.tBodies[0]);}
 
 // Receiving all distributions lists with message statistics
 async function getDistributions() {
     let response = await fetch('/admin/distribution', {
-        headers: {'Content-Type': 'application/json'}
-    })
-        if (response.ok) {
-        let distributions = await response.json(),
-            rows = document.querySelector(tbs);
+        headers: { 'Content-Type': 'application/json' }
+    });
+    if (response.ok) {
+        let distributions = await response.json(), rows = document.querySelector(tbs);
         await getDistribution(distributions[0], 0);
-        for await (let distribution of distributions) { rows.append(row(distribution)) };
+        for await (let distribution of distributions) {
+            rows.append(row(distribution));
+        }
+        ;
         document.getElementById("distributionId").value = "";
     }
-    else await displayOnError("Error --> "+" "+response.status+" "+response.statusText);
+    else
+        await displayOnError("Error --> " + " " + response.status + " " + response.statusText);
 }
-
 // Receiving all messages for the distribution
 async function getMessages(distribution, status) {
     let url = '';
-    status === "com" ? url = `/admin/message?id_distribution=${distribution.id}`:
-                       url = `/admin/message/status?id_distribution=${distribution.id}&status=${status}`;
+    status === "com" ? url = `/admin/message?id_distribution=${distribution.id}` :
+        url = `/admin/message/status?id_distribution=${distribution.id}&status=${status}`;
     let response = await fetch(url, {
-         headers: {'Content-Type': 'application/json'}
+        headers: { 'Content-Type': 'application/json' }
     });
-    if (response.ok) return await response.json();
-    else await displayOnError("Error --> "+" "+response.status+" "+response.statusText);
- }
-
+    if (response.ok)
+        return await response.json();
+    else
+        await displayOnError("Error --> " + " " + response.status + " " + response.statusText);
+}
 // Getting a Single Distribution
 async function getDistribution(distribution, list_number) {
     document.getElementById("distributionId").value = distribution.id;
@@ -337,289 +339,219 @@ async function getDistribution(distribution, list_number) {
     document.getElementById("distributionTeg").value = distribution.teg;
     document.getElementById("distributionMob").value = distribution.mob;
     document.getElementById("distributionText").value = distribution.text;
-
-    await displayOnError(
-        "Ready for Update distribution ID=" +distribution.id+
-        ".   Change the attributes and click Save button. "  +
+    await displayOnError("Ready for Update distribution ID=" + distribution.id +
+        ".   Change the attributes and click Save button. " +
         "  For Update others distributions click Update button by match. " +
         "  For Create a new Distribution click Reset button. " +
-        "  Messages are ready for viewing. Click the appropriate button."
-    );
+        "  Messages are ready for viewing. Click the appropriate button.");
 }
-
 // Getting a Single Distribution with message's statistic
 async function getDistributionStatistic(id_number) {
     let response = await fetch(`/admin/statistic?id=${id_number}`, {
-        headers: {'Content-Type': 'application/json'}
+        headers: { 'Content-Type': 'application/json' }
     });
-    if (response.ok) return await response.json();
-    else await displayOnError("Error --> "+" "+response.status+" "+response.statusText);
+    if (response.ok)
+        return await response.json();
+    else
+        await displayOnError("Error --> " + " " + response.status + " " + response.statusText);
 }
-
 // Adding a Distribution
-async function createDistribution(
-                                    distributionStart_date,
-                                    distributionEnd_date,
-                                    distributionTeg,
-                                    distributionMob,
-                                    distributionText
-                                   )
-    {let one=1; let en=900;
-        if (
-              distributionStart_date===""||
-              distributionEnd_date===""||
-              Date.now()>Date.parse(distributionStart_date)||
-              Date.now()>Date.parse(distributionEnd_date)||
-              Date.parse(distributionStart_date)>Date.parse(distributionEnd_date)||
-              distributionTeg===""||
-              distributionText===""||
-              distributionTeg.length<one||
-              distributionText.length<one||
-              distributionMob===""||
-              distributionMob<en||
-              distributionMob>999
-          )
-          await displayOnError("Error --> ... life is hard... very hard. It must be repeated..." + Date());
-        else {
-            await displayOnError("");
-            let response = await fetch("/distribution", {
-                method: "POST",
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    start_date: distributionStart_date,
-                    end_date: distributionEnd_date,
-                    teg: distributionTeg,
-                    mob: distributionMob,
-                    text: distributionText,
-                })
-            });
-            if (response.ok) {
-                let distribution = await response.json();
-                await getDistribution(distribution[0], 0);
-                document.getElementById("distributionId").value = "";
-                await displayOnError("Created distribution ID="+distribution[0]['id'] +
-                    " " + response.status + " " + response.statusText +
-                    " Press the UpdateGlobal button to monitor the status of messages");
-            }
-            else await displayOnError("Error --> "+" "+response.status+" "+response.statusText);
-     }
+async function createDistribution(distributionStart_date, distributionEnd_date, distributionTeg, distributionMob, distributionText) {
+    let one = 1;
+    let en = 900;
+    if (distributionStart_date === "" ||
+        distributionEnd_date === "" ||
+        Date.now() > Date.parse(distributionStart_date) ||
+        Date.now() > Date.parse(distributionEnd_date) ||
+        Date.parse(distributionStart_date) > Date.parse(distributionEnd_date) ||
+        distributionTeg === "" ||
+        distributionText === "" ||
+        distributionTeg.length < one ||
+        distributionText.length < one ||
+        distributionMob === "" ||
+        distributionMob < en ||
+        distributionMob > 999)
+        await displayOnError("Error --> ... life is hard... very hard. It must be repeated..." + Date());
+    else {
+        await displayOnError("");
+        let response = await fetch("/distribution", {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                start_date: distributionStart_date,
+                end_date: distributionEnd_date,
+                teg: distributionTeg,
+                mob: distributionMob,
+                text: distributionText,
+            })
+        });
+        if (response.ok) {
+            let distribution = await response.json();
+            await getDistribution(distribution[0], 0);
+            document.getElementById("distributionId").value = "";
+            await displayOnError("Created distribution ID=" + distribution[0]['id'] +
+                " " + response.status + " " + response.statusText +
+                " Press the UpdateGlobal button to monitor the status of messages");
+        }
+        else
+            await displayOnError("Error --> " + " " + response.status + " " + response.statusText);
+    }
 }
-
 //  Distribution Update
 async function editDistribution(id, start_date, end_date, teg, mob, text) {
     let response = await fetch("/distribution", {
         method: "PUT",
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             distribution: { id: id, },
             upd: {
-            start_date: start_date,
-            end_date: end_date,
-            teg: teg,
-            mob: mob,
-            text: text, },
+                start_date: start_date,
+                end_date: end_date,
+                teg: teg,
+                mob: mob,
+                text: text,
+            },
         })
     });
     if (response.ok) {
         let listDistributionStatistic = await getDistributionStatistic(id);
         document.querySelector(`tr[data-rowid="${listDistributionStatistic[0].id}"]`).
             replaceWith(row(listDistributionStatistic[0]));
-        await displayOnError("Updated distribution ID="+id +" "+response.status+" "+ response.statusText+
+        await displayOnError("Updated distribution ID=" + id + " " + response.status + " " + response.statusText +
             " Press the UpdateGlobal button to monitor the status of messages");
     }
-    else await displayOnError("Error --> "+" "+response.status+" "+response.statusText+" "+messageInfo);
+    else
+        await displayOnError("Error --> " + " " + response.status + " " + response.statusText);
 }
-
 // Delete the distribution
 async function deleteDistribution(distribution, list_number) {
     let response = await fetch(`/distribution`, {
         method: "DELETE",
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             id: distribution.id,
-            },
-        )
+        })
     });
     if (response.ok) {
-        await displayOnError("Deleted distribution ID="+ distribution.id +" with messages");
+        await displayOnError("Deleted distribution ID=" + distribution.id + " with messages");
         document.querySelector(`tr[data-rowid='${distribution.id}']`).remove();
     }
-    else await displayOnError("Error --> "+" "+response.status+" "+response.statusText);
+    else
+        await displayOnError("Error --> " + " " + response.status + " " + response.statusText);
 }
-
 // Open window to view messages
 async function showMessages(distribution, list_number, status) {
     await getDistribution(distribution, list_number);
     await displayMessage(distribution, status);
     return;
 }
-
 // Reset form data after submit
 async function reset() {
-
     document.getElementById("distributionId").value =
-    document.getElementById("distributionStart_date").value =
-    document.getElementById("distributionEnd_date").value =
-    document.getElementById("distributionText").value = "";
+        document.getElementById("distributionStart_date").value =
+            document.getElementById("distributionEnd_date").value =
+                document.getElementById("distributionText").value = "";
     [document.getElementById("distributionTeg").value,
-     document.getElementById("distributionMob").value
-    ]= ["control", "906"];
+        document.getElementById("distributionMob").value
+    ] = ["message", "906"];
     await displayOnError("Ready for CREATE a new Distribution" +
-        ". Enter the attributes and click Save button.\n "
-    );
+        ". Enter the attributes and click Save button.\n ");
 }
-
 // Page refresh
 async function updateGlobal() {
-    var response = await fetch('/admin/distribution', {
+    let response = await fetch('/admin/distribution', {
         method: "GET",
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
     });
-    if (response.ok)
-        {
-            let distributions = await response.json();
-            await removeTableBody();
-            await getDistribution(distributions[0], 0);
-            let rows = document.querySelector(tbs);
-            for await (let distribution of distributions) {rows.append(row(distribution))};
-            document.getElementById("distributionId").value = "";
-            await displayOnError("All updated");
+    if (response.ok) {
+        let distributions = await response.json();
+       // await removeTableBody();
+        await getDistribution(distributions[0], 0);
+        let rows = document.querySelector(tbs);
+        for await (let distribution of distributions) {
+            rows.append(row(distribution));
         }
-    else await displayOnError("Error --> "+" "+response.status+" "+response.statusText);
+        ;
+        document.getElementById("distributionId").value = "";
+        await displayOnError("All updated");
+    }
+    else
+        await displayOnError("Error --> " + " " + response.status + " " + response.statusText);
 }
-
 // create distribution's string for table
 function row(distribution) {
-    let trs = document.createElement("tr"),
-        linksTd = document.createElement("td"),
-        showCom = document.createElement("button"),
-        showFormed = document.createElement("button"),
-        showQueue = document.createElement("button"),
-        showSent = document.createElement("button"),
-        showFailure = document.createElement("button"),
-        showExpired = document.createElement("button"),
-        editLink = document.createElement("button"),
-        removeLink = document.createElement("button");
-
-    trs.setAttribute("data-rowid",distribution.id);
-
+    let trs = document.createElement("tr"), linksTd = document.createElement("td"), showCom = document.createElement("button"), showFormed = document.createElement("button"), showQueue = document.createElement("button"), showSent = document.createElement("button"), showFailure = document.createElement("button"), showExpired = document.createElement("button"), editLink = document.createElement("button"), removeLink = document.createElement("button");
+    trs.setAttribute("data-rowid", distribution.id);
     showCom.append("Com ", distribution.com);
-    showCom.addEventListener("click", async() => await showMessages(distribution,distribution.id,"com"));
-
-    showFormed.append("Formed ",distribution.formed);
-    showFormed.addEventListener("click", async() => await showMessages(distribution, distribution.id,  "formed"));
-
-    showQueue.append("Queue ",distribution.queue);
-    showQueue.addEventListener("click", async() => await showMessages(distribution,distribution.id,"queue"));
-
-    showSent.append("Sent ",distribution.sent);
-    showSent.addEventListener("click", async() => await showMessages(distribution,distribution.id,"sent"));
-
-    showFailure.append("Failure ",distribution.failure);
-    showFailure.addEventListener("click", async() => await showMessages(distribution, distribution.id, "failure"));
-
-    showExpired.append("Expired ",distribution.expired);
-    showExpired.addEventListener("click", async() => await showMessages(distribution, distribution.id,  "expired"));
-
+    showCom.addEventListener("click", async () => await showMessages(distribution, distribution.id, "com"));
+    showFormed.append("Formed ", distribution.formed);
+    showFormed.addEventListener("click", async () => await showMessages(distribution, distribution.id, "formed"));
+    showQueue.append("Queue ", distribution.queue);
+    showQueue.addEventListener("click", async () => await showMessages(distribution, distribution.id, "queue"));
+    showSent.append("Sent ", distribution.sent);
+    showSent.addEventListener("click", async () => await showMessages(distribution, distribution.id, "sent"));
+    showFailure.append("Failure ", distribution.failure);
+    showFailure.addEventListener("click", async () => await showMessages(distribution, distribution.id, "failure"));
+    showExpired.append("Expired ", distribution.expired);
+    showExpired.addEventListener("click", async () => await showMessages(distribution, distribution.id, "expired"));
     editLink.setAttribute('class', 'updateDistribution');
     editLink.append("Update");
-    editLink.addEventListener("click", async() => await getDistribution(distribution,distribution.id));
-
+    editLink.addEventListener("click", async () => await getDistribution(distribution, distribution.id));
     removeLink.setAttribute('class', 'deleteDistribution');
     removeLink.append("Delete");
     removeLink.addEventListener("click", async () => await deleteDistribution(distribution, distribution.id));
-
     linksTd.append(showCom, showFormed, showQueue, showSent, showFailure, showExpired, editLink, removeLink);
     trs.appendChild(linksTd);
-
-    let idTd = document.createElement("td"),
-         start_dateTd = document.createElement("td"),
-         end_dateTd = document.createElement("td"),
-         tegTd = document.createElement("td"),
-         mobTd = document.createElement("td"),
-         textTd = document.createElement("td");
-
+    let idTd = document.createElement("td"), start_dateTd = document.createElement("td"), end_dateTd = document.createElement("td"), tegTd = document.createElement("td"), mobTd = document.createElement("td"), textTd = document.createElement("td");
     idTd.append(distribution.id);
     start_dateTd.append(distribution.start_date);
     end_dateTd.append(distribution.end_date);
-
     tegTd.setAttribute("class", "teg");
     tegTd.append(distribution.teg.substring(0, 8));
-
     mobTd.append(distribution.mob);
-
     textTd.setAttribute("class", "text");
     textTd.append(distribution.text);
-
     trs.append(idTd, start_dateTd, end_dateTd, tegTd, mobTd, textTd);
     return trs;
 }
-
 // create message's string for table
 function rowMessage(message) {
-    let trs = document.createElement("tr"),
-        linksTd = document.createElement("td"),
-        idTd = document.createElement("td"),
-        start_dateTd = document.createElement("td"),
-        phoneTd = document.createElement("td"),
-        timezoneTd = document.createElement("td"),
-        statusTd = document.createElement("td");
-
-    trs.setAttribute("data-rowid",message.id);
-
+    let trs = document.createElement("tr"), linksTd = document.createElement("td"), idTd = document.createElement("td"), start_dateTd = document.createElement("td"), phoneTd = document.createElement("td"), timezoneTd = document.createElement("td"), statusTd = document.createElement("td");
+    trs.setAttribute("data-rowid", message.id);
     idTd.append(message.id);
     start_dateTd.append(message.start_date);
     phoneTd.append(message.phone);
     timezoneTd.append("00", message.timezone);
     statusTd.append(message.status);
-
     trs.append(idTd, start_dateTd, phoneTd, timezoneTd, statusTd);
     return trs;
 }
-
 // Reset all
-document.getElementById("resetBtn").addEventListener("click", async () =>  reset());
-
+document.getElementById("resetBtn").addEventListener("click", async () => reset());
 // UpdateGlobal
-document.getElementById("updateGlBtn").addEventListener("click", async () =>  updateGlobal());
-
+document.getElementById("updateGlBtn").addEventListener("click", async () => updateGlobal());
 // Submitting the form for further use
 document.getElementById("saveBtn").addEventListener("click", async () => {
-
-    let id = document.getElementById("distributionId").value,
-        start_date = document.getElementById("distributionStart_date").value,
-        end_date = document.getElementById("distributionEnd_date").value,
-        teg = document.getElementById("distributionTeg").value,
-        mob = document.getElementById("distributionMob").value,
-        text = document.getElementById("distributionText").value;
-
+    let id = document.getElementById("distributionId").value, start_date = document.getElementById("distributionStart_date").value,
+        end_date = document.getElementById("distributionEnd_date").value, teg = document.getElementById("distributionTeg").value,
+        mob = document.getElementById("distributionMob").value, text = document.getElementById("distributionText").value;
     id === "" ? await createDistribution(start_date, end_date, teg, mob, text) :
-                await editDistribution(id, start_date, end_date, teg, mob, text);
+        await editDistribution(id, start_date, end_date, teg, mob, text);
 });
-
 // Create window for messages
 async function displayMessage(distribution, status) {
-    let messages = await getMessages(distribution, status),
-        html = document.querySelector('html'),
-        windowRight = document.createElement('div'),
-        closeBtn = document.createElement('button'),
-        divCom = document.createElement('div'),
-        table = document.createElement('table'),
-        tHead = document.createElement('tHead'),
-        tr = document.createElement('tr'),
-        messageId = document.createElement('th'),
-        messageStart_date = document.createElement('th'),
-        messagePhone = document.createElement('th'),
-        messageTimezone = document.createElement('th'),
-        messageStatus = document.createElement('th'),
-        divBody = document.createElement('div'),
-        rows = document.createElement(tbs);
-
+    let messages = await getMessages(distribution, status), html = document.querySelector('html'),
+        windowRight = document.createElement('div'), closeBtn = document.createElement('button'),
+        divCom = document.createElement('div'), table = document.createElement('table'),
+        tHead = document.createElement('tHead'), tr = document.createElement('tr'), messageId = document.createElement('th'),
+        messageStart_date = document.createElement('th'), messagePhone = document.createElement('th'),
+        messageTimezone = document.createElement('th'), messageStatus = document.createElement('th'),
+        divBody = document.createElement('div'), rows = document.createElement(tbs);
     windowRight.setAttribute('class', 'wind');
     html.appendChild(windowRight);
     closeBtn.textContent = 'Close window';
     windowRight.appendChild(closeBtn);
-    closeBtn.onclick = async function() {windowRight.parentNode.removeChild(windowRight);}
+    closeBtn.onclick = async function () { windowRight.parentNode.removeChild(windowRight); };
     divCom.setAttribute('class', "scroll-table");
     windowRight.appendChild(divCom);
     divCom.appendChild(table);
@@ -637,14 +569,18 @@ async function displayMessage(distribution, status) {
     tr.appendChild(messageStatus);
     divBody.setAttribute('class', "scroll-table-body");
     divCom.appendChild(divBody);
-
-   for await (let message of messages) { rows.append(rowMessage(message)) };
-   divBody.appendChild(rows);
+    for await (let message of messages) {
+        rows.append(rowMessage(message));
+    }
+    ;
+    divBody.appendChild(rows);
 }
 //   start working
-let tbs="TBody";
+let ssl = Symbol("msp");
+let tbs = "TBody";
 getDistributions();
 
         </script>
     </body>
+
 </html>
