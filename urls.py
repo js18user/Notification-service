@@ -17,6 +17,7 @@ db_name_aws: str = f'd3hc7n6us4d3no'
 db_password_aws: str = f'p94bca2313004c8089b6cfcd9ec536c2a00e6212b58c63059e26298791dce5972'
 db_port_aws: int = 5432
 db_host_aws: str = f'cbu5eice9b7g15.cluster-czz5s0kz4scl.eu-west-1.rds.amazonaws.com'
+
 """
 # Postgresql 17  on Local machine
 user: str = f'postgres'
@@ -25,14 +26,16 @@ password: str = f'aa4401'
 port: int = 5432
 host: str = f'localhost'
 """
+
 # Postgresql 17  on Local net
-# psql 'postgresql://gen_user:Aaa4401%26%26@192.168.0.4:5432/default_db'
-urltw: str = 'postgresql://gen_user:Aaa4401%26%26@147.45.104.36:5432/default_db'
+# psql 'postgresql://gen_user:K5m_5u5tAB0%26lp@192.168.0.4:5432/default_db'
+# urltw: str = 'postgresql://gen_user:Aaa4401%26%26@147.45.104.36:5432/default_db'
+# urltw: str = 'postgresql://gen_user:K5m_5u5tAB0%26lp@192.168.0.4:5432/default_db'
 user: str = f'gen_user'
 name: str = f'default_db'
-password: str = "Aaa4401%26%26" 
+password = r"K5m_5u5tAB0&lp" 
 port: int = 5432
-host: str = f"147.45.104.36"
+host: str = f"192.168.0.4"
 
 query_many: str = f"INSERT INTO message (start_date,status,id_distribution,id_client) VALUES ($1,$2,$3,$4);"
 
@@ -53,7 +56,8 @@ db_host_twp: str = f"147.45.239.120"
 
 # url_msp: str = f"postgresql://gen_user:********@192.168.0.4:5432/default_db"
 
-url_azure: str = f"postgresql://neondb_owner:npg_GoPNxHe0pzm4@ep-rapid-glitter-a9y5kqy5-pooler.gwc.azure.neon.tech/neondb?sslmode=require"
+# url_azure: str = f"postgresql://neondb_owner:npg_GoPNxHe0pzm4@ep-rapid-glitter-a9y5kqy5-pooler.gwc.azure.neon.tech/neondb?sslmode=require"
+
 
 
 
