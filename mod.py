@@ -38,15 +38,15 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.cors import CORSMiddleware
 from uvicorn import run
 from asyncpg_pool import configure_asyncpg
+from urls import user
 from urls import host
 from urls import name
 from urls import password
 from urls import port
 from urls import query_many
 from urls import query_ratio
-from urls import url_azure
+# from urls import url_azure
 from urls import url_rabbit_google as url_rabbitmq
-from urls import user
 # from urls import urltw
 json = __import__('orjson')
 # from contextlib import asynccontextmanager
