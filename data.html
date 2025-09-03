@@ -465,7 +465,7 @@ async function updateGlobal() {
     });
     if (response.ok) {
         let distributions = await response.json();
-       // await removeTableBody();
+        await removeTableBody();
         await getDistribution(distributions[0], 0);
         let rows = document.querySelector(tbs);
         for await (let distribution of distributions) {
