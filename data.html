@@ -547,8 +547,14 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 });
 // Create window for messages
 async function displayMessage(distribution, status) {
-    let messages = await getMessages(distribution, status);
-    /*  number 1        */
+    let messages = await getMessages(distribution, status),
+        html = document.querySelector('html'),
+        windowRight = document.createElement('div'), closeBtn = document.createElement('button'),
+        divCom = document.createElement('div'), table = document.createElement('table'),
+        tHead = document.createElement('tHead'), tr = document.createElement('tr'), messageId = document.createElement('th'),
+        messageStart_date = document.createElement('th'), messagePhone = document.createElement('th'),
+        messageTimezone = document.createElement('th'), messageStatus = document.createElement('th'),
+        divBody = document.createElement('div'), rows = document.createElement(tbs);
     windowRight.setAttribute('class', 'wind');
     html.appendChild(windowRight);
     closeBtn.textContent = 'Close window';
@@ -559,7 +565,16 @@ async function displayMessage(distribution, status) {
     divCom.appendChild(table);
     table.appendChild(tHead);
     tHead.appendChild(tr);
-    /* NUMBER 2   */
+    messageId.textContent = "(id)";
+    tr.appendChild(messageId);
+    messageStart_date.textContent = ".........Date operation.........";
+    tr.appendChild(messageStart_date);
+    messagePhone.textContent = "....Phone....";
+    tr.appendChild(messagePhone);
+    messageTimezone.textContent = "utc";
+    tr.appendChild(messageTimezone);
+    messageStatus.textContent = "Status";
+    tr.appendChild(messageStatus);
     divBody.setAttribute('class', "scroll-table-body");
     divCom.appendChild(divBody);
     for await (let message of messages) {
@@ -571,26 +586,7 @@ async function displayMessage(distribution, status) {
 //   start working
 // let ssl = Symbol("msp");
 let tbs = "TBody";
-// number 1
-let html = document.querySelector('html'),
-    windowRight = document.createElement('div'), closeBtn = document.createElement('button'),
-    divCom = document.createElement('div'), table = document.createElement('table'),
-    tHead = document.createElement('tHead'), tr = document.createElement('tr'), messageId = document.createElement('th'),
-    messageStart_date = document.createElement('th'), messagePhone = document.createElement('th'),
-    messageTimezone = document.createElement('th'), messageStatus = document.createElement('th'),
-    divBody = document.createElement('div'), rows = document.createElement(tbs);
-// NUMBER 2
-    messageId.textContent = "(id)";
-    tr.appendChild(messageId);
-    messageStart_date.textContent = ".........Date operation.........";
-    tr.appendChild(messageStart_date);
-    messagePhone.textContent = "....Phone....";
-    tr.appendChild(messagePhone);
-    messageTimezone.textContent = "utc";
-    tr.appendChild(messageTimezone);
-    messageStatus.textContent = "Status";
-    tr.appendChild(messageStatus);
 getDistributions();
-
         </script>
     </body>
+</html>
