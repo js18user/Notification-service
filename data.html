@@ -547,6 +547,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 });
 // Create window for messages
 async function displayMessage(distribution, status) {
+    let messages = await getMessages(distribution, status);
     /*  number 1        */
     windowRight.setAttribute('class', 'wind');
     html.appendChild(windowRight);
@@ -571,7 +572,7 @@ async function displayMessage(distribution, status) {
 // let ssl = Symbol("msp");
 let tbs = "TBody";
 // number 1
-let messages = await getMessages(distribution, status), html = document.querySelector('html'),
+let html = document.querySelector('html'),
     windowRight = document.createElement('div'), closeBtn = document.createElement('button'),
     divCom = document.createElement('div'), table = document.createElement('table'),
     tHead = document.createElement('tHead'), tr = document.createElement('tr'), messageId = document.createElement('th'),
