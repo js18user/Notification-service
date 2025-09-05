@@ -131,7 +131,7 @@ input    {
            background-color: RoyalBlue;
            color: white;
            border: 1px solid FireBrick;
-           font-family: 'Times New Roman';
+           font-family: 'Uncut';
            font-size: 16px;
 }
 
@@ -203,7 +203,7 @@ input    {
         position: fixed;
         left: 0; bottom: 0;
         padding: 7px;
-  /*      background: #d8d8d8;   */
+  /*      background: #d8d8d8;  Times New Roman */
         background: SteelBlue;
         color: MediumBlue;
         width: 100%;
@@ -298,6 +298,8 @@ async function displayOnError(error) {
     document.getElementById('content').textContent = '';
     messageError.append(error);
 }
+// message for display error
+async function createMessageError(response) { return await "Error --> " + " " + response.status + " " + response.statusText; }
 // Clearing table rows
 async function removeTableBody() {tableId.replaceChild(document.createElement(tbs), tableId.tBodies[0]);}
 
@@ -316,7 +318,7 @@ async function getDistributions() {
         document.getElementById("distributionId").value = "";
     }
     else
-        await displayOnError("Error --> " + " " + response.status + " " + response.statusText);
+        await displayOnError(await createMessageError(response) );
 }
 // Receiving all messages for the distribution
 async function getMessages(distribution, status) {
@@ -329,7 +331,7 @@ async function getMessages(distribution, status) {
     if (response.ok)
         return await response.json();
     else
-        await displayOnError("Error --> " + " " + response.status + " " + response.statusText);
+        await displayOnError(await createMessageError(response) );
 }
 // Getting a Single Distribution
 async function getDistribution(distribution, list_number) {
@@ -353,7 +355,7 @@ async function getDistributionStatistic(id_number) {
     if (response.ok)
         return await response.json();
     else
-        await displayOnError("Error --> " + " " + response.status + " " + response.statusText);
+        await displayOnError(await createMessageError(response) );
 }
 // Adding a Distribution
 async function createDistribution(distributionStart_date, distributionEnd_date, distributionTeg, distributionMob, distributionText) {
@@ -394,7 +396,7 @@ async function createDistribution(distributionStart_date, distributionEnd_date, 
                 " Press the UpdateGlobal button to monitor the status of messages");
         }
         else
-            await displayOnError("Error --> " + " " + response.status + " " + response.statusText);
+            await displayOnError(await createMessageError(response) );
     }
 }
 //  Distribution Update
@@ -421,7 +423,7 @@ async function editDistribution(id, start_date, end_date, teg, mob, text) {
             " Press the UpdateGlobal button to monitor the status of messages");
     }
     else
-        await displayOnError("Error --> " + " " + response.status + " " + response.statusText);
+        await displayOnError(await createMessageError(response) );
 }
 // Delete the distribution
 async function deleteDistribution(distribution, list_number) {
@@ -437,7 +439,7 @@ async function deleteDistribution(distribution, list_number) {
         document.querySelector(`tr[data-rowid='${distribution.id}']`).remove();
     }
     else
-        await displayOnError("Error --> " + " " + response.status + " " + response.statusText);
+        await displayOnError(await createMessageError(response) );
 }
 // Open window to view messages
 async function showMessages(distribution, list_number, status) {
@@ -476,11 +478,13 @@ async function updateGlobal() {
         await displayOnError("All updated");
     }
     else
-        await displayOnError("Error --> " + " " + response.status + " " + response.statusText);
+        await displayOnError(await createMessageError(response) );
 }
 // create distribution's string for table
-function row(distribution) {
-    let trs = document.createElement("tr"), linksTd = document.createElement("td"), showCom = document.createElement("button"), showFormed = document.createElement("button"), showQueue = document.createElement("button"), showSent = document.createElement("button"), showFailure = document.createElement("button"), showExpired = document.createElement("button"), editLink = document.createElement("button"), removeLink = document.createElement("button");
+async function row(distribution) {
+    let trs = document.createElement("tr"), linksTd = document.createElement("td"), showCom = document.createElement("button"), showFormed = document.createElement("button"),
+        showQueue = document.createElement("button"), showSent = document.createElement("button"), showFailure = document.createElement("button"),
+        showExpired = document.createElement("button"), editLink = document.createElement("button"), removeLink = document.createElement("button");
     trs.setAttribute("data-rowid", distribution.id);
     showCom.append("Com ", distribution.com);
     showCom.addEventListener("click", async () => await showMessages(distribution, distribution.id, "com"));
@@ -502,7 +506,8 @@ function row(distribution) {
     removeLink.addEventListener("click", async () => await deleteDistribution(distribution, distribution.id));
     linksTd.append(showCom, showFormed, showQueue, showSent, showFailure, showExpired, editLink, removeLink);
     trs.appendChild(linksTd);
-    let idTd = document.createElement("td"), start_dateTd = document.createElement("td"), end_dateTd = document.createElement("td"), tegTd = document.createElement("td"), mobTd = document.createElement("td"), textTd = document.createElement("td");
+    let idTd = document.createElement("td"), start_dateTd = document.createElement("td"), end_dateTd = document.createElement("td"),
+        tegTd = document.createElement("td"), mobTd = document.createElement("td"), textTd = document.createElement("td");
     idTd.append(distribution.id);
     start_dateTd.append(distribution.start_date);
     end_dateTd.append(distribution.end_date);
@@ -512,11 +517,13 @@ function row(distribution) {
     textTd.setAttribute("class", "text");
     textTd.append(distribution.text);
     trs.append(idTd, start_dateTd, end_dateTd, tegTd, mobTd, textTd);
-    return trs;
+    return await trs;
 }
 // create message's string for table
-function rowMessage(message) {
-    let trs = document.createElement("tr"), linksTd = document.createElement("td"), idTd = document.createElement("td"), start_dateTd = document.createElement("td"), phoneTd = document.createElement("td"), timezoneTd = document.createElement("td"), statusTd = document.createElement("td");
+async function rowMessage(message) {
+    let trs = document.createElement("tr"), linksTd = document.createElement("td"), idTd = document.createElement("td"),
+        start_dateTd = document.createElement("td"), phoneTd = document.createElement("td"),
+        timezoneTd = document.createElement("td"), statusTd = document.createElement("td");
     trs.setAttribute("data-rowid", message.id);
     idTd.append(message.id);
     start_dateTd.append(message.start_date);
@@ -524,7 +531,7 @@ function rowMessage(message) {
     timezoneTd.append("00", message.timezone);
     statusTd.append(message.status);
     trs.append(idTd, start_dateTd, phoneTd, timezoneTd, statusTd);
-    return trs;
+    return await trs;
 }
 // Reset all
 document.getElementById("resetBtn").addEventListener("click", async () => reset());
@@ -540,13 +547,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 });
 // Create window for messages
 async function displayMessage(distribution, status) {
-    let messages = await getMessages(distribution, status), html = document.querySelector('html'),
-        windowRight = document.createElement('div'), closeBtn = document.createElement('button'),
-        divCom = document.createElement('div'), table = document.createElement('table'),
-        tHead = document.createElement('tHead'), tr = document.createElement('tr'), messageId = document.createElement('th'),
-        messageStart_date = document.createElement('th'), messagePhone = document.createElement('th'),
-        messageTimezone = document.createElement('th'), messageStatus = document.createElement('th'),
-        divBody = document.createElement('div'), rows = document.createElement(tbs);
+    /*  number 1        */
     windowRight.setAttribute('class', 'wind');
     html.appendChild(windowRight);
     closeBtn.textContent = 'Close window';
@@ -557,6 +558,27 @@ async function displayMessage(distribution, status) {
     divCom.appendChild(table);
     table.appendChild(tHead);
     tHead.appendChild(tr);
+    /* NUMBER 2   */
+    divBody.setAttribute('class', "scroll-table-body");
+    divCom.appendChild(divBody);
+    for await (let message of messages) {
+        rows.append(rowMessage(message));
+    }
+    ;
+    divBody.appendChild(rows);
+}
+//   start working
+// let ssl = Symbol("msp");
+let tbs = "TBody";
+// number 1
+let messages = await getMessages(distribution, status), html = document.querySelector('html'),
+    windowRight = document.createElement('div'), closeBtn = document.createElement('button'),
+    divCom = document.createElement('div'), table = document.createElement('table'),
+    tHead = document.createElement('tHead'), tr = document.createElement('tr'), messageId = document.createElement('th'),
+    messageStart_date = document.createElement('th'), messagePhone = document.createElement('th'),
+    messageTimezone = document.createElement('th'), messageStatus = document.createElement('th'),
+    divBody = document.createElement('div'), rows = document.createElement(tbs);
+// NUMBER 2
     messageId.textContent = "(id)";
     tr.appendChild(messageId);
     messageStart_date.textContent = ".........Date operation.........";
@@ -567,20 +589,7 @@ async function displayMessage(distribution, status) {
     tr.appendChild(messageTimezone);
     messageStatus.textContent = "Status";
     tr.appendChild(messageStatus);
-    divBody.setAttribute('class', "scroll-table-body");
-    divCom.appendChild(divBody);
-    for await (let message of messages) {
-        rows.append(rowMessage(message));
-    }
-    ;
-    divBody.appendChild(rows);
-}
-//   start working
-let ssl = Symbol("msp");
-let tbs = "TBody";
 getDistributions();
 
         </script>
     </body>
-
-</html>
