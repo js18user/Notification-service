@@ -300,8 +300,8 @@ async function displayOnError(error) {
 }
 // message for display error
 async function createMessageError(response) { 
-    let error =  "Error --> " + " " + response.status + " " + response.statusText;
-    return await error
+    let err =  "Error --> " + " " + response.status + " " + response.statusText;
+    return await err
 }
 // Clearing table rows
 async function removeTableBody() {tableId.replaceChild(document.createElement(tbs), tableId.tBodies[0]);}
