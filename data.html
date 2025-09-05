@@ -299,7 +299,10 @@ async function displayOnError(error) {
     messageError.append(error);
 }
 // message for display error
-async function createMessageError(response) { return await "Error --> " + " " + response.status + " " + response.statusText; }
+async function createMessageError(response) { 
+    let error =  "Error --> " + " " + response.status + " " + response.statusText;
+    return await error
+}
 // Clearing table rows
 async function removeTableBody() {tableId.replaceChild(document.createElement(tbs), tableId.tBodies[0]);}
 
