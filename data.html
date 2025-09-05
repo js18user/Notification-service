@@ -299,9 +299,9 @@ async function displayOnError(error) {
     messageError.append(error);
 }
 // message for display error
-async function createMessageError(response) { 
+function createMessageError(response) { 
     let err =  "Error --> " + " " + response.status + " " + response.statusText;
-    return await err
+    return err
 }
 // Clearing table rows
 async function removeTableBody() {tableId.replaceChild(document.createElement(tbs), tableId.tBodies[0]);}
@@ -321,7 +321,7 @@ async function getDistributions() {
         document.getElementById("distributionId").value = "";
     }
     else
-        await displayOnError(await createMessageError(response) );
+        await displayOnError(createMessageError(response));
 }
 // Receiving all messages for the distribution
 async function getMessages(distribution, status) {
@@ -334,7 +334,7 @@ async function getMessages(distribution, status) {
     if (response.ok)
         return await response.json();
     else
-        await displayOnError(await createMessageError(response) );
+        await displayOnError(createMessageError(response));
 }
 // Getting a Single Distribution
 async function getDistribution(distribution, list_number) {
@@ -358,7 +358,7 @@ async function getDistributionStatistic(id_number) {
     if (response.ok)
         return await response.json();
     else
-        await displayOnError(await createMessageError(response) );
+        await displayOnError(createMessageError(response));
 }
 // Adding a Distribution
 async function createDistribution(distributionStart_date, distributionEnd_date, distributionTeg, distributionMob, distributionText) {
@@ -399,7 +399,7 @@ async function createDistribution(distributionStart_date, distributionEnd_date, 
                 " Press the UpdateGlobal button to monitor the status of messages");
         }
         else
-            await displayOnError(await createMessageError(response) );
+            await displayOnError(createMessageError(response));
     }
 }
 //  Distribution Update
@@ -426,7 +426,7 @@ async function editDistribution(id, start_date, end_date, teg, mob, text) {
             " Press the UpdateGlobal button to monitor the status of messages");
     }
     else
-        await displayOnError(await createMessageError(response) );
+        await displayOnError(createMessageError(response));
 }
 // Delete the distribution
 async function deleteDistribution(distribution, list_number) {
@@ -442,7 +442,7 @@ async function deleteDistribution(distribution, list_number) {
         document.querySelector(`tr[data-rowid='${distribution.id}']`).remove();
     }
     else
-        await displayOnError(await createMessageError(response) );
+        await displayOnError(createMessageError(response));
 }
 // Open window to view messages
 async function showMessages(distribution, list_number, status) {
@@ -481,7 +481,7 @@ async function updateGlobal() {
         await displayOnError("All updated");
     }
     else
-        await displayOnError(await createMessageError(response) );
+        await displayOnError(createMessageError(response));
 }
 // create distribution's string for table
 async function row(distribution) {
