@@ -48,6 +48,7 @@ from urls import query_ratio
 # from urls import url_azure
 from urls import url_rabbit_google as url_rabbitmq
 from urls import urltw
+from cache import AsyncLRU
 json = __import__('orjson')
 # from contextlib import asynccontextmanager
 
@@ -433,22 +434,35 @@ try:
                 f"ORDER BY m.start_date ; "
             )
 
-
+    @AsyncLRU(maxsize=128)
     async def seek(db, ) -> Sequence[dict]:
-        async with db.transaction():
-            return await db.fetch(
-                f"SELECT d.*, "
-                f"COUNT(m.status) AS com, "
-                f"COUNT(m.status) FILTER (WHERE  m.status = 'sent') AS sent, "
-                f"COUNT(m.status) FILTER (WHERE  m.status = 'queue') AS queue, "
-                f"COUNT(m.status) FILTER (WHERE  m.status = 'formed') AS formed, "
-                f"COUNT(m.status) FILTER (WHERE  m.status = 'failure') AS failure, "
-                f"COUNT(m.status) FILTER (WHERE  m.status = 'expired') AS expired "
-                f"FROM distribution AS d JOIN message AS m  "
-                f"ON ( m.id_Distribution=d.id ) "
-                f"GROUP BY ( d.id   )  "
-                f"ORDER BY ( d.id ) DESC; "
-            )
+        return await db.fetch(
+            f"SELECT d.*, "
+            f"COUNT(m.status) AS com, "
+            f"COUNT(m.status) FILTER (WHERE  m.status = 'sent') AS sent, "
+            f"COUNT(m.status) FILTER (WHERE  m.status = 'queue') AS queue, "
+            f"COUNT(m.status) FILTER (WHERE  m.status = 'formed') AS formed, "
+            f"COUNT(m.status) FILTER (WHERE  m.status = 'failure') AS failure, "
+            f"COUNT(m.status) FILTER (WHERE  m.status = 'expired') AS expired "
+            f"FROM distribution AS d JOIN message AS m  "
+            f"ON ( m.id_Distribution=d.id ) "
+            f"GROUP BY ( d.id   )  "
+            f"ORDER BY ( d.id ) DESC; "
+        )
+    @AsyncLRU(maxsize=128)
+    async def seek_status(db, id_distribution, status):
+        return await db.fetch(
+            f"SELECT m.*, "
+            f"c.timezone AS timezone, "
+            f"c.phone AS phone "
+            f"FROM message AS m, client as c "
+            f"WHERE (m.id_distribution={id_distribution} AND "
+            f"m.status='{status}' AND "
+            f"c.id=m.id_client ) "
+            f"ORDER BY m.start_date, c.timezone, c.phone;"
+        )
+
+    
 
 
     """    Begin    """
@@ -700,7 +714,8 @@ try:
 
     @app.get('/admin/distribution', status_code=200, description="", )
     async def select_distributions(db=Depends(conn.connection), ):
-        return await seek(db, )
+        async with db.transaction():
+            return await seek(db, )
 
 
     @app.get("/admin/statistic", status_code=200, description="", )
@@ -746,16 +761,8 @@ try:
             status: str = Query(),
     ):
         async with db.transaction():
-            return await db.fetch(
-                f"SELECT m.*, "
-                f"c.timezone AS timezone, "
-                f"c.phone AS phone "
-                f"FROM message AS m, client as c "
-                f"WHERE (m.id_distribution={id_distribution} AND "
-                f"m.status='{status}' AND "
-                f"c.id=m.id_client ) "
-                f"ORDER BY m.start_date, c.timezone, c.phone;"
-            )
+            return await seek_status(db, id_distribution, status)
+            
 except:
     logging.info(f"Basis error")
 finally: pass
