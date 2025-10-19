@@ -52,7 +52,7 @@ from urls import query_many
 from urls import query_ratio
 """ from urls import url_azure as url """
 """ from cache import AsyncLRU """
-from urls import url_mcp as url
+from urls import url_msp as url
 from urls import url_rabbit_google as url_rabbitmq
 """ from fastapi.testclient import TestClient """
 
