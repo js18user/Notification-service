@@ -4,7 +4,7 @@
 """ script by js18user  """
 
 json = __import__('orjson')
-from httpx import AsyncClient
+""" from httpx import AsyncClient """
 from asyncio import sleep as sl
 from collections.abc import Sequence
 from datetime import datetime
