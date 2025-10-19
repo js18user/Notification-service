@@ -50,9 +50,9 @@ from urls import port
 from urls import user
 from urls import query_many
 from urls import query_ratio
-from urls import url_azure as url
+# from urls import url_azure as url
 from cache import AsyncLRU
-# from urls import urltw as url
+from urls import urltw as url
 from urls import url_rabbit_google as url_rabbitmq
 """ from fastapi.testclient import TestClient """
 
