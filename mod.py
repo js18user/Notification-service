@@ -755,10 +755,11 @@ try:
         async with db.transaction():
             return await seek_status(db, id_distribution, status)
 
-
+    """
     @app.get('/favicon.ico', status_code=200, include_in_schema=False)
     async def favicon():
         return
+    """
 
 except:
     logging.info(f"Basis error")
@@ -771,4 +772,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         pass
     finally:
-        pass
+        exit()
