@@ -40,7 +40,7 @@ from pydantic import Field
 from pydantic.dataclasses import dataclass
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.cors import CORSMiddleware
-from starlette.middleware.gzip import GZipMiddleware
+""" from starlette.middleware.gzip import GZipMiddleware """
 from uvicorn import run
 from asyncpg_pool import configure_asyncpg
 from urls import host
@@ -462,7 +462,7 @@ try:
         allow_methods=["GET", "PUT", "POST", "DELETE"],
     )
     """ app.add_middleware(HTTPSRedirectMiddleware) """
-    app.add_middleware(GZipMiddleware, minimum_size=500, compresslevel=3, )
+    """ app.add_middleware(GZipMiddleware, minimum_size=500, compresslevel=3, ) """
     app.mount("/static", StaticFiles(directory="static"), name="static")
 
     @app.middleware("http")
