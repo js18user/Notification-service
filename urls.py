@@ -46,11 +46,12 @@ url_azure: str = (f"postgresql://neondb_owner:npg_GoPNxHe0pzm4@ep-rapid-glitter-
                   f"azure.neon.tech/neondb?sslmode=require")
 
 # Postgresql 15  on Local Timeweb
-"""
+
 user: str = f'postgres'
 name: str = f'msp'
 password: str = f'Aaa4401&&'
 port: int = 5432
 host: str = f'192.168.0.5'
-"""
-url_msp: str = f'postgresql://gen_user:********@192.168.0.5:5432/default_db'
+
+url_msp: str = f"postgresql://gen_user:********@192.168.0.5:5432/default_db"
+
