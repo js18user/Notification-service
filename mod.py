@@ -1,6 +1,10 @@
+#!/Usr/bin/env python313
 # -*- coding: utf-8 -*-
+
 """ script by js18user  """
 
+json = __import__('orjson')
+from httpx import AsyncClient
 from asyncio import sleep as sl
 from collections.abc import Sequence
 from datetime import datetime
@@ -15,8 +19,6 @@ from typing import Union
 from aio_pika import DeliveryMode
 from aio_pika import Message as Msg
 from aio_pika import connect as cnt
-from aio_pika import exceptions
-# from asyncpg import exceptions as asyncpg_exception
 from dateutil.parser import parse
 from fastapi import BackgroundTasks
 from fastapi import Depends
@@ -29,28 +31,31 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse
 from fastapi.responses import ORJSONResponse
+from fastapi.staticfiles import StaticFiles
+""" from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware """
 from loguru import logger as logging
-#  from prometheus_fastapi_instrumentator import Instrumentator
+""" from prometheus_fastapi_instrumentator import Instrumentator """
 from pydantic import BaseModel
 from pydantic import Field
 from pydantic.dataclasses import dataclass
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.gzip import GZipMiddleware
 from uvicorn import run
 from asyncpg_pool import configure_asyncpg
-from urls import user
 from urls import host
 from urls import name
 from urls import password
 from urls import port
+from urls import user
 from urls import query_many
 from urls import query_ratio
-# from urls import url_azure
-from urls import url_rabbit_google as url_rabbitmq
-from urls import urltw
+from urls import url_azure as url
 from cache import AsyncLRU
-json = __import__('orjson')
-# from contextlib import asynccontextmanager
+# from urls import urltw as url
+from urls import url_rabbit_google as url_rabbitmq
+""" from fastapi.testclient import TestClient """
+
 
 @dataclass
 class Ind:
@@ -65,7 +70,6 @@ def memory_dict(f):
         def __missing__(self, key):
             ret = self[key] = f(key)
             return ret
-
     return ms().__getitem__
 
 
@@ -85,16 +89,12 @@ class UnicornException(Exception):
         self.uny = uny
 
 
-class BaseExc(Exception):
-    pass
-
-
 class Status(str, Enum):
-    formed = 'formed'
-    sent = 'sent'
-    queue = 'queue'
-    failure = 'failure'
-    expired = 'expired'
+    formed: str = 'formed'
+    sent: str = 'sent'
+    queue: str = 'queue'
+    failure: str = 'failure'
+    expired: str = 'expired'
 
 
 class Crud(str, Enum):
@@ -186,20 +186,6 @@ def timing_decorator(func_async):
         start_time, result = t(), await func_async(*args, **kwargs)
         print(f"Function {func_async.__name__} took {int((t() - start_time) * 1000)} m.sec")
         return result
-
-    return wrapper
-
-
-def cache_result(func):
-    wrapper.cache = {}
-    @wraps(func)
-    async def wrapper(*args):
-        if args in wrapper.cache:
-            return wrapper.cache[args]
-        result = await func(*args)
-        wrapper.cache[args] = result
-        return result
-
     return wrapper
 
 try:
@@ -229,7 +215,6 @@ try:
     def realtimes(dt, zone: int, ):
         return dt - ind.ine * zone + ind.interval - ind.ine
 
-
     async def parsedate(model: dict, ) -> dict:
         if model.get('start_date'):
             model['start_date']: datetime = parse(model['start_date'], ignoretz=True)
@@ -238,7 +223,7 @@ try:
         return model
 
 
-    def query_update(table, model, adu, ):
+    def query_update(table: str, model: dict, adu: dict, ) -> str:
         counter, params, cond, vals, qs = 1, [], [], [], "UPDATE {table} SET {columns} WHERE {cond} RETURNING * ;"
         for column, value in model.items():
             match value is not None and value != 0:
@@ -256,15 +241,15 @@ try:
                     counter += 1
                 case _:
                     pass
-        sql = qs.format(
+        sql: str = qs.format(
             table=table, columns=" ,".join(vals), cond=" AND ".join(cond)
         )
         return sql, params
 
 
-    def query_delete(table, model, fields='*', ):
+    def query_delete(table: str, model: dict, fields: str ='*', ) -> str:
         if model.get('id'):
-            return f"DELETE FROM {table} WHERE id={model.get('id')} RETURNING {fields};"
+            return f"DELETE FROM {table} WHERE id={model['id']} RETURNING {fields};"
         else:
             return "DELETE FROM {table} WHERE {where} RETURNING {fields};".format(
                 table=table,
@@ -276,9 +261,9 @@ try:
             )
 
 
-    def query_select(table, model, fields="*", ):
+    def query_select(table, model: dict, fields: str = "*", ) -> str:
         if model.get('id'):
-            return f"SELECT {fields} FROM {table} WHERE id={model.get('id')};"
+            return f"SELECT {fields} FROM {table} WHERE id={model['id']};"
         else:
             where = " and ".join(
                 ["%s='%s'" % (item, model[item]) for item in model.keys() if (model[item] is not None)])
@@ -290,11 +275,13 @@ try:
                     return f"SELECT {fields} FROM {table} WHERE ({where});"
 
 
-    def query_insert(table, model, fields="*", ):
+    def query_insert(table: str, model: dict, fields: str = "*", ) -> str:
         length_model = (model.values()).__len__()
-        return (f"INSERT INTO {table} ({",".join(list(model.keys()))}) "
+        return (
+                f"INSERT INTO {table} ({",".join(list(model.keys()))}) "
                 f"VALUES ({",".join([f"${p + 1}" for p in range(length_model)])})"
-                f" On Conflict Do Nothing Returning {fields};")
+                f" On Conflict Do Nothing Returning {fields};"
+        )
 
 
     async def insert(db, table, model, ) -> Sequence[dict]:
@@ -317,10 +304,11 @@ try:
         async with db.transaction():
             return await db.fetch(sql, *params, )
 
-    # @timing_decorator
+
     async def update_ids(db, tds, status, ):
         async with db.transaction():
             return await db.execute(f"UPDATE message SET status='{status}' WHERE id in {tds};")
+
 
     async def send_message(db,
                            index: int,
@@ -354,11 +342,11 @@ try:
     async def create_queue_release(db,
                                    list_messages: Sequence[dict],
                                    ) -> None:
-        rss: dict = {0: len(list_messages), 1: [], 2: [], }
+        rss: dict = {0: len(list_messages), 1: [], }
         for lm_index, dict_message in enumerate(list_messages):
             await send_message(db, lm_index, dict(dict_message), rss, )
         await update_ids(db=db, tds=tuple(rss[1]), status=Status.sent.value, )
-        print(f"control: {rss[0]}  {len(rss[1])}  {len(rss[2])}")
+        print(f"control: {rss[0]}  {len(rss[1])} ")
         contact = await cnt(url_rabbitmq, )
         async with contact.channel() as session:
             await send_pika(session, list_messages)
@@ -366,58 +354,32 @@ try:
         return
 
 
-    async def crms(lc: Sequence[dict],
-                   distribution: dict,
-                   ) -> Sequence[tuple]:
-
-        lms = []
-        for _, client in enumerate(lc):
-            match (await realtime(distribution['end_date'], client['timezone']) < datetime.now()):
-                case True:
-                    status = Status.expired.value
-                case _:
-                    status = Status.formed.value
-
-            mode = (MessageInsert(status=status,
-                                  start_date=parse(str(await realtime(distribution['start_date'],
-                                                                      client['timezone']))),
-                                  id_distribution=distribution['id'],
-                                  id_client=client['id'],
-                                  ).dict()).values()
-            lms.append(tuple(mode))
-
-        return lms
-
     async def crml(lc: Sequence[dict],
                    distribution: dict,
                    ) -> Sequence[tuple]:
-
         return [tuple((MessageInsert(id_distribution=distribution['id'],
                                      id_client=client['id'],
                                      status=Status.formed.value,
-                                     start_date=parse(str(await realtime(distribution['start_date'],
-                                                                         client['timezone'])))                                                                                                                                       ,
-                                    ).dict()).values()) for _, client in enumerate(lc)]
-
+                                     start_date= realtimes(distribution['start_date'],
+                                                                         client['timezone']),
+                                     ).dict()).values()) for _, client in enumerate(lc)]
 
     async def create_queue_messages(db,
                                     ld: Sequence[dict],
                                     ) -> None:
 
         for _, distribution in enumerate(ld):
-
             async with db.transaction():
                 await db.executemany(query_many, await crml(tuple(await select(db,
-                                                        table=Table.client.value,
-                                                        fields='id,timezone,phone',
-                                                        model=Client(mob=distribution['mob'],
-                                                                     teg=distribution['teg'], ).dict()
-                                                        )), distribution, ))
+                                                                               table=Table.client.value,
+                                                                               fields='id,timezone,phone',
+                                                                               model=Client(mob=distribution['mob'],
+                                                                                            teg=distribution[
+                                                                                                'teg'], ).dict()
+                                                                               )), distribution, ))
         return
 
-
     async def m_restart(db, ) -> Sequence[dict]:
-
         async with db.transaction():
             return await db.fetch(
                 f"SELECT d.text, "
@@ -427,43 +389,53 @@ try:
                 f"m.status, "
                 f"m.id_distribution, "
                 f"m.id "
-                f"FROM client AS c, message AS m, distribution AS d "
-                f"WHERE ( m.status IN ('formed', 'queue', 'failure') "
-                f"AND d.id = m.id_distribution  "
-                f"AND c.id = m.id_client ) "
+                f"FROM message AS m "
+                f"INNER JOIN client AS c "
+                f"ON (c.id = m.id_client) "
+                f"INNER JOIN distribution AS d "
+                f"ON (d.id = m.id_distribution) "
+                f"WHERE m.status IN ('formed', 'queue', 'failure') "
                 f"ORDER BY m.start_date ; "
             )
 
-    @AsyncLRU(maxsize=128)
     async def seek(db, ) -> Sequence[dict]:
         return await db.fetch(
-            f"SELECT d.*, "
+            f"SELECT d.id,"
+            f"d.start_date,"
+            f"d.text,"
+            f"d.mob,"
+            f"d.teg,"
+            f"d.end_date,"
+            f"interval, "
             f"COUNT(m.status) AS com, "
             f"COUNT(m.status) FILTER (WHERE  m.status = 'sent') AS sent, "
             f"COUNT(m.status) FILTER (WHERE  m.status = 'queue') AS queue, "
             f"COUNT(m.status) FILTER (WHERE  m.status = 'formed') AS formed, "
             f"COUNT(m.status) FILTER (WHERE  m.status = 'failure') AS failure, "
             f"COUNT(m.status) FILTER (WHERE  m.status = 'expired') AS expired "
-            f"FROM distribution AS d JOIN message AS m  "
-            f"ON ( m.id_Distribution=d.id ) "
+            f"FROM distribution AS d  "
+            f"INNER JOIN message AS m  "
+            f"ON ( m.id_distribution=d.id ) "
             f"GROUP BY ( d.id   )  "
             f"ORDER BY ( d.id ) DESC; "
         )
-    @AsyncLRU(maxsize=128)
+
     async def seek_status(db, id_distribution, status):
         return await db.fetch(
-            f"SELECT m.*, "
+            f"SELECT m.id,"
+            f"m.start_date,"
+            f"m.status,"
+            f"m.id_distribution,"
+            f"m.id_client,"
             f"c.timezone AS timezone, "
             f"c.phone AS phone "
-            f"FROM message AS m, client as c "
+            f"FROM message AS m "
+            f"INNER JOIN client as c "
+            f"ON ( c.id=m.id_client ) "
             f"WHERE (m.id_distribution={id_distribution} AND "
-            f"m.status='{status}' AND "
-            f"c.id=m.id_client ) "
+            f"m.status='{status}'  ) "
             f"ORDER BY m.start_date, c.timezone, c.phone;"
         )
-
-    
-
 
     """    Begin    """
     setlocale(LC_ALL, "de")
@@ -472,11 +444,15 @@ try:
     app = FastAPI(
         debug=False,
         reload=False,
-        workers=3,
+        # workers=3,
         access_log=False,
         title=f"API documentation",
         description=f"A set of Api for completing the task is presented",
         swagger_ui_parameters={f"syntaxHighlight.theme": f"obsidian"},
+        contact={
+            "name": "API Support",
+            "email": "js18.user@gmail.com",
+        },
         default_response_class=ORJSONResponse,
     )
     app.add_middleware(
@@ -485,11 +461,14 @@ try:
         allow_headers=[],
         allow_methods=["GET", "PUT", "POST", "DELETE"],
     )
+    """ app.add_middleware(HTTPSRedirectMiddleware) """
+    app.add_middleware(GZipMiddleware, minimum_size=500, compresslevel=3, )
+    app.mount("/static", StaticFiles(directory="static"), name="static")
 
     @app.middleware("http")
     async def time_crud(request: Request, call_next, ):
         start_time, response = t(), await call_next(request)
-        print(f"{"\033[91m"}endpoint execution time:{1000 * (t() - start_time): .0f} m.sec  "
+        print(f"{'\033[91m'}endpoint execution time:{1000 * (t() - start_time): .0f} m.sec  "
               f"{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}")
         return response
 
@@ -497,7 +476,7 @@ try:
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request: Request, exc: RequestValidationError):
         _, _ = request, exc
-        # print(f"RequestValidationError  {request.url}")
+        print(f"RequestValidationError  {request.url}")
         return ORJSONResponse(status_code=400,
                               content=jsonable_encoder([]),
                               )
@@ -521,43 +500,40 @@ try:
         )
 
     # conn = configure_asyncpg(app, url_azure, )
-    conn = configure_asyncpg(app, urltw, )
+    conn = configure_asyncpg(app, url, )
     # conn = db_connect()
-
 
     @conn.on_init
     async def initial_db(db):
         with open(f'create_tables.sql', f'r') as sql:
             return await db.execute(sql.read(), )
 
-    #  Instrumentator().instrument(app).expose(app)
+
+    """ Instrumentator().instrument(app).expose(app) """
 
     @app.get('/client', status_code=200, description="", )
     async def client_select(
             db=Depends(conn.connection),
-            id: Optional[int] = Query(default=None, ge=0, ),
-            phone: int | None = Query(default=None, ),
-            mob: int | None = Query(default=None, ge=900, le=999, ),
-            teg: str | None = Query(default=None, ),
-            timezone: int | None = Query(default=None, ),
+            id: int = Query(default=None, ge=0, ),
+            phone: int = Query(default=None, ),
+            mob: int = Query(default=None, ge=900, le=999, ),
+            teg: str = Query(default=None, ),
+            timezone: int = Query(default=None, ),
     ) -> Sequence[dict]:
         return await select(db,
                             table=Table.client.value,
-                            model=json.loads(Client(id=id,
-                                                    phone=phone,
-                                                    mob=mob,
-                                                    teg=teg,
-                                                    timezone=timezone,
-                                                    ).json()),
-                            )
-
+                            model=jsonable_encoder(Client(id=id,
+                                                          phone=phone,
+                                                          mob=mob,
+                                                          teg=teg,
+                                                          timezone=timezone, )))
 
     @app.post('/client', status_code=400, description="", )
     async def client_insert(response: Response,
                             client: ClientInsert,
                             db=Depends(conn.connection),
                             ) -> Sequence[dict]:
-        if row := await insert(db, table=Table.client.value, model=json.loads(client.json()), ):
+        if row := await insert(db, table=Table.client.value, model=jsonable_encoder(client), ):
             response.status_code = 200
         return row
 
@@ -567,9 +543,10 @@ try:
                             client: Client,
                             db=Depends(conn.connection),
                             ) -> Sequence[dict]:
-        if row := await delete(db, table=Table.client.value, model=json.loads(client.json()), ):
+        if row := await delete(db, table=Table.client.value, model=jsonable_encoder(client), ):
             pass
-        else: response.status_code = 400
+        else:
+            response.status_code = 400
         return row
 
 
@@ -580,42 +557,47 @@ try:
                             db=Depends(conn.connection),
                             ) -> Sequence[dict]:
         if row := await update(db, table=Table.client.value,
-                           model=json.loads(client.json()),
-                           adu=json.loads(upd.json()),
-                           ): pass
-        else: response.status_code = 400
+                               model=jsonable_encoder(client),
+                               adu=jsonable_encoder(upd),
+                               ):
+            pass
+        else:
+            response.status_code = 400
         return row
 
 
     @app.get('/distribution', status_code=200, description="", )
     async def distribution_select(
             db=Depends(conn.connection, ),
-            id: int | None = Query(default=None, ge=0, ),
-            mob: int | None = Query(default=None, ge=900, le=999, ),
+            id: int = Query(default=None, ge=0, ),
+            mob: int = Query(default=None, ge=900, le=999, ),
             teg: str | None = Query(default=None, ),
-            start_date: datetime | None = Query(default=None, ),
-            end_date: datetime | None = Query(default=None, ),
-            text: str | None = Query(default=None, ),
+            start_date: datetime = Query(default=None, ),
+            end_date: datetime = Query(default=None, ),
+            text: str = Query(default=None, ),
     ) -> Sequence[dict]:
         return await select(db,
                             table=Table.distribution.value,
-                            model=json.loads(Distribution(id=id,
+                            model=jsonable_encoder(Distribution(id=id,
                                                           mob=mob,
                                                           teg=teg,
                                                           start_date=start_date,
                                                           end_date=end_date,
                                                           text=text,
-                                                          ).json()),
+                                                          )),
                             )
 
-
-    @app.post('/distribution', status_code=400, description="", )
+    @app.post('/distribution',
+              status_code=400,
+              summary="Create an distribution",
+              description="Creates an gistribution with all the required information. Make sure the name is unique.",
+    )
     async def distribution_insert(response: Response,
                                   distribution: DistributionInsert,
                                   tasks: BackgroundTasks,
                                   db=Depends(conn.connection),
                                   ) -> Sequence[dict]:
-        model: dict = await parsedate(json.loads(distribution.json()))
+        model: dict = await parsedate(jsonable_encoder(distribution))
         match model['end_date'] > model['start_date'] and model['end_date'] > datetime.now():
             case True:
                 if row := await insert(db,
@@ -624,8 +606,11 @@ try:
                                        ):
                     response.status_code = 200
                     tasks.add_task(create_queue, db, row, )
-            case _: pass
-        return row
+                    return row
+                else:
+                    return []
+            case _:
+                return []
 
 
     @app.delete('/distribution', status_code=200, description="", )
@@ -634,10 +619,12 @@ try:
                                    db=Depends(conn.connection),
                                    ):
         if row := await delete(db,
-                           table=Table.distribution.value,
-                           model=await parsedate(json.loads(distribution.json())),
-                           ): pass
-        else: response.status_code = 400
+                               table=Table.distribution.value,
+                               model=jsonable_encoder(distribution),
+                               ):
+            pass
+        else:
+            response.status_code = 400
         return row
 
 
@@ -648,14 +635,14 @@ try:
                                    background_tasks: BackgroundTasks,
                                    db=Depends(conn.connection),
                                    ):
-        adu = await parsedate(json.loads(upd.json()), )
+        adu = jsonable_encoder(upd, )
         match adu['end_date'] < datetime.now():
             case True:
                 return []
             case _:
                 pass
         row = await update(db, table=Table.distribution.value,
-                           model=await parsedate(json.loads(distribution.json()), ),
+                           model=jsonable_encoder(distribution, ),
                            adu=adu,
                            )
         match len(row) == 0:
@@ -674,20 +661,20 @@ try:
     @app.get('/message', status_code=200, description="", )
     async def select_message(
             db=Depends(conn.connection),
-            id: int | None = Query(default=None, ge=0, ),
+            id: int = Query(default=None, ge=0, ),
             id_distribution: int | None = Query(default=None, ge=0, ),
             id_client: int | None = Query(default=None, ge=0, ),
             status: Status | None = Query(default=None, ),
-            start_date: datetime | None = Query(default=None, ),
+            start_date: datetime = Query(default=None, ),
     ) -> Sequence[dict]:
         return await select(db,
                             table=Table.message.value,
-                            model=json.loads(Message(id=id,
+                            model=jsonable_encoder(Message(id=id,
                                                      id_distribution=id_distribution,
                                                      id_client=id_client,
                                                      start_date=start_date,
                                                      status=status,
-                                                     ).json()),
+                                                     )),
                             )
 
 
@@ -698,6 +685,9 @@ try:
     async def main():
         return FileResponse("data.html")
 
+    @app.get(path="/gct")
+    async def gct():
+        return FileResponse("gct.html")
 
     @app.get('/admin/speed', status_code=200, description="Speed Api", )
     async def speed_api():
@@ -725,15 +715,17 @@ try:
     ):
         async with db.transaction():
             return await db.fetch(
-                f"SELECT d.*,COUNT(m.status) AS com,"
+                f"SELECT d.*, "
+                f"COUNT(m.status) AS com,"
                 f"COUNT(m.status) FILTER (WHERE m.status='sent') AS sent,"
                 f"COUNT(m.status) FILTER (WHERE m.status='queue') AS queue,"
                 f"COUNT(m.status) FILTER (WHERE m.status='formed') AS formed,"
                 f"COUNT(m.status) FILTER (WHERE m.status='failure') AS failure,"
                 f"COUNT(m.status) FILTER (WHERE m.status='expired') AS expired "
-                f"FROM Distribution AS d JOIN Message as m  "
-                f"ON ( d.id={id} AND m.id_Distribution={id}) "
-                f"GROUP BY ( d.id  );"
+                f"FROM Distribution AS d "
+                f"INNER JOIN Message AS m ON (m.id_distribution = d.id) "
+                f" WHERE ( d.id={id} ) "
+                f"GROUP BY (d.id);"
             )
 
 
@@ -747,30 +739,36 @@ try:
                 f"SELECT m.*,"
                 f"c.timezone,"
                 f"c.phone "
-                f"FROM message AS m, client as c "
-                f"WHERE (m.id_distribution={id_distribution} AND "
-                f"c.id=m.id_client) "
+                f"FROM message AS m "
+                f"INNER JOIN client AS c "
+                f"ON (c.id=m.id_client ) "
+                f"WHERE (m.id_distribution={id_distribution}) "
                 f"ORDER BY m.start_date,c.timezone,c.phone,m.status;"
             )
-
 
     @app.get('/admin/message/status', status_code=200, description="", )
     async def select_messages_status(
             db=Depends(conn.connection),
             id_distribution: int = Query(ge=0, ),
             status: str = Query(),
-    ):
+        ):
         async with db.transaction():
             return await seek_status(db, id_distribution, status)
-            
+
+
+    @app.get('/favicon.ico', status_code=200, include_in_schema=False)
+    async def favicon():
+        return
+
 except:
     logging.info(f"Basis error")
-finally: pass
-
+finally:
+    pass
 
 if __name__ == "__main__":
-    
     try:
-        run('mod:app', host='0.0.0.0', port=80, )  # reload=True, )
+        run('mod:app', host='0.0.0.0', port=80, reload=True, )
     except KeyboardInterrupt:
+        pass
+    finally:
         pass
