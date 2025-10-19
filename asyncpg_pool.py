@@ -1,16 +1,16 @@
 from __future__ import annotations
-import asyncpg
 from typing import Callable
+from asyncpg import Connection
+from asyncpg import create_pool
 
 
-async def noop(db: asyncpg.Connection):
+async def noop(db: Connection):
     return
-
 
 class configure_asyncpg:
     def __init__(
         self,
-        app: FastAPI,
+        app: Fastapi,
         dsn: str,
         *,
         init_db: Callable = None,
@@ -29,7 +29,7 @@ class configure_asyncpg:
         if self._pool:
             self.app.state.pool = self._pool
             return
-        pool = await asyncpg.create_pool(dsn=self.dsn, **self.con_opts)
+        pool = await create_pool(dsn=self.dsn, **self.con_opts)
         async with pool.acquire() as db:
             await self.init_db(db)
         self.app.state.pool = pool
@@ -57,7 +57,7 @@ class configure_asyncpg:
             await txn.start()
             try:
                 yield db
-            except:  # noqa
+            except:
                 await txn.rollback()
                 raise
             else:
