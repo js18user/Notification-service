@@ -9,8 +9,9 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 COPY requirements.txt .
+RUN pip install --root-user-action=ignore
 
-RUN pip install --upgrade pip
+# RUN pip install --upgrade pip
 
 RUN pip install -r requirements.txt
 
@@ -33,6 +34,7 @@ EXPOSE 80
 CMD ["mod.py" ]
 
 ENTRYPOINT ["python"]
+
 
 
 
