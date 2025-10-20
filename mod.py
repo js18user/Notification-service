@@ -1,4 +1,4 @@
-#!/Usr/bin/env python313
+
 # -*- coding: utf-8 -*-
 
 """ script by js18user  """
