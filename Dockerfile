@@ -9,15 +9,12 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 COPY requirements.txt .
-RUN pip install --root-user-action=ignore
-
-# RUN pip install --upgrade pip
 
 RUN pip install -r requirements.txt
 
-# RUN adduser --disabled-password --gecos '' appuser
+RUN adduser --disabled-password --gecos '' appuser
 
-# USER appuser
+USER appuser
 
 COPY data.html .
 
@@ -34,6 +31,7 @@ EXPOSE 80
 CMD ["mod.py" ]
 
 ENTRYPOINT ["python"]
+
 
 
 
