@@ -444,7 +444,7 @@ try:
     app = FastAPI(
         debug=False,
         reload=False,
-        # workers=3,
+        workers=2,
         access_log=False,
         title=f"API documentation",
         description=f"A set of Api for completing the task is presented",
