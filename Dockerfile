@@ -10,6 +10,8 @@ ENV PYTHONUNBUFFERED=1
 
 COPY requirements.txt .
 
+RUN pip install --upgrade pip
+
 RUN pip install -r requirements.txt
 
 RUN adduser --disabled-password --gecos '' appuser
@@ -31,6 +33,7 @@ EXPOSE 80
 CMD ["mod.py" ]
 
 ENTRYPOINT ["python"]
+
 
 
 
