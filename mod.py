@@ -43,18 +43,10 @@ from starlette.middleware.cors import CORSMiddleware
 """ from starlette.middleware.gzip import GZipMiddleware """
 from uvicorn import run
 from asyncpg_pool import configure_asyncpg
-from urls import host
-from urls import name
-from urls import password
-from urls import port
-from urls import user
 from urls import query_many
 from urls import query_ratio
-""" from urls import url_azure as url """
-""" from cache import AsyncLRU """
 from urls import url_msp as url
 from urls import url_rabbit_google as url_rabbitmq
-""" from fastapi.testclient import TestClient """
 
 
 @dataclass
@@ -770,4 +762,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         pass
     finally:
-        exit()
+        pass
