@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 LABEL maintainer="Jurij <js18.user@gmail.com>"
 
@@ -13,10 +13,6 @@ COPY requirements.txt .
 RUN pip install --upgrade pip
 
 RUN pip install -r requirements.txt
-
-RUN adduser --disabled-password --gecos '' appuser
-
-USER appuser
 
 COPY data.html .
 
@@ -33,6 +29,7 @@ EXPOSE 80
 CMD ["mod.py" ]
 
 ENTRYPOINT ["python"]
+
 
 
 
