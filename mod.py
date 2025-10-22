@@ -30,7 +30,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse
 from fastapi.responses import ORJSONResponse 
-""" from fastapi.staticfiles import StaticFiles """
+from fastapi.staticfiles import StaticFiles 
 """ from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware """
 from loguru import logger as logging
 """ from prometheus_fastapi_instrumentator import Instrumentator """
@@ -454,7 +454,7 @@ try:
     )
     """ app.add_middleware(HTTPSRedirectMiddleware) """
     """ app.add_middleware(GZipMiddleware, minimum_size=500, compresslevel=3, ) """
-    """ app.mount("/static", StaticFiles(directory="static"), name="static") """
+    app.mount("/static", StaticFiles(directory="static"), name="static") 
 
     @app.middleware("http")
     async def time_crud(request: Request, call_next, ):
