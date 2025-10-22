@@ -14,7 +14,7 @@ RUN pip install --upgrade pip
 
 RUN pip install -r requirements.txt
 
-COPY ./static .
+COPY /static .
 
 # COPY static/data.css .
 
@@ -35,6 +35,7 @@ EXPOSE 80
 CMD ["mod.py" ]
 
 ENTRYPOINT ["python"]
+
 
 
 
