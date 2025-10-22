@@ -674,7 +674,7 @@ try:
 
     @app.get("/")
     async def main():
-        return FileResponse("data.html")
+        return FileResponse("static/data.html")
 
     @app.get(path="/gct")
     async def gct():
