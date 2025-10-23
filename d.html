@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="eu">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="author" content="js18user">
+        <link rel="icon" href="https://www.w3.org/assets/logos/w3c-2025/favicons/favicon.ico" crossorigin>
+        <title>admin</title>
+        <link href="static/data.css" rel="stylesheet">
+    </head>
+    <body translate="no">
+        <nav class="container"><div id="content" class="errorMessage"></div><div class="begin"><input type="hidden" id="distributionId"><input type="hidden" id="messageId"><p><label for="distributionStart_date">Start date:</label><input id="distributionStart_date" required type="datetime-local" spellcheck="true"></p><p><label for="distributionEnd_date">End date:&nbsp;</label><input id="distributionEnd_date" required type="datetime-local" spellcheck="true"></p><p><label for="distributionTeg">Teg:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label><input id="distributionTeg" required type="text" list="browsers"><datalist id="browsers"><option value="message"><option value="control"></datalist></p><p><label for="distributionMob">Mob &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;</label><input id="distributionMob" type="number" spellcheck="true" min="901" max="999" required></p><p><label for="distributionText">Text:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label><input id="distributionText" required type="text" placeholder="e.g. your message for clients"></p><p><button id="saveBtn">Save</button><button id="resetBtn">Reset</button><button id="selectBtn">Select</button><button id="deleteBtn">Delete</button><button id="updateGlBtn">UpdateGlobal</button></p></div><div class="scroll-table"><table><thead><tr><th>|............................................................... MESSAGES ....................................................| |...... DISTRIBUTIONS .....| </th><th>&nbsp;&nbsp;ID&nbsp;</th><th>&nbsp;&nbsp;&nbsp;START DATE&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp; END DATE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><th> TEG &nbsp;</th><th>mb</th><th>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; TEXT &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</th></tr></thead></table><div class="scroll-table-body"><table id="tableId" class="tbl"><tbody id="sid"><tr></tr></tbody></table></div></div><div id="footer"></div></nav>
+      <script src="static/data.js" async></script>
+    </body>
+</html>
