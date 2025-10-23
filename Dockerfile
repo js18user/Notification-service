@@ -14,7 +14,9 @@ RUN pip install --upgrade pip
 
 RUN pip install -r requirements.txt
 
-COPY data.html .
+COPY d.html .
+
+COPY static .
 
 COPY create_tables.sql .
 
@@ -29,3 +31,4 @@ EXPOSE 80
 CMD ["mod.py" ]
 
 ENTRYPOINT ["python"]
+
