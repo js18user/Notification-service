@@ -23,5 +23,10 @@ CREATE TABLE IF NOT EXISTS distribution  (
         status VARCHAR ,
         id_distribution INTEGER REFERENCES distribution (Id) ON DELETE CASCADE,
         id_client INTEGER REFERENCES client (id) ON DELETE CASCADE
-
+);
+CREATE TABLE IF NOT EXISTS products (
+        id SERIAL PRIMARY KEY,
+        model VARCHAR(30),
+        company VARCHAR(30),
+        price INT
 );
