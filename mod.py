@@ -31,7 +31,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse
 from fastapi.responses import ORJSONResponse 
 """ from fastapi.staticfiles import StaticFiles """
-""" from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware """
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware 
 from loguru import logger as logging
 """ from prometheus_fastapi_instrumentator import Instrumentator """
 from pydantic import BaseModel
@@ -44,7 +44,7 @@ import uvicorn
 from asyncpg_pool import configure_asyncpg
 from urls import query_many
 from urls import query_ratio
-from urls import url_azure as url
+from urls import url_msp as url
 from urls import url_rabbit_google as url_rabbitmq
 
 
@@ -500,7 +500,7 @@ try:
             return await db.execute(sql.read(), )
 
 
-    """ Instrumentator().instrument(app).expose(app) """
+    Instrumentator().instrument(app).expose(app) 
 
     @app.get('/client', status_code=200, description="", )
     async def client_select(
