@@ -33,14 +33,14 @@ from fastapi.responses import ORJSONResponse
 """ from fastapi.staticfiles import StaticFiles """
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware 
 from loguru import logger as logging
-""" from prometheus_fastapi_instrumentator import Instrumentator """
+from prometheus_fastapi_instrumentator import Instrumentator 
 from pydantic import BaseModel
 from pydantic import Field
 from pydantic.dataclasses import dataclass
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.cors import CORSMiddleware
 """ from starlette.middleware.gzip import GZipMiddleware """
-import uvicorn
+from uvicorn import run
 from asyncpg_pool import configure_asyncpg
 from urls import query_many
 from urls import query_ratio
@@ -757,7 +757,7 @@ finally:
 
 if __name__ == "__main__":
     try:
-        uvicorn.run('mod:app', host='0.0.0.0', port=80, )  # reload=True, )
+        run('mod:app', host='0.0.0.0', port=80, )  # reload=True, )
     except KeyboardInterrupt:
         pass
     finally:
