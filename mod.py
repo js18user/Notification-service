@@ -588,7 +588,7 @@ try:
                                   tasks: BackgroundTasks,
                                   db=Depends(conn.connection),
                                   ) -> Sequence[dict]:
-        model: dict = await parsedate(jsonable_encoder(distribution))
+        model: dict = await parsedate(jsonable_encoder(distribution))                              
         match model['end_date'] > model['start_date'] and model['end_date'] > datetime.now():
             case True:
                 if row := await insert(db,
@@ -626,7 +626,7 @@ try:
                                    background_tasks: BackgroundTasks,
                                    db=Depends(conn.connection),
                                    ):
-        adu = jsonable_encoder(upd, )
+        adu: dict = await parsedate(jsonable_encoder(upd))
         match adu['end_date'] < datetime.now():
             case True:
                 return []
