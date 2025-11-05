@@ -2,8 +2,8 @@
 
 FROM python:3.13-alpine
 
-RUN addgroup –S appgroup </span>
-&& adduser –S appuser –G appgroup
+RUN addgroup –S appgroup </span> && adduser –S appuser –G appgroup
+
 USER appuser
 
 LABEL maintainer="Jurij <js18.user@gmail.com>"
@@ -37,6 +37,7 @@ EXPOSE 80
 CMD ["mod.py" ]
 
 ENTRYPOINT ["python"]
+
 
 
 
