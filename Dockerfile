@@ -2,6 +2,10 @@
 
 FROM python:3.13-alpine
 
+RUN addgroup –S appgroup </span>
+&& adduser –S appuser –G appgroup
+USER appuser
+
 LABEL maintainer="Jurij <js18.user@gmail.com>"
 
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -33,6 +37,7 @@ EXPOSE 80
 CMD ["mod.py" ]
 
 ENTRYPOINT ["python"]
+
 
 
 
