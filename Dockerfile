@@ -2,10 +2,6 @@
 
 FROM python:3.13-alpine
 
-RUN addgroup -S appgroup </span> && adduser -S appuser -G appgroup 
- 
-USER appuser
-
 LABEL maintainer="Jurij <js18.user@gmail.com>"
 
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -20,10 +16,6 @@ RUN pip install -r requirements.txt
 
 COPY data.html .
 
-# COPY static static .
-
-# COPY static/data.css .
-
 COPY create_tables.sql .
 
 COPY urls.py .
@@ -37,6 +29,7 @@ EXPOSE 80
 CMD ["mod.py" ]
 
 ENTRYPOINT ["python"]
+
 
 
 
