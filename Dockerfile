@@ -2,7 +2,8 @@
 
 FROM python:3.13-alpine
 
-RUN addgroup –S appgroup && adduser –S appuser –G appgroup
+RUN addgroup -S appgroup </span>
+ && adduser -S appuser -G appgroup 
 
 USER appuser
 
@@ -37,6 +38,7 @@ EXPOSE 80
 CMD ["mod.py" ]
 
 ENTRYPOINT ["python"]
+
 
 
 
