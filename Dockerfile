@@ -1,15 +1,12 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.13-alpine
+FROM python:3.13.3-debian13-fips-dev
 
 LABEL maintainer="Jurij <js18.user@gmail.com>"
 
 ENV PYTHONDONTWRITEBYTECODE=1
 
 ENV PYTHONUNBUFFERED=1
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc
 
 COPY requirements.txt .
 
@@ -32,6 +29,7 @@ EXPOSE 80
 CMD ["mod.py" ]
 
 ENTRYPOINT ["python"]
+
 
 
 
