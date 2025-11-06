@@ -8,9 +8,10 @@ ENV PYTHONDONTWRITEBYTECODE=1
 
 ENV PYTHONUNBUFFERED=1
 
-RUN apt-get update
-RUN apt-get install -y netcat
+RUN addgroup --gid 1001 --system app && \
+    adduser --no-create-home --shell /bin/false --disabled-password --uid 1001 --system --group app
 
+USER app
 COPY requirements.txt .
 
 RUN pip install --upgrade pip
@@ -32,6 +33,7 @@ EXPOSE 80
 CMD ["mod.py" ]
 
 ENTRYPOINT ["python"]
+
 
 
 
