@@ -1,33 +1,34 @@
-# Docker project generated files to ignore
-#  if you want to ignore files created by your editor/tools,
-#  please consider a global .gitignore https://help.github.com/articles/ignoring-files
-.vagrant*
-bin
-docker/docker
-Dockerfile
-.*.swp
-**/*.class
-a.out
-*.orig
-build_src
-.git
-.cache
-.flymake*
-.idea
-* .log
-.DS_Store
-docs/_build
-docs/_static
-docs/_templates
-.gopath/
-.dotcloud
-*.test
-bundles/
-.hg/
+# Directory and file structure
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.tmp
+*.swp
+.env
+*.env
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE and editor folders
+.vscode/
+.idea/
+
+# Git and version control
 .git/
-vendor/pkg/
-pyenv
-Vagrantfile
-!README*.md
-README-secret.md
-node_modules/
+.gitignore
+
+# Testing
+.pytest_cache/
+tests/
+*.test.py
+
+# Build and distribution
+build/
+dist/
+*.egg-info/
+*.egg
