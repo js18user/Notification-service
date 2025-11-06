@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.13-alpine3.14
+FROM python:3.13.3-alpine
 
 LABEL maintainer="Jurij <js18.user@gmail.com>"
 
@@ -29,6 +29,7 @@ EXPOSE 80
 CMD ["mod.py" ]
 
 ENTRYPOINT ["python"]
+
 
 
 
