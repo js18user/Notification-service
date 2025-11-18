@@ -200,11 +200,11 @@ try:
 
 
     async def realtime(dt, zone: int, ):
-        return dt - ind.ine * zone + ind.interval - ind.ine
+        return dt - ind.ine * zone + ind.interval 
 
 
     def realtimes(dt, zone: int, ):
-        return dt - ind.ine * zone + ind.interval - ind.ine
+        return dt - ind.ine * zone + ind.interval 
 
     async def parsedate(model: dict, ) -> dict:
         if model.get('start_date'):
