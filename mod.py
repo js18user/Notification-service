@@ -12,9 +12,9 @@ from datetime import timezone as tzs
 from enum import Enum
 from functools import wraps
 from locale import setlocale, LC_ALL
-из времени импортировать время как t
-из набора текста импорт Необязательный
-из набора текста импорт Union
+from time import time as t
+# from typing import Optional
+from typing import Union
 from aio_pika import DeliveryMode
 from aio_pika import Message as Msg
 from aio_pika import connect as cnt
