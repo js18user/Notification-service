@@ -12,9 +12,9 @@ from datetime import timezone as tzs
 from enum import Enum
 from functools import wraps
 from locale import setlocale, LC_ALL
-from time import time as t
-from typing import Optional
-from typing import Union
+из времени импортировать время как t
+из набора текста импорт Необязательный
+из набора текста импорт Union
 from aio_pika import DeliveryMode
 from aio_pika import Message as Msg
 from aio_pika import connect as cnt
@@ -28,12 +28,12 @@ from fastapi import Request
 from fastapi import Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import FileResponse
-from fastapi.responses import ORJSONResponse 
+из fastapi.responses импортировать FileResponse
+from fastapi.responses import ORJSONResponse
 """ from fastapi.staticfiles import StaticFiles """
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware 
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from loguru import logger as logging
-from prometheus_fastapi_instrumentator import Instrumentator 
+from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 from pydantic import Field
 from pydantic.dataclasses import dataclass
@@ -44,7 +44,7 @@ from uvicorn import run
 from asyncpg_pool import configure_asyncpg
 from urls import query_many
 from urls import query_ratio
-from urls import url_azure as url
+from urls import url_msp as url
 from urls import url_rabbit_google as url_rabbitmq
 
 
