@@ -757,7 +757,7 @@ finally:
 
 if __name__ == "__main__":
     try:
-        run('mod:app', host='0.0.0.0', port=80, workers=2, )  # reload=True, )
+        run('mod:app', host='0.0.0.0', port=80, )  # reload=True, )
     except KeyboardInterrupt:
         pass
     finally:
