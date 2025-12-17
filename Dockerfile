@@ -16,6 +16,8 @@ RUN pip install -r requirements.txt
 
 COPY data.html .
 
+COPY gct.html .
+
 COPY create_tables.sql .
 
 COPY urls.py .
@@ -29,6 +31,7 @@ EXPOSE 80
 CMD ["mod.py" ]
 
 ENTRYPOINT ["python"]
+
 
 
 
