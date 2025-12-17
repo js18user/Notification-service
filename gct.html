@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<meta name="author" content="js18user">
+<link rel="icon" href="https:///www.w3.org/2008/site/images/favicon.ico" crossorigin>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<title>analyze</title>
+<body translate="no">
+<div>
+    <p id="myChart" style="width:100%; height:500px; "></p>
+    <p id="chart_div" style="width:100%; height: 500px; margin-left: 800px;"></p>
+</div>
+<script>
+google.charts.load('current', {'packages': ['corechart']});
+let timeout;
+let timer_on = 0;
+let counter = 0;
+
+function timedCount() {
+    counter++;
+    timeout = setTimeout(timedCount, 500);
+
+function drawChart() {
+    const data = google.visualization.arrayToDataTable([
+      ['Country', 'Mhl'],
+      ['Italy',54.8 - counter/4],
+      ['France',48.6 + counter/2],
+      ['Spain',44.4],
+      ['USA',23.9],
+      ['Argentina',14.5 + counter/3]
+    ]);
+
+    const chart = new google.visualization.PieChart(document.getElementById('myChart'));
+    const chart_d = new google.visualization.PieChart(document.getElementById('chart_div'));
+// const data = google.visualization.arrayToDataTable(data);
+
+const options = {
+  title: 'World Wide Wine Production',
+  is3D: true
+};
+chart.draw(data, options);
+chart_d.draw(data, options);
+}
+
+google.charts.setOnLoadCallback(drawChart);
+}
+timedCount()
+</script>
+</body>
+</html>
