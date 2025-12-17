@@ -28,7 +28,7 @@ from fastapi import Request
 from fastapi import Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
-из fastapi.responses импортировать FileResponse
+из fastapi.responses import FileResponse
 from fastapi.responses import ORJSONResponse
 """ from fastapi.staticfiles import StaticFiles """
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
