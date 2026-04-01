@@ -53,6 +53,6 @@ password: str = f'Aaa4401&&'
 port: int = 5432
 host: str = f'192.168.0.5'
 
-# url_msp: str = "postgresql://gen_user:aaa4401&&@192.168.0.5:5432/default_db"
-url_msp: str = f'postgresql://gen_user:********@192.168.0.4:5432/default_db'
+url_msp: str = "postgresql://gen_user:aaa4401&&@192.168.0.5:5432/default_db"
+# url_msp: str = f'postgresql://gen_user:********@192.168.0.4:5432/default_db'
 
