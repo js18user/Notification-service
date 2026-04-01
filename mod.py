@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
+# script by js18user
 
-""" script by js18user  """
-
-json = __import__('orjson')
-""" from httpx import AsyncClient """
+from asyncpg import PostgresError
 from asyncio import sleep as sl
 from collections.abc import Sequence
 from datetime import datetime
@@ -13,7 +11,6 @@ from enum import Enum
 from functools import wraps
 from locale import setlocale, LC_ALL
 from time import time as t
-# from typing import Optional
 from typing import Union
 from aio_pika import DeliveryMode
 from aio_pika import Message as Msg
@@ -22,7 +19,6 @@ from dateutil.parser import parse
 from fastapi import BackgroundTasks
 from fastapi import Depends
 from fastapi import FastAPI
-from fastapi import HTTPException
 from fastapi import Query
 from fastapi import Request
 from fastapi import Response
@@ -30,8 +26,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse
 from fastapi.responses import ORJSONResponse
-""" from fastapi.staticfiles import StaticFiles """
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
+# from fastapi.staticfiles import StaticFiles
 from loguru import logger as logging
 from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
@@ -39,19 +34,21 @@ from pydantic import Field
 from pydantic.dataclasses import dataclass
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.cors import CORSMiddleware
-""" from starlette.middleware.gzip import GZipMiddleware """
+# from starlette.middleware.gzip import GZipMiddleware
 from uvicorn import run
 from asyncpg_pool import configure_asyncpg
 from urls import query_many
 from urls import query_ratio
-from urls import url_msp as url
+from urls import url_azure as url
 from urls import url_rabbit_google as url_rabbitmq
+json = __import__('orjson')
 
 
 @dataclass
 class Ind:
     interval: timedelta = datetime.now() - datetime.now(tzs.utc).replace(tzinfo=None)
-    ine = timedelta(hours=1, )
+    ine: timedelta = timedelta(hours=1, )
+    index_cache: int = 0
 
 
 def memory_dict(f):
@@ -179,16 +176,22 @@ def timing_decorator(func_async):
         return result
     return wrapper
 
-try:
-    def db_connect():
-        return configure_asyncpg(app, 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
-            user=user,
-            name=name,
-            password=password,
-            port=port,
-            host=host, ),
-                                 )
 
+def handle_db_errors(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        try:
+            return await func(*args, **kwargs)
+        except PostgresError as e:
+            logging.info(f"DB error into {func.__name__}: {e}")
+            raise
+        except Exception as e:
+            logging.info(f"Unknown error into {func.__name__}: {e}")
+            raise
+    return wrapper
+
+
+try:
 
     async def send_pika(channel, mess):
         await channel.default_exchange.publish(
@@ -198,13 +201,12 @@ try:
             routing_key='queue',
         )
 
-
     async def realtime(dt, zone: int, ):
-        return dt - ind.ine * zone + ind.interval 
+        return dt - ind.ine * zone + ind.interval - ind.ine
 
+    def realtime_s(dt, zone: int, ):
+        return dt - ind.ine * zone + ind.interval - ind.ine
 
-    def realtimes(dt, zone: int, ):
-        return dt - ind.ine * zone + ind.interval 
 
     async def parsedate(model: dict, ) -> dict:
         if model.get('start_date'):
@@ -213,8 +215,7 @@ try:
             model['end_date']: datetime = parse(model['end_date'], ignoretz=True)
         return model
 
-
-    def query_update(table: str, model: dict, adu: dict, ) -> str:
+    def query_update(table: str, model: dict, adu: dict, ):
         counter, params, cond, vals, qs = 1, [], [], [], "UPDATE {table} SET {columns} WHERE {cond} RETURNING * ;"
         for column, value in model.items():
             match value is not None and value != 0:
@@ -232,13 +233,9 @@ try:
                     counter += 1
                 case _:
                     pass
-        sql: str = qs.format(
-            table=table, columns=" ,".join(vals), cond=" AND ".join(cond)
-        )
-        return sql, params
+        return params, qs.format(table=table, columns=" ,".join(vals), cond=" AND ".join(cond))
 
-
-    def query_delete(table: str, model: dict, fields: str ='*', ) -> str:
+    def query_delete(table: str, model: dict, fields: str = '*', ) -> str:
         if model.get('id'):
             return f"DELETE FROM {table} WHERE id={model['id']} RETURNING {fields};"
         else:
@@ -250,7 +247,6 @@ try:
                                      if model[item]
                                      ])),
             )
-
 
     def query_select(table, model: dict, fields: str = "*", ) -> str:
         if model.get('id'):
@@ -265,7 +261,6 @@ try:
                 case _:
                     return f"SELECT {fields} FROM {table} WHERE ({where});"
 
-
     def query_insert(table: str, model: dict, fields: str = "*", ) -> str:
         length_model = (model.values()).__len__()
         return (
@@ -275,31 +270,35 @@ try:
         )
 
 
+    @handle_db_errors
     async def insert(db, table, model, ) -> Sequence[dict]:
         async with db.transaction():
             return await db.fetch(query_insert(table, model), *list(model.values()), )
 
 
+    @handle_db_errors
     async def select(db, table, model, args=None, fields="*", ) -> Sequence[dict]:
         async with db.transaction():
             return await db.fetch(query_select(table, model, fields, ), *(args or []), )
 
 
+    @handle_db_errors
     async def delete(db, table, model, args=None, fields='*', ) -> Sequence[dict]:
         async with db.transaction():
             return await db.fetch(query_delete(table, model, fields), *(args or []), )
 
 
+    @handle_db_errors
     async def update(db, table, model, adu, ) -> Sequence[dict]:
-        sql, params = query_update(table, model, adu, )
+        tx, fx = query_update(table, model, adu, )
         async with db.transaction():
-            return await db.fetch(sql, *params, )
+            return await db.fetch(fx, *tx)
 
 
+    @handle_db_errors
     async def update_ids(db, tds, status, ):
         async with db.transaction():
             return await db.execute(f"UPDATE message SET status='{status}' WHERE id in {tds};")
-
 
     async def send_message(db,
                            index: int,
@@ -308,27 +307,25 @@ try:
                            ) -> dict:
         if index == 0:
             await update(db, table=Table.message.value,
-                         model=Message(id=dict_message['id']).dict(),
-                         adu=MessageUpdate(status=Status.queue.value,
-                                           start_date=datetime.now()
-                                           ).dict(),
-                         )
+                         model=dict(id=dict_message['id']),
+                         adu=dict(status=Status.queue.value,
+                                  start_date=datetime.now()))
+
         dict_message['status'] = Status.queue.value
         pause: int = (dict_message['start_date'].timestamp().__sub__(datetime.now().timestamp()))
-        if pause < 0: pause = 0
+        if pause < 0:
+            pause = 0
         await sl(pause, )
         dict_message['status'] = Status.sent.value
         rss[1].append(dict_message['id'])
         return rss
 
-
     async def create_queue(db,
                            list_distributions: Sequence[dict],
                            ) -> None:
         await create_queue_messages(db, list_distributions, )
-        await create_queue_release(db, list_messages=await m_restart(db, ), )
+        await create_queue_release(db, await m_restart(db, ), )
         return
-
 
     async def create_queue_release(db,
                                    list_messages: Sequence[dict],
@@ -337,59 +334,55 @@ try:
         for lm_index, dict_message in enumerate(list_messages):
             await send_message(db, lm_index, dict(dict_message), rss, )
         await update_ids(db=db, tds=tuple(rss[1]), status=Status.sent.value, )
-        print(f"control: {rss[0]}  {len(rss[1])} ")
+        print(f"control: {rss[0]} com  {len(rss[1])} new  {datetime.now()}")
         contact = await cnt(url_rabbitmq, )
         async with contact.channel() as session:
             await send_pika(session, list_messages)
         await contact.close()
         return
 
-
-    async def crml(lc: Sequence[dict],
-                   distribution: dict,
-                   ) -> Sequence[tuple]:
-        return [tuple((MessageInsert(id_distribution=distribution['id'],
-                                     id_client=client['id'],
-                                     status=Status.formed.value,
-                                     start_date= realtimes(distribution['start_date'],
-                                                                         client['timezone']),
-                                     ).dict()).values()) for _, client in enumerate(lc)]
+    async def createmessage(lc: Sequence[dict],
+                            distribution: dict,
+                            ) -> Sequence[tuple]:
+        return [tuple(dict(start_date=realtime_s(distribution['start_date'],
+                                                 client['timezone']),
+                           status=Status.formed.value,
+                           id_distribution=distribution['id'],
+                           id_client=client['id'],
+                           ).values()) for _, client in enumerate(lc)]
 
     async def create_queue_messages(db,
                                     ld: Sequence[dict],
                                     ) -> None:
-
         for _, distribution in enumerate(ld):
             async with db.transaction():
-                await db.executemany(query_many, await crml(tuple(await select(db,
-                                                                               table=Table.client.value,
-                                                                               fields='id,timezone,phone',
-                                                                               model=Client(mob=distribution['mob'],
-                                                                                            teg=distribution[
-                                                                                                'teg'], ).dict()
-                                                                               )), distribution, ))
+                await db.executemany(query_many, await createmessage(tuple(await select(
+                    db,
+                    table=Table.client.value,
+                    fields='id,timezone,phone',
+                    model=dict(mob=distribution['mob'], teg=distribution['teg']))), distribution, ))
         return
 
     async def m_restart(db, ) -> Sequence[dict]:
         async with db.transaction():
             return await db.fetch(
-                f"SELECT d.text, "
-                f"d.interval, "
-                f"c.phone, "
-                f"m.start_date, "
-                f"m.status, "
-                f"m.id_distribution, "
-                f"m.id "
-                f"FROM message AS m "
-                f"INNER JOIN client AS c "
-                f"ON (c.id = m.id_client) "
-                f"INNER JOIN distribution AS d "
-                f"ON (d.id = m.id_distribution) "
-                f"WHERE m.status IN ('formed', 'queue', 'failure') "
-                f"ORDER BY m.start_date ; "
+                """
+                SELECT d.text, 
+                d.interval,
+                c.phone, 
+                m.start_date, 
+                m.status, 
+                m.id_distribution,
+                m.id 
+                FROM message AS m 
+                JOIN client AS c ON (c.id = m.id_client)                 
+                JOIN distribution AS d ON (d.id = m.id_distribution)                 
+                WHERE m.status IN ('formed', 'queue', 'failure') 
+                ORDER BY m.start_date ; 
+                """
             )
 
-    async def seek(db, ) -> Sequence[dict]:
+    async def seek(db, ):
         return await db.fetch(
             f"SELECT d.id,"
             f"d.start_date,"
@@ -421,9 +414,9 @@ try:
             f"c.timezone AS timezone, "
             f"c.phone AS phone "
             f"FROM message AS m "
-            f"INNER JOIN client as c "
-            f"ON ( c.id=m.id_client ) "
-            f"WHERE (m.id_distribution={id_distribution} AND "
+            f"CROSS JOIN client as c "
+            f"WHERE ( c.id=m.id_client AND "
+            f"m.id_distribution={id_distribution} AND "
             f"m.status='{status}'  ) "
             f"ORDER BY m.start_date, c.timezone, c.phone;"
         )
@@ -431,15 +424,14 @@ try:
     """    Begin    """
     setlocale(LC_ALL, "de")
     ind, skip = Ind(), '\n'
-
+    logging.add("async.log", enqueue=True)
     app = FastAPI(
         debug=False,
         reload=False,
-        workers=2,
         access_log=False,
-        title=f"API documentation",
-        description=f"A set of Api for completing the task is presented",
-        swagger_ui_parameters={f"syntaxHighlight.theme": f"obsidian"},
+        title="API documentation",
+        description="A set of Api for completing the task is presented",
+        swagger_ui_parameters={"syntaxHighlight.theme": "obsidian"},
         contact={
             "name": "API Support",
             "email": "js18.user@gmail.com",
@@ -452,9 +444,9 @@ try:
         allow_headers=[],
         allow_methods=["GET", "PUT", "POST", "DELETE"],
     )
-    """ app.add_middleware(HTTPSRedirectMiddleware) """
-    """ app.add_middleware(GZipMiddleware, minimum_size=500, compresslevel=3, ) """
-    """ app.mount("/static", StaticFiles(directory="static"), name="static") """
+    # app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+    # app.mount("/static", StaticFiles(directory="static"), name="static") """
 
     @app.middleware("http")
     async def time_crud(request: Request, call_next, ):
@@ -476,7 +468,7 @@ try:
     @app.exception_handler(StarletteHTTPException)
     async def http_exception_handler(request: Request, exc):
         _, _ = request, exc
-        # print(f"StarletteHTTPException  {request.url}")
+        print(f"StarletteHTTPException  {request.url}")
         return ORJSONResponse(status_code=400,
                               content=jsonable_encoder([]),
                               )
@@ -490,17 +482,16 @@ try:
             content={"message": f"Attention! Error with Uvicorn: {exc.uny}"},
         )
 
-    # conn = configure_asyncpg(app, url_azure, )
+
     conn = configure_asyncpg(app, url, )
-    # conn = db_connect()
 
     @conn.on_init
-    async def initial_db(db):
-        with open(f'create_tables.sql', f'r') as sql:
+    async def initialization(db):
+        with open('create_tables.sql', 'r') as sql:
             return await db.execute(sql.read(), )
 
 
-    Instrumentator().instrument(app).expose(app) 
+    Instrumentator().instrument(app).expose(app)
 
     @app.get('/client', status_code=200, description="", )
     async def client_select(
@@ -570,25 +561,25 @@ try:
         return await select(db,
                             table=Table.distribution.value,
                             model=jsonable_encoder(Distribution(id=id,
-                                                          mob=mob,
-                                                          teg=teg,
-                                                          start_date=start_date,
-                                                          end_date=end_date,
-                                                          text=text,
-                                                          )),
+                                                                mob=mob,
+                                                                teg=teg,
+                                                                start_date=start_date,
+                                                                end_date=end_date,
+                                                                text=text,
+                                                                )),
                             )
 
     @app.post('/distribution',
               status_code=400,
               summary="Create an distribution",
-              description="Creates an gistribution with all the required information. Make sure the name is unique.",
-    )
+              description="Creates an distribution with all the required information. Make sure the name is unique.",
+              )
     async def distribution_insert(response: Response,
                                   distribution: DistributionInsert,
                                   tasks: BackgroundTasks,
                                   db=Depends(conn.connection),
                                   ) -> Sequence[dict]:
-        model: dict = await parsedate(jsonable_encoder(distribution))                              
+        model: dict = await parsedate(jsonable_encoder(distribution))
         match model['end_date'] > model['start_date'] and model['end_date'] > datetime.now():
             case True:
                 if row := await insert(db,
@@ -661,11 +652,11 @@ try:
         return await select(db,
                             table=Table.message.value,
                             model=jsonable_encoder(Message(id=id,
-                                                     id_distribution=id_distribution,
-                                                     id_client=id_client,
-                                                     start_date=start_date,
-                                                     status=status,
-                                                     )),
+                                                           id_distribution=id_distribution,
+                                                           id_client=id_client,
+                                                           start_date=start_date,
+                                                           status=status,
+                                                           )),
                             )
 
 
@@ -694,7 +685,9 @@ try:
 
 
     @app.get('/admin/distribution', status_code=200, description="", )
-    async def select_distributions(db=Depends(conn.connection), ):
+    async def select_distributions(response: Response,
+                                   db=Depends(conn.connection)):
+        response.headers["Cache-Control"] = "private, max-age=30"
         async with db.transaction():
             return await seek(db, )
 
@@ -739,10 +732,12 @@ try:
 
     @app.get('/admin/message/status', status_code=200, description="", )
     async def select_messages_status(
+            response: Response,
             db=Depends(conn.connection),
             id_distribution: int = Query(ge=0, ),
             status: str = Query(),
-        ):
+    ):
+        response.headers["Cache-Control"] = "private, max-age=30"
         async with db.transaction():
             return await seek_status(db, id_distribution, status)
 
@@ -750,14 +745,15 @@ try:
     async def favicon():
         return
 
-except:
-    logging.info(f"Basis error")
+except ():
+    logging.info("Basis error")
 finally:
     pass
 
 if __name__ == "__main__":
     try:
-        run('mod:app', host='0.0.0.0', port=80, )  # reload=True, )
+        run('mod:app', host='0.0.0.0', port=80, reload=True, )
+        pass
     except KeyboardInterrupt:
         pass
     finally:
