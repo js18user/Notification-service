@@ -37,7 +37,7 @@ from pydantic import Field
 from pydantic.dataclasses import dataclass
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.cors import CORSMiddleware
-from starlette.middleware.gzip import GZipMiddleware
+# from starlette.middleware.gzip import GZipMiddleware
 
 from asyncpg_pool import configure_asyncpg
 from urls import query_many
@@ -467,7 +467,7 @@ try:
         allow_methods=["GET", "PUT", "POST", "DELETE"],
     )
 
-    app.add_middleware(GZipMiddleware, minimum_size=1000)
+    # app.add_middleware(GZipMiddleware, minimum_size=1000)
 
     # app.mount("/static", StaticFiles(directory="static"), name="static") """
 
