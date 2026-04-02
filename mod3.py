@@ -31,7 +31,7 @@ from fastapi.responses import FileResponse
 from fastapi.responses import ORJSONResponse
 # from fastapi.staticfiles import StaticFiles
 from loguru import logger as logging
-from prometheus_fastapi_instrumentator import Instrumentator
+# from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 from pydantic import Field
 from pydantic.dataclasses import dataclass
@@ -505,7 +505,7 @@ try:
             return await db.execute(sql.read(), )
 
 
-    Instrumentator().instrument(app).expose(app)
+    # Instrumentator().instrument(app).expose(app)
 
 
     @app.get('/client', status_code=200, description="", )
