@@ -17,7 +17,7 @@ hypercorn==0.18.0
 starlette==0.22.0
 python-dateutil==2.9.0.post0
 fastapi~=0.88.0
-prometheus-fastapi-instrumentator==5.11.1
+# prometheus-fastapi-instrumentator==5.11.1
 httptools==0.6.4
 uvloop<0.22.0,>=0.21
-uvicorn==0.40.0
+# uvicorn==0.40.0
