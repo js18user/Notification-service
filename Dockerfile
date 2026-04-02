@@ -22,11 +22,11 @@ COPY urls.py .
 
 COPY asyncpg_pool.py .
 
-COPY mod.py .
+COPY mod3.py .
 
 EXPOSE 80
 
-CMD ["mod.py" ]
+CMD ["mod3.py" ]
 
 ENTRYPOINT ["python"]
 
