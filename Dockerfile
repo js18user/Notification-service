@@ -10,7 +10,7 @@ ENV PYTHONUNBUFFERED=1
 
 COPY requirements.txt .
 
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt --root-user-action=ignore
 
 COPY data.html .
 
