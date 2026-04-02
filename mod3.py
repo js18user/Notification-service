@@ -762,8 +762,8 @@ try:
 
     async def mns():
         config = Config()
-        config.bind = ["localhost:80"]
-        config.quic_bind = ["localhost:80"]
+        config.bind = ["0.0.0.0:80"]
+        config.quic_bind = ["0.0.0.0:80"]
         config.use_reloader = True
         config.access_logfile = True
         config.log_level = "debug"
