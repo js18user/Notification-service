@@ -31,13 +31,13 @@ from fastapi.responses import FileResponse
 from fastapi.responses import ORJSONResponse
 # from fastapi.staticfiles import StaticFiles
 from loguru import logger as logging
-# from prometheus_fastapi_instrumentator import Instrumentator
+from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 from pydantic import Field
 from pydantic.dataclasses import dataclass
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.cors import CORSMiddleware
-# from starlette.middleware.gzip import GZipMiddleware
+from starlette.middleware.gzip import GZipMiddleware
 
 from asyncpg_pool import configure_asyncpg
 from urls import query_many
@@ -441,7 +441,7 @@ try:
     """    Begin    """
     setlocale(LC_ALL, "de")
     ind, skip = Ind(), '\n'
-    logging.add("async.log", enqueue=True)
+    # logging.add("async.log", enqueue=True)
     app = FastAPI(
         debug=False,
         reload=False,
@@ -462,7 +462,7 @@ try:
         allow_methods=["GET", "PUT", "POST", "DELETE"],
     )
 
-    # app.add_middleware(GZipMiddleware, minimum_size=1000)
+    app.add_middleware(GZipMiddleware, minimum_size=1000)
 
     # app.mount("/static", StaticFiles(directory="static"), name="static") """
 
@@ -491,7 +491,7 @@ try:
             return await db.execute(sql.read(), )
 
 
-    # Instrumentator().instrument(app).expose(app)
+    Instrumentator().instrument(app).expose(app)
 
 
     @app.get('/client', status_code=200, description="", )
