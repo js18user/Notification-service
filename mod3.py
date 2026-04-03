@@ -77,11 +77,6 @@ class D(dict):
         self[n] = val
 
 
-class UnicornException(Exception):
-    def __init__(self, uny: str):
-        self.uny = uny
-
-
 class Status(str, Enum):
     formed: str = 'formed'
     sent: str = 'sent'
@@ -488,15 +483,6 @@ try:
                               content=jsonable_encoder([]),
                               )
 
-
-    @app.exception_handler(UnicornException)
-    async def unicorn_exception_handler(request: Request, exc: UnicornException):
-        print(f"UnicornException  {request.url}")
-        return ORJSONResponse(
-            status_code=418,
-            content={"message": f"Attention! Error with Uvicorn: {exc.uny}"},
-        )
-
     conn = configure_asyncpg(app, url, )
 
     @conn.on_init
@@ -702,7 +688,7 @@ try:
     @app.get('/admin/distribution', status_code=200, description="", )
     async def select_distributions(response: Response,
                                    db=Depends(conn.connection)):
-        response.headers["Cache-Control"] = "private, max-age=30"
+        response.headers["Cache-Control"] = "public, max-age=30"
         async with db.transaction():
             return await seek(db, )
 
@@ -752,7 +738,7 @@ try:
             id_distribution: int = Query(ge=0, ),
             status: str = Query(),
     ):
-        response.headers["Cache-Control"] = "private, max-age=30"
+        response.headers["Cache-Control"] = "public, max-age=30"
         async with db.transaction():
             return await seek_status(db, id_distribution, status)
 
