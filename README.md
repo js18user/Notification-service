@@ -1,6 +1,6 @@
 # Notification service 
 The software stack for implementing the task is as follows:
-- Python 3.12.4 
+- Python 3.13.3 
 - Fastapi
 - Pydantic
 - Asyncio
@@ -13,6 +13,7 @@ The software stack for implementing the task is as follows:
 - HTML
 - Logging/loguru
 - aio_pika
+- Hypercorn(QUIC)
 
 Statement of the problem (Technical specifications for programming)
 It is necessary to develop a mailing management service.
