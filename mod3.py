@@ -467,7 +467,7 @@ try:
             start_time, response = t(), await call_next(request)
             print(f"{'\033[91m'}endpoint execution time:{1000 * (t() - start_time): .0f} m.sec  "
                   f"{datetime.now().strftime("%d-%m-%Y %H:%M:%S")} {'\033[30m'}")
-            response.headers["Alt-Svc"] = 'h3=":80"; ma=86400'
+            # response.headers["Alt-Svc"] = 'h3=":80"; ma=86400'
             return response
         
     # app.add_middleware(GZipMiddleware, minimum_size=1000)
