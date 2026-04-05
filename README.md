@@ -7,13 +7,14 @@ The software stack for implementing the task is as follows:
 - Async/await
 - Asyncpg
 - SQL
-- Postgresql 15  DBaaS  or Localhost
+- Postgresql 18 
 - JS
 - CSS
 - HTML
 - Logging/loguru
 - aio_pika
-- Hypercorn(QUIC)
+- Uvocorn
+- BackgroundTasks/Celery
 
 Statement of the problem (Technical specifications for programming)
 It is necessary to develop a mailing management service.
