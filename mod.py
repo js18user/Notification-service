@@ -753,7 +753,7 @@ finally:
 
 if __name__ == "__main__":
     try:
-        run('mod:app', host='0.0.0.0', port=80, )  # reload=True, )
+        run('mod:app', host='0.0.0.0', port=80, http=httptools, loop=uvloop, )  # reload=True, )
         pass
     except KeyboardInterrupt:
         pass
