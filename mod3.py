@@ -759,12 +759,7 @@ except ():
     logging.info("Basis error")
 finally:
     pass
-
-except ():
-    logging.info("Basis error")
-finally:
-    pass
-
+    
 if __name__ == "__main__":
 
     try:
