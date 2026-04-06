@@ -44,7 +44,7 @@ from urls import query_many
 from urls import query_ratio
 from urls import url_msp as url
 from urls import url_rabbit_google as url_rabbitmq
-
+import uvloop
 json = __import__('orjson')
 
 
@@ -442,6 +442,7 @@ try:
     setlocale(LC_ALL, "de")
     ind, skip = Ind(), '\n'
     # logging.add("async.log", enqueue=True)
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     app = FastAPI(
         debug=False,
         reload=False,
@@ -754,20 +755,29 @@ try:
     async def favicon():
         return
 
-    async def mns():
-        config = Config()
-        config.bind = ["0.0.0.0:80"]
-        config.quic_bind = ["0.0.0.0:80"]
-        config.use_reloader = True
-        config.access_logfile = True
-        config.log_level = "debug"
-        # config.accesslog = '-'
-        # config.debug = True
-        await serve(app, config)
-
-    run(mns())
+except ():
+    logging.info("Basis error")
+finally:
+    pass
 
 except ():
     logging.info("Basis error")
 finally:
     pass
+
+if __name__ == "__main__":
+
+    try:
+        config = Config()
+        config.bind = ["0.0.0.0:80"]
+        config.quic_bind = ["0.0.0.0:80"]
+        config.access_logfile = "-"
+        config.access_log_format = '%(U)s %(s)s'
+        config.log_level = "info"
+        config.use_reloader = True
+        config.accesslog = "-"
+        run(serve(app, config))
+    except KeyboardInterrupt:
+        pass
+    finally:
+        pass
