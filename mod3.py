@@ -6,6 +6,7 @@ from hypercorn.asyncio import serve
 from asyncpg import PostgresError
 from asyncio import sleep as sl
 from asyncio import run
+from asyncio import set_event_loop_policy
 from collections.abc import Sequence
 from datetime import datetime
 from datetime import timedelta
@@ -442,7 +443,7 @@ try:
     setlocale(LC_ALL, "de")
     ind, skip = Ind(), '\n'
     # logging.add("async.log", enqueue=True)
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+    set_event_loop_policy(uvloop.EventLoopPolicy())
     app = FastAPI(
         debug=False,
         reload=False,
