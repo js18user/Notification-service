@@ -24,7 +24,7 @@ COPY asyncpg_pool.py .
 
 COPY mod3.py .
 
-EXPOSE 80
+EXPOSE 443
 
 CMD ["mod3.py" ]
 
