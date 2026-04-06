@@ -20,6 +20,7 @@ prometheus-fastapi-instrumentator==5.11.1
 httptools==0.6.4
 uvloop<0.22.0,>=0.21
 - uvicorn==0.40.0
+hypercorn==0.18.0
 h11==0.16.0
 h2==4.3.0
 hpack==4.1.0
