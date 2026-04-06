@@ -766,8 +766,8 @@ if __name__ == "__main__":
     try:
         uvloop.install()
         config = Config()
-        config.bind = ["0.0.0.0:443"]
-        config.quic_bind = ["0.0.0.0:443"]
+        config.bind = ["0.0.0.0:80"]
+        config.quic_bind = ["0.0.0.0:80"]
         config.access_logfile = "-"
         config.access_log_format = '%(U)s %(s)s'
         config.log_level = "info"
