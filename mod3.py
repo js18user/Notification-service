@@ -444,6 +444,7 @@ try:
     ind, skip = Ind(), '\n'
     # logging.add("async.log", enqueue=True)
     set_event_loop_policy(uvloop.EventLoopPolicy())
+    
     app = FastAPI(
         debug=False,
         reload=False,
