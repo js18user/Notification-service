@@ -468,7 +468,7 @@ try:
     @app.middleware("http")
     async def time_crud(request: Request, call_next, ):
         start_time, response = t(), await call_next(request)
-        response.headers["Alt-Svc"] = 'h3=":443"; ma=172800'
+        response.headers["Alt-Svc"] = 'h3=":4433"; ma=172800'
         print(f"{'\033[91m'}endpoint execution time:{1000 * (t() - start_time): .0f} m.sec  "
               f"{datetime.now().strftime("%d-%m-%Y %H:%M:%S")} {'\033[30m'}")
         return response
@@ -766,9 +766,9 @@ try:
         else:
             return {"status": "running", "loop": "standard asyncio", "details": loop_type}
 
-    @app.get("/protocol")
+    @app.get("/admin/protocol")
     async def get_protocol(request: Request):
-        protocol = request.scope.get("http_version")
+        protocol = await request.scope.get("http_version")
         return {"protocol": protocol}
 
 except ():
@@ -781,8 +781,8 @@ if __name__ == "__main__":
     try:
         uvloop.install()
         config = Config()
-        config.bind = ["0.0.0.0:443"]
-        config.quic_bind = ["0.0.0.0:443"]
+        # config.bind = ["0.0.0.0:443"]
+        config.quic_bind = ["0.0.0.0:4433"]
         config.access_logfile = "-"
         config.access_log_format = '%(U)s %(s)s'
         config.log_level = "info"
