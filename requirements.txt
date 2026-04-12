@@ -27,3 +27,4 @@ hpack==4.1.0
 hyperframe==6.1.0
 aioquic==1.3.0
 h3==4.4.2
+multiprocessing==2.6.2.1
