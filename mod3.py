@@ -45,7 +45,6 @@ from urls import query_many
 from urls import query_ratio
 from urls import url_msp as url
 from urls import url_rabbit_google as url_rabbitmq
-from multiprocessing import cpu_count()
 import uvloop
 json = __import__('orjson')
 
@@ -773,6 +772,8 @@ finally:
     
 if __name__ == "__main__":
 
+    from multiprocessing import cpu_count() as cpu
+
     try:
         uvloop.install()
         config = Config()
@@ -784,7 +785,7 @@ if __name__ == "__main__":
         # config.use_reloader = True
         config.accesslog = "-"
         # config.worker_class: str = 'uvloop'
-        config.workers = cpu_count() * 2 + 1
+        config.workers = cpu() * 2 + 1
         print(f"Starting server with {config.workers} workers on uvloop...")
         run(serve(app, config))
     except KeyboardInterrupt:
