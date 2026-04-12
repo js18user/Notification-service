@@ -40,7 +40,6 @@ from pydantic.dataclasses import dataclass
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.cors import CORSMiddleware
 # from starlette.middleware.gzip import GZipMiddleware
-
 from asyncpg_pool import configure_asyncpg
 from urls import query_many
 from urls import query_ratio
