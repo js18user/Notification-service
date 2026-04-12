@@ -45,6 +45,7 @@ from urls import query_many
 from urls import query_ratio
 from urls import url_msp as url
 from urls import url_rabbit_google as url_rabbitmq
+from multiprocessing import cpu_count()
 import uvloop
 json = __import__('orjson')
 
@@ -756,7 +757,7 @@ try:
     async def favicon():
         return
 
-    @app.get("/admin/check-loop")
+    @app.get("/admin/loop")
         async def check_loop():
             loop = get_running_loop()
             loop_type = str(type(loop))
@@ -780,9 +781,11 @@ if __name__ == "__main__":
         config.access_logfile = "-"
         config.access_log_format = '%(U)s %(s)s'
         config.log_level = "info"
-        config.use_reloader = True
+        # config.use_reloader = True
         config.accesslog = "-"
-        config.worker_class: str = 'uvloop'
+        # config.worker_class: str = 'uvloop'
+        config.workers = cpu_count() * 2 + 1
+        print(f"Starting server with {config.workers} workers on uvloop...")
         run(serve(app, config))
     except KeyboardInterrupt:
         pass
