@@ -783,7 +783,7 @@ if __name__ == "__main__":
         config.log_level = "info"
         config.use_reloader = True
         config.accesslog = "-"
-        config.worker_class: str = 'uviloop'
+        config.worker_class: str = 'uvloop'
         run(serve(app, config))
     except KeyboardInterrupt:
         pass
