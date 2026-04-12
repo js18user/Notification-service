@@ -768,7 +768,7 @@ try:
 
     @app.get("/admin/protocol")
     async def get_protocol(request: Request):
-        protocol = await request.scope.get("http_version")
+        protocol = request.scope.get("http_version")
         return {"protocol": protocol}
 
 except ():
