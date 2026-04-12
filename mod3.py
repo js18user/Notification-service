@@ -442,6 +442,7 @@ try:
     setlocale(LC_ALL, "de")
     ind, skip = Ind(), '\n'
     # logging.add("async.log", enqueue=True)
+    
     set_event_loop_policy(uvloop.EventLoopPolicy())
     
     app = FastAPI(
@@ -772,8 +773,6 @@ finally:
     
 if __name__ == "__main__":
 
-    from multiprocessing import cpu_count() as cpu
-
     try:
         uvloop.install()
         config = Config()
@@ -785,8 +784,7 @@ if __name__ == "__main__":
         # config.use_reloader = True
         config.accesslog = "-"
         # config.worker_class: str = 'uvloop'
-        config.workers = cpu() * 2 + 1
-        print(f"Starting server with {config.workers} workers on uvloop...")
+        
         run(serve(app, config))
     except KeyboardInterrupt:
         pass
