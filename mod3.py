@@ -175,7 +175,6 @@ def timing_decorator(func_async):
         start_time, result = t(), await func_async(*args, **kwargs)
         print(f"Function {func_async.__name__} took {int((t() - start_time) * 1000)} m.sec")
         return result
-
     return wrapper
 
 
