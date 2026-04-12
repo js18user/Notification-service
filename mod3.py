@@ -766,6 +766,11 @@ try:
         else:
             return {"status": "running", "loop": "standard asyncio", "details": loop_type}
 
+    @app.get("/protocol")
+    async def get_protocol(request: Request):
+        protocol = request.scope.get("http_version")
+        return {"protocol": protocol}
+
 except ():
     logging.info("Basis error")
 finally:
