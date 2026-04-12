@@ -758,13 +758,13 @@ try:
         return
 
     @app.get("/admin/loop")
-        async def check_loop():
-            loop = get_running_loop()
-            loop_type = str(type(loop))
-            if "uvloop" in loop_type.lower():
-                return {"status": "success", "loop": "uvloop (Fast!)", "details": loop_type}
-            else:
-                return {"status": "running", "loop": "standard asyncio", "details": loop_type}
+    async def check_loop():
+        loop = get_running_loop()
+        loop_type = str(type(loop))
+        if "uvloop" in loop_type.lower():
+            return {"status": "success", "loop": "uvloop (Fast!)", "details": loop_type}
+        else:
+            return {"status": "running", "loop": "standard asyncio", "details": loop_type}
 
 except ():
     logging.info("Basis error")
