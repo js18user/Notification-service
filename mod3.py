@@ -6,6 +6,7 @@ from hypercorn.asyncio import serve
 from asyncpg import PostgresError
 from asyncio import sleep as sl
 from asyncio import run
+from asyncio import get_running_loop
 from asyncio import set_event_loop_policy
 from collections.abc import Sequence
 from datetime import datetime
@@ -756,6 +757,15 @@ try:
     @app.get('/favicon.ico', status_code=200, include_in_schema=False)
     async def favicon():
         return
+
+    @app.get("/admin/check-loop")
+        async def check_loop():
+            loop = get_running_loop()
+            loop_type = str(type(loop))
+            if "uvloop" in loop_type.lower():
+                return {"status": "success", "loop": "uvloop (Fast!)", "details": loop_type}
+            else:
+                return {"status": "running", "loop": "standard asyncio", "details": loop_type}
 
 except ():
     logging.info("Basis error")
