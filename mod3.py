@@ -7,7 +7,7 @@ from asyncpg import PostgresError
 from asyncio import sleep as sl
 from asyncio import run
 from asyncio import get_running_loop
-from asyncio import set_event_loop_policy
+# from asyncio import set_event_loop_policy
 from collections.abc import Sequence
 from datetime import datetime
 from datetime import timedelta
@@ -45,7 +45,7 @@ from urls import query_many
 from urls import query_ratio
 from urls import url_msp as url
 from urls import url_rabbit_google as url_rabbitmq
-import uvloop
+# import uvloop
 json = __import__('orjson')
 
 
@@ -443,7 +443,7 @@ try:
     ind, skip = Ind(), '\n'
     # logging.add("async.log", enqueue=True)
     
-    set_event_loop_policy(uvloop.EventLoopPolicy())
+    # set_event_loop_policy(uvloop.EventLoopPolicy())
     
     app = FastAPI(
         debug=False,
@@ -779,7 +779,7 @@ finally:
 if __name__ == "__main__":
 
     try:
-        uvloop.install()
+        # uvloop.install()
         config = Config()
         config.bind = ["0.0.0.0:443"]
         config.quic_bind = ["0.0.0.0:443"]
