@@ -24,7 +24,7 @@ COPY asyncpg_pool.py .
 
 COPY mod3.py .
 
-EXPOSE 443 
+EXPOSE 443/udp
 
 CMD ["mod3.py" ]
 
