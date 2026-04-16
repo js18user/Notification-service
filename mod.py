@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 # script by js18user
-
+import uvloop
 from asyncpg import PostgresError
 from asyncio import sleep as sl
+from asyncio import get_running_loop
 from collections.abc import Sequence
 from datetime import datetime
 from datetime import timedelta
@@ -451,7 +452,7 @@ try:
     @app.middleware("http")
     async def time_crud(request: Request, call_next, ):
         start_time, response = t(), await call_next(request)
-        response.headers["Alt-Svc"] = 'h3=":80"; ma=86400'
+        # response.headers["Alt-Svc"] = 'h3=":80"; ma=86400'
         print(f"{'\033[91m'}endpoint execution time:{1000 * (t() - start_time): .0f} m.sec  "
               f"{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}")
         return response
@@ -742,6 +743,20 @@ try:
         async with db.transaction():
             return await seek_status(db, id_distribution, status)
 
+    @app.get("/admin/loop")
+    async def check_loop():
+        loop = get_running_loop()
+        loop_type = str(type(loop))
+        if "uvloop" in loop_type.lower():
+            return {"status": "success", "loop": "uvloop (Fast!)", "details": loop_type}
+        else:
+            return {"status": "running", "loop": "standard asyncio", "details": loop_type}
+
+    @app.get("/admin/protocol")
+    async def get_protocol(request: Request):
+        protocol = request.scope.get("http_version")
+        return {"protocol": protocol}
+
     @app.get('/favicon.ico', status_code=200, include_in_schema=False)
     async def favicon():
         return
@@ -753,7 +768,11 @@ finally:
 
 if __name__ == "__main__":
     try:
-        run('mod:app', host='0.0.0.0', port=80, )  # reload=True, )
+        run('mod:app', 
+            host='0.0.0.0', 
+            port=80, 
+            loop="uvloop", 
+            http="httptools" )  # reload=True, )
         pass
     except KeyboardInterrupt:
         pass
