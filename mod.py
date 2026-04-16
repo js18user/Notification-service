@@ -669,16 +669,16 @@ try:
     async def main():
         return FileResponse("data.html")
 
-    @app.get(path="/gct")
+    @app.get(path="/gct", include_in_schema=False, )
     async def gct():
         return FileResponse("gct.html")
 
-    @app.get('/admin/speed', status_code=200, description="Speed Api", )
+    @app.get('/admin/speed', status_code=200, description="Speed Api", include_in_schema=False, )
     async def speed_api():
         return []
 
 
-    @app.get('/admin/ratio', status_code=200, description="", )
+    @app.get('/admin/ratio', status_code=200, description="", include_in_schema=False, )
     async def select_ratio(
             db=Depends(conn.connection),
     ):
@@ -743,7 +743,7 @@ try:
         async with db.transaction():
             return await seek_status(db, id_distribution, status)
 
-    @app.get("/admin/loop")
+    @app.get("/admin/loop", include_in_schema=False, )
     async def check_loop():
         loop = get_running_loop()
         loop_type = str(type(loop))
@@ -752,7 +752,7 @@ try:
         else:
             return {"status": "running", "loop": "standard asyncio", "details": loop_type}
 
-    @app.get("/admin/protocol")
+    @app.get("/admin/protocol", include_in_schema=False, )
     async def get_protocol(request: Request):
         protocol = request.scope.get("http_version")
         return {"protocol": protocol}
