@@ -2,6 +2,10 @@
 
 FROM python:3.13.3-alpine
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
 LABEL maintainer="Jurij <js18.user@gmail.com>"
 
 ENV PYTHONDONTWRITEBYTECODE=1
