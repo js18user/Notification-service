@@ -352,6 +352,7 @@ try:
                            id_client=client['id'],
                            ).values()) for _, client in enumerate(lc)]
 
+    @handle_db_errors
     async def create_queue_messages(db,
                                     ld: Sequence[dict],
                                     ) -> None:
@@ -364,6 +365,7 @@ try:
                     model=dict(mob=distribution['mob'], teg=distribution['teg']))), distribution, ))
         return
 
+    @handle_db_errors
     async def m_restart(db, ) -> Sequence[dict]:
         async with db.transaction():
             return await db.fetch(
@@ -383,6 +385,7 @@ try:
                 """
             )
 
+    @handle_db_errors
     async def seek(db, ):
         return await db.fetch(
             f"SELECT d.id,"
@@ -405,6 +408,7 @@ try:
             f"ORDER BY ( d.id ) DESC; "
         )
 
+    @handle_db_errors
     async def seek_status(db, id_distribution, status):
         return await db.fetch(
             f"SELECT m.id,"
