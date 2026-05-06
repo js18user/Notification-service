@@ -754,8 +754,13 @@ finally:
 if __name__ == "__main__":
     try:
         jit_question()
-        run('modp:app', host='0.0.0.0', port=80, use_colors=True, loop="uvloop", 
-            http="httptools" )  # reload=True, 
+        run(
+            'modp:app', 
+            host='0.0.0.0', 
+            port=80,
+            use_colors=True, 
+            loop="uvloop", 
+            http="httptools" ) 
         pass
     except KeyboardInterrupt:
         pass
