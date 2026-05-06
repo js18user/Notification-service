@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # script by js18user
-
+import uvloop
 from hashlib import md5
 from asyncpg import PostgresError
 from asyncio import sleep as sl
@@ -753,7 +753,8 @@ finally:
 if __name__ == "__main__":
     try:
         jit_question()
-        run('mod:app', host='0.0.0.0', port=80, use_colors=True, )  # reload=True,
+        run('mod:app', host='0.0.0.0', port=80, use_colors=True, loop="uvloop", 
+            http="httptools" )  # reload=True, 
         pass
     except KeyboardInterrupt:
         pass
