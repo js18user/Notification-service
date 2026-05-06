@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # script by js18user
+
 import uvloop
 from hashlib import md5
 from asyncpg import PostgresError
