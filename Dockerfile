@@ -24,6 +24,8 @@ COPY urls.py .
 
 COPY asyncpg_pool.py .
 
+COPY jit.py .
+
 COPY modp.py .
 
 EXPOSE 80
