@@ -30,3 +30,5 @@ CREATE TABLE IF NOT EXISTS products (
         company VARCHAR(30),
         price INT
 );
+CREATE INDEX IF NOT EXISTS idx_client_id_phone_tz ON client (id) INCLUDE (phone, timezone);
+CREATE INDEX IF NOT EXISTS idx_perf_message ON message (id_distribution, status) INCLUDE (id, start_date, id_client);
