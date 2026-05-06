@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.13.13-alpine
+FROM FROM python:3.13-alpine
 
 ENV PYTHON_JIT=1
 
