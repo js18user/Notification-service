@@ -2,6 +2,8 @@
 
 FROM python:3.13.13-alpine
 
+ENV PYTHON_JIT=1
+
 RUN apk add --no-cache build-base
 
 LABEL maintainer="Jurij <js18.user@gmail.com>"
