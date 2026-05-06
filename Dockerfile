@@ -33,9 +33,3 @@ COPY modp.py .
 EXPOSE 80
 
 CMD ["python", "-X", "jit", "modp.py" ]
-
--- ENTRYPOINT ["python"]
-
-
-
-
