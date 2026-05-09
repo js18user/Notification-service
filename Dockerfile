@@ -2,10 +2,6 @@
 
 FROM python:3.13-alpine
 
-ENV PYTHON_JIT=1
-
-RUN apk add --no-cache build-base
-
 LABEL maintainer="Jurij <js18.user@gmail.com>"
 
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -32,4 +28,4 @@ COPY modp.py .
 
 EXPOSE 80
 
-CMD ["python", "-X", "jit", "modp.py" ]
+CMD ["python", "modp.py" ]
