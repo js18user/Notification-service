@@ -1,10 +1,8 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.12-slim
+FROM python:3.13.3-alpine
 
-LABEL maintainer="Jurij <js18.user@gmail.com>"
-
-ENV PYTHON_GIL=0 
+LABEL maintainer="Jurij <js18.user@gmail.com>" 
 
 ENV PYTHONDONTWRITEBYTECODE=1
 
@@ -18,8 +16,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-
-RUN pip install --no-cache-dir -r requirements.txt
 
 RUN pip install -r requirements.txt --root-user-action=ignore
 
@@ -39,4 +35,4 @@ COPY modp.py .
 
 EXPOSE 80
 
-CMD ["python", "modp.py","-X", "freethreaded", "-m" "--loop", "asyncio"]
+CMD ["python", "modp.py"]
