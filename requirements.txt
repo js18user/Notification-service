@@ -1,5 +1,5 @@
 aio-pika==9.6.2
-aiormq==9.6.4
+aiormq>=6.8,<7
 anyio==4.9.0
 asyncpg==0.31.0
 idna==3.10
