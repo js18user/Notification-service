@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.13-slim-bookworm
+FROM python:3.12-slim
 
 LABEL maintainer="Jurij <js18.user@gmail.com>"
 
