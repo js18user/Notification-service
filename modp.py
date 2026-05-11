@@ -679,7 +679,7 @@ try:
         return Response(content=json_data, media_type="application/json",
                         headers={
                             "Content-Length": str(len_json_data),
-                            "Cache-Control": "private, max-age=30",
+                            "Cache-Control": "public, max-age=30",
                             "ETag": etg, })
 
     @app.get("/")
