@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.13.3-alpine
+FROM python:3.13-alpine
 
 LABEL maintainer="Jurij <js18.user@gmail.com>" 
 
@@ -17,8 +17,6 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt --root-user-action=ignore
 
 COPY data.html .
-
-COPY gct.html .
 
 COPY create_tables.sql .
 
