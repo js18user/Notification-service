@@ -28,8 +28,8 @@ COPY asyncpg_pool.py .
 
 COPY jit.py .
 
-COPY modp.py .
+COPY mod.py .
 
 EXPOSE 80
 
-CMD ["python", "modp.py"]
+CMD ["python", "mod.py"]
