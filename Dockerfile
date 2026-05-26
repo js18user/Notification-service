@@ -1,14 +1,12 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.13-alpine3.22
+FROM python:3.13-alpine
 
 LABEL maintainer="Jurij <js18.user@gmail.com>" 
 
 ENV PYTHONDONTWRITEBYTECODE=1
 
 ENV PYTHONUNBUFFERED=1
-
-WORKDIR /app
 
 RUN apk update && apk add --no-cache build-base gcc
 
