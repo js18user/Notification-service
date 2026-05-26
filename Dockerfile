@@ -8,7 +8,10 @@ ENV PYTHONUNBUFFERED=1
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+ENV PIP_ROOT_USER_ACTION=ignore
+
+
+RUN pip install -r requirements.txt
 
 COPY data.html .
 
