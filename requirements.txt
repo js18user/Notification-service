@@ -27,3 +27,4 @@ hyperframe==6.1.0
 aioquic==1.3.0
 h3==4.4.2
 brotli==1.1.0
+brotil-asgi==1.6.0
