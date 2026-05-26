@@ -14,7 +14,7 @@ RUN apk update && apk add --no-cache build-base gcc
 
 COPY requirements.txt .
 
-RUN pip install -r requirements.txt --root-user-action=ignore
+RUN pip install -r requirements.txt
 
 COPY data.html .
 
