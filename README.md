@@ -13,8 +13,9 @@ The software stack for implementing the task is as follows:
 - HTML
 - Logging/loguru
 - aio_pika
-- Uvocorn
+- Uvicorn
 - BackgroundTasks/Celery
+- Lifespan
 
 Statement of the problem (Technical specifications for programming)
 It is necessary to develop a mailing management service.
@@ -70,20 +71,11 @@ List and functions of the presented scripts:
 - urls.py  no comments
 - Dockerfile  no comment
 
-This task is self-documented.
-- docker pull js18user/smp:mode
-- docker run -p 80:80 smp:mode
-- 
-- http://127.0.0.1:80/docs       forAPI documentation Swagger
-- http://127.0.0.1:80/metrics
-- http://127.0.0.1:80    for WEB UI(admin panel)
-
 The database and Rabbitmq are relevant, you can work
 
 This is an alternative way For a quick start:
 
-- https://js18user-notification-service-d823.twc1.net              for WEB UI(admin panel)
-- https://js18user-notification-service-d823.twc1.net/docs         forAPI documentation Swagger
-- https://js18user-notification-service-d823.twc1.net/metrics      
+- https://msp.mcp-service.eu              for WEB UI(admin panel)
+- https://msp.mcp-service.eu/docs         forAPI documentation Swagger      
 
 Write me for help: @js18user  telegram 
