@@ -178,7 +178,7 @@ class CreateMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         start_time, response, path_with_query = t(), await call_next(request), request.url.path
         if request.url.query: path_with_query += f"?{request.url.query}"
-         print(
+        print(
             f"INFO:     "
             f"{datetime.now().strftime("%d-%m-%y %H:%M:%S")} "
             f'{request.client.host if request.client else "127.0.0.1"}:'
@@ -186,8 +186,8 @@ class CreateMiddleware(BaseHTTPMiddleware):
             f"{request.method} {path_with_query} {f"HTTP/{request.scope.get('http_version', '1.1')}"} "
             f"{response.status_code} "
             f'{ind.status_phrases.get(response.status_code, "")}{skip}'
-            f"  endpoint execution time: {1000 * (t() - start_time):.0f} ms{skip}"
-            f" content-length: {response.headers.get('content-length')} bytes{skip}"
+            f"          endpoint execution time: {1000 * (t() - start_time):.0f} ms{skip}"
+            f"          content-length: {response.headers.get('content-length')} bytes{skip}"
         )
         return response
 
