@@ -17,21 +17,15 @@ CREATE TABLE IF NOT EXISTS distribution  (
         interval INTERVAL NOT NULL GENERATED ALWAYS AS (end_date -  start_date) STORED
 );
 
-        CREATE TABLE IF NOT EXISTS message (
+CREATE TABLE IF NOT EXISTS message (
         id serial PRIMARY KEY,
         start_date TIMESTAMP ,
         status VARCHAR ,
         id_distribution INTEGER REFERENCES distribution (Id) ON DELETE CASCADE,
         id_client INTEGER REFERENCES client (id) ON DELETE CASCADE
 );
-CREATE TABLE IF NOT EXISTS products (
-        id SERIAL PRIMARY KEY,
-        model VARCHAR(30),
-        company VARCHAR(30),
-        price INT
-);
 CREATE INDEX IF NOT EXISTS idx_client_id_phone_tz ON client (id) INCLUDE (phone, timezone);
 CREATE INDEX IF NOT EXISTS idx_perf_message ON message (id_distribution, status) INCLUDE (id, start_date, id_client);
-SELECT pg_prewarm('message_pkey'),pg_prewarm('mcds'),pg_prewarm('idx_perf_message'),pg_prewarm('client_pkey'),
-       pg_prewarm('client_phone_teg_key'),pg_prewarm('cpt'),pg_prewarm('idx_client_id_phone_tz'),
-       pg_prewarm('distribution_pkey');
+--SELECT pg_prewarm('message_pkey'),pg_prewarm('mcds'),pg_prewarm('client_phone_teg_key'),pg_prewarm('cpt');
+SELECT pg_prewarm('message_pkey'),pg_prewarm('distribution_pkey'),pg_prewarm('client_pkey'),
+       pg_prewarm('idx_client_id_phone_tz'),pg_prewarm('idx_perf_message');
