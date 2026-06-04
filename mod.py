@@ -14,7 +14,7 @@ from datetime import datetime
 from datetime import timedelta
 from datetime import timezone as tzs
 from enum import Enum
-from functools import wrapsL
+from functools import wrap
 from time import time as t
 from typing import Union, Optional, Any, cast
 from aio_pika import DeliveryMode
@@ -35,7 +35,6 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse
 from fastapi.responses import JSONResponse
 from fastapi.responses import StreamingResponse
-# from fastapi.staticfiles import StaticFiles
 from loguru import logger as logging
 from pydantic import BaseModel
 from pydantic import Field
