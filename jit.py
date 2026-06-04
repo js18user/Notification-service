@@ -1,6 +1,8 @@
 
+
 def jit_question():
 
+    from os import cpu_count
     import sys
     from sysconfig import get_config_var
 
@@ -18,4 +20,5 @@ def jit_question():
         print("Python is built with JIT support.")
     else:
         print("Python is built without JIT support.")
+    print("number of cores in a processor: ", cpu_count())
     return
