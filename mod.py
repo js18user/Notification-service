@@ -865,6 +865,14 @@ try:
             headers={"X-Accel-Buffering": "no"}
         )
 
+@app.get("/cv")
+    async def get_cv_file():
+        return FileResponse(
+            path="cv.pdf",
+            media_type="application/pdf",
+            headers={"Content-Disposition": "inline; filename=Jurijs_Satalovs_CV.pdf"}
+        )
+
 except ():
     logging.info("Basis error")
 finally:
