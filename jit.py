@@ -20,5 +20,4 @@ def jit_question():
         print("Python is built with JIT support.")
     else:
         print("Python is built without JIT support.")
-    print("number of cores in a processor: ", cpu_count())
     return
