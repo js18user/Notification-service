@@ -20,8 +20,6 @@ COPY create_tables.sql .
 
 COPY urls.py .
 
-COPY asyncpg_pool.py .
-
 COPY jit.py .
 
 COPY mod.py .
