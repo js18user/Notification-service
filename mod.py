@@ -14,7 +14,7 @@ from datetime import datetime
 from datetime import timedelta
 from datetime import timezone as tzs
 from enum import Enum
-from functools import wrap
+from functools import wraps
 from time import time as t
 from typing import Union, Optional, Any, cast
 from aio_pika import DeliveryMode
