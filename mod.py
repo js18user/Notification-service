@@ -5,19 +5,16 @@ import asyncpg
 
 from contextlib import asynccontextmanager
 from hashlib import md5
-from sys import platform
 from asyncpg import PostgresError
 from asyncio import sleep as sl
 from asyncio import create_task
 from asyncio import get_running_loop
-# from asyncio import set_event_loop_policy
 from collections.abc import Sequence
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone as tzs
 from enum import Enum
-from functools import wraps
-from locale import setlocale, LC_ALL
+from functools import wrapsL
 from time import time as t
 from typing import Union, Optional, Any, cast
 from aio_pika import DeliveryMode
@@ -590,7 +587,7 @@ try:
 
 
     """    Begin    """
-    setlocale(LC_ALL, "de")
+    
     ind, skip = Ind(), '\n'
     logging.add("async.log", enqueue=True)
     app = FastAPI(
