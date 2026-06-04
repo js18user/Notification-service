@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 # script by js18user
 
-from hashlib import md5
+import asyncpg
 
+from contextlib import asynccontextmanager
+from hashlib import md5
+from sys import platform
 from asyncpg import PostgresError
 from asyncio import sleep as sl
+from asyncio import create_task
 from asyncio import get_running_loop
+# from asyncio import set_event_loop_policy
 from collections.abc import Sequence
 from datetime import datetime
 from datetime import timedelta
@@ -21,6 +26,7 @@ from aio_pika import connect as cnt
 from dateutil.parser import parse
 from brotli_asgi import BrotliMiddleware
 from fastapi import BackgroundTasks
+from fastapi.responses import HTMLResponse
 from fastapi import Depends
 from fastapi import FastAPI
 from fastapi import Query
@@ -41,7 +47,9 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from uvicorn import run
-from asyncpg_pool import configure_asyncpg
+# from granian import Granian
+# from granian.constants import Interfaces
+# from pure_asgi import PureASGILoggingMiddleware
 from urls import query_many
 from urls import query_ratio
 from urls import url_azure as url
@@ -59,7 +67,6 @@ class Ind:
 
 
 def memory_dict(f):
-    """ Memoization decorator for a function that takes one argument """
 
     class ms(dict):
         def __missing__(self, key):
@@ -174,27 +181,26 @@ class DistributionInsert(BaseModel):
 class CreateMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         start_time, response, path_with_query = t(), await call_next(request), request.url.path
-        if request.url.query:
-            path_with_query += f"?{request.url.query}"
+        if request.url.query: path_with_query += f"?{request.url.query}"
         print(
-            f"INFO:     "
-            f'{datetime.now().strftime("%d-%m-%y %H:%M:%S")} '
+            f"{'\033[32m'}INFO{'\033[0m'}:     "
+            f"{'\033[91m'}{datetime.now().strftime("%d-%m-%y %H:%M:%S")}{'\033[0m'} "
             f'{request.client.host if request.client else "127.0.0.1"}:'
             f'{request.client.port if request.client else "0"}  '
-            f'"{request.method} {path_with_query} {f"HTTP/{request.scope.get('http_version', '1.1')}"}" '
-            f"{response.status_code} "
-            f'{ind.status_phrases.get(response.status_code, "")}'
-            f"  endpoint execution time: {1000 * (t() - start_time):.0f} ms"
-            f" content-length: {response.headers.get('content-length')} bytes{skip}"
-        )
+            f"{request.method} {path_with_query} {f"HTTP/{request.scope.get('http_version', '1.1')}"} " 
+            f"{'\033[32m'}{response.status_code} "
+            f'{ind.status_phrases.get(response.status_code, "")}{'\033[0m'}'
+            f"  endpoint execution time: {'\033[91m'}{1000 * (t() - start_time):.0f} ms{'\033[0m'}"
+            f" content-length: {'\033[91m'}{response.headers.get('content-length')} bytes{'\033[0m'}{skip}"
+            )
         return response
 
 
-def timing_execute(func_async):
+def time_speed(func_async):
     @wraps(func_async)
     async def wrapper(*args, **kwargs):
         start_time, result = t(), await func_async(*args, **kwargs)
-        logging.info(f"Function {func_async.__name__} took {int((t() - start_time) * 1000)} m.sec")
+        print(f"Function {func_async.__name__} took {int((t() - start_time) * 1000)} m.sec")
         return result
     return wrapper
 
@@ -214,6 +220,38 @@ def except_db_errors(func):
 
 
 try:
+    async def init_db():
+        conn = await asyncpg.connect(url)
+        try:
+                with open('create_tables.sql', 'r') as sql:
+                    await conn.execute(sql.read(), )
+        except asyncpg.exceptions.DuplicateObjectError:
+            pass
+        finally:
+            await conn.close()
+
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        await init_db()
+        app.state.db_pool = await asyncpg.create_pool(url, min_size=5, max_size=20)
+        app.state.contact = await cnt(url_rabbitmq, )
+        polling_task = create_task(polling_worker(app.state.db_pool, app.state.contact))
+        yield
+
+        polling_task.cancel()
+        await app.state.contact.close()
+        await app.state.db_pool.close()
+
+    async def polling_worker(db_pool, contact, ):
+        while True:
+            async with db_pool.acquire() as db:
+                if single := await db.fetch("SELECT start_date FROM message WHERE status='formed' LIMIT 1;"):
+                    if datetime.now() > next(iter(dict(single[0]).values())):
+                        await create_queue_release(db, contact, )
+            await sl(119)
+        return
+
 
     async def send_pika(channel, mess):
         await channel.default_exchange.publish(
@@ -312,45 +350,30 @@ try:
         async with db.transaction():
             return await db.execute(f"UPDATE message SET status='{status}' WHERE id in {tds};")
 
-    async def send_message(db,
+    async def send_message(db, contact,
                            index: int,
                            dict_message: dict,
                            rss: dict,
                            ) -> dict:
-        if index == 0:
-            await update(db, table=Table.message.value,
-                         model=dict(id=dict_message['id']),
-                         adu=dict(status=Status.queue.value,
-                                  start_date=datetime.now()))
-
-        dict_message['status'] = Status.queue.value
-        pause: int = (dict_message['start_date'].timestamp().__sub__(datetime.now().timestamp()))
-        if pause < 0:
-            pause = 0
-        await sl(pause, )
         dict_message['status'] = Status.sent.value
         rss[1].append(dict_message['id'])
         return rss
 
-    async def create_queue(db,
-                           list_distributions: Sequence[dict],
-                           ) -> None:
+    async def create_queue(db, list_distributions, ):
         await create_queue_messages(db, list_distributions, )
-        await create_queue_release(db, await m_restart(db, ), )
         return
 
-    async def create_queue_release(db,
-                                   list_messages: Sequence[dict],
-                                   ) -> None:
+    async def create_queue_release(db, contact, ):
+        list_messages = await m_restart(db, )
         rss: dict = {0: len(list_messages), 1: [], }
         for lm_index, dict_message in enumerate(list_messages):
-            await send_message(db, lm_index, dict(dict_message), rss, )
+            await send_message(db, contact, lm_index, dict(dict_message), rss, )
         await update_ids(db=db, tds=tuple(rss[1]), status=Status.sent.value, )
-        print(f"control: {rss[0]} com  {len(rss[1])} new  {datetime.now()}")
-        contact = await cnt(url_rabbitmq, )
+        print(
+            f"{'\033[32m'}INFO{'\033[0m'}:     "
+            f"control: {rss[0]} com  {len(rss[1])} new  {datetime.now()}")
         async with contact.channel() as session:
             await send_pika(session, list_messages)
-        await contact.close()
         return
 
     async def createmessage(lj,
@@ -359,10 +382,10 @@ try:
         lc = json.loads(lj)
         return [tuple(dict(start_date=realtime_s(distribution['start_date'],
                                                  client['timezone']),
-                           status=Status.formed.value,
+                           status=Status.formed.value if indx >= 1 else Status.queue.value,
                            id_distribution=distribution['id'],
                            id_client=client['id'],
-                           ).values()) for _, client in enumerate(lc)]
+                           ).values()) for indx, client in enumerate(lc)]
 
     async def create_queue_messages(db,
                                     ld: Sequence[dict],
@@ -548,6 +571,23 @@ try:
         )
         return [dict(row) for row in rows]
 
+    async def get_streamer(db):
+        async with db.transaction():
+            query = """
+                SELECT json_build_object(
+                    'id', id, 
+                    'start_date', start_date,
+                    'text', text,
+                    'mob', mob,
+                    'teg', teg,
+                    'end_date', end_date,
+                    'interval', interval                    
+                )::text 
+                FROM distribution
+            """
+            async for row in db.cursor(query):
+                yield row[0] + "\n"
+
 
     """    Begin    """
     setlocale(LC_ALL, "de")
@@ -565,6 +605,7 @@ try:
             "email": "js18.user@gmail.com",
         },
         default_response_class=JSONResponse,
+        lifespan=lifespan,
     )
     app.add_middleware(
         cast(Any, CORSMiddleware),
@@ -574,8 +615,9 @@ try:
         allow_origins=["http://localhost:80"],
         expose_headers=["Content-Encoding"],
     )
-    app.add_middleware(cast(Any, CreateMiddleware))
     app.add_middleware(cast(Any, BrotliMiddleware), quality=5,  minimum_size=1024)
+    app.add_middleware(cast(Any, CreateMiddleware))
+    # app.add_middleware(PureASGILoggingMiddleware)
     # app.mount("/static", StaticFiles(directory="static"), name="static") """
 
     @app.exception_handler(RequestValidationError)
@@ -617,17 +659,13 @@ try:
             content={"message": f"Attention! Error with Uvicorn: {exc.uny}"},
         )
 
-
-    conn = configure_asyncpg(app, url, )
-
-    @conn.on_init
-    async def initialization(db):
-        with open('create_tables.sql', 'r') as sql:
-            return await db.execute(sql.read(), )
+    async def get_db_connection():
+        async with app.state.db_pool.acquire() as connection:
+            yield connection
 
     @app.get('/client', status_code=200, description="", )
     async def client_select(
-            db=Depends(conn.connection),
+            db=Depends(get_db_connection),
             params: Client = Depends(), ):
         return Response(content=await select(db,
                                              table="client",
@@ -637,7 +675,7 @@ try:
     @app.post('/client', status_code=400, description="", )
     async def client_insert(response: Response,
                             params: ClientInsert,
-                            db=Depends(conn.connection),
+                            db=Depends(get_db_connection),
                             ):
         if rows := await insert(db, table="client", model=params.model_dump(exclude_none=True, ), ):
             response.status_code = 200
@@ -648,7 +686,7 @@ try:
     @app.delete('/client', status_code=200, description="", )
     async def client_delete(response: Response,
                             params: Client,
-                            db=Depends(conn.connection),
+                            db=Depends(get_db_connection),
                             ):
         if rows := await delete(db, table=Table.client.value, model=params.model_dump(exclude_none=True, ), ):
             pass
@@ -661,7 +699,7 @@ try:
     async def client_update(response: Response,
                             client: Client = Body(embed=True),
                             upd: ClientUpdate = Body(embed=True),
-                            db=Depends(conn.connection),
+                            db=Depends(get_db_connection),
                             ) -> Sequence[dict]:
         if rows := await update(db, table=Table.client.value,
                                 model=client.model_dump(exclude_none=True),
@@ -674,7 +712,7 @@ try:
 
     @app.get('/distribution', status_code=200, description="", )
     async def distribution_select(
-            db=Depends(conn.connection, ),
+            db=Depends(get_db_connection, ),
             params: Distribution = Depends(),
     ):
         return Response(content=await select(db,
@@ -689,7 +727,7 @@ try:
               )
     async def distribution_insert(response: Response,
                                   params: DistributionInsert,
-                                  db=Depends(conn.connection),
+                                  db=Depends(get_db_connection),
                                   tasks: BackgroundTasks = BackgroundTasks(),
                                   ):
         # match model['end_date'] > model['start_date'] and model['end_date'] > datetime.now():
@@ -708,7 +746,7 @@ try:
     @app.delete('/distribution', status_code=200, description="", )
     async def delete_distributions(response: Response,
                                    params: Distribution,
-                                   db=Depends(conn.connection),
+                                   db=Depends(get_db_connection),
                                    ):
         if rows := await delete(db,
                                 table=Table.distribution.value,
@@ -725,7 +763,7 @@ try:
                                    background_tasks: BackgroundTasks,
                                    distribution: Distribution = Body(embed=True),
                                    upd: DistributionUpdate = Body(embed=True),
-                                   db=Depends(conn.connection),
+                                   db=Depends(get_db_connection),
                                    ):
         if rows := await update(db, table="distribution",
                                 model=distribution.model_dump(exclude_none=True),
@@ -743,7 +781,7 @@ try:
 
     @app.get('/message', status_code=200, description="", )
     async def select_message(
-            db=Depends(conn.connection),
+            db=Depends(get_db_connection),
             params: Message = Depends(),
     ):
         return Response(content=await select(db,
@@ -765,14 +803,9 @@ try:
                             "ETag": etg, })
 
     @app.get("/")
-    async def main():
+    async def main(db=Depends(get_db_connection)):
+        await db.execute("SELECT 1")
         return FileResponse("data.html")
-
-    """
-    @app.get(path="/gct")
-    async def gct():
-        return FileResponse("gct.html")
-    """
 
     @app.get('/admin/speed', status_code=200, description="Speed Api", )
     async def speed_api():
@@ -780,26 +813,25 @@ try:
 
 
     @app.get('/admin/ratio', status_code=200, description="", )
-    async def select_ratio(db=Depends(conn.connection), ):
+    async def select_ratio(db=Depends(get_db_connection), ):
         return await db.fetch(query_ratio, )
 
     @app.get('/admin/distribution/stat', status_code=200, description="", )
-    async def get_all_distributions(request: Request,
-                                    db=Depends(conn.connection), ):
-        return await json_response(request, await seek_json_opt(db))
+    async def get_all_distributions(request: Request, db=Depends(get_db_connection), ):
+            return await json_response(request, await seek_json_opt(db))
 
 
     @app.get('/admin/message', status_code=200, description="", )
     async def select_messages(
             request: Request,
-            db=Depends(conn.connection),
+            db=Depends(get_db_connection),
             id_distribution: int = Query(ge=0, ),
     ): return await json_response(request, await seek_messages_opt(db, id_distribution, ))
 
     @app.get('/admin/message/status', status_code=200, description="", )
     async def select_messages_status(
             request: Request,
-            db=Depends(conn.connection),
+            db=Depends(get_db_connection),
             id_distribution: int = Query(ge=0, ),
             status: str = Query(),
     ): return await json_response(request, await seek_status_opt(db, id_distribution, status))
@@ -807,7 +839,7 @@ try:
 
     @app.get("/admin/statistic", status_code=200, description="", )
     async def select_distribution_by_id(
-            db=Depends(conn.connection),
+            db=Depends(get_db_connection),
             id_distribution: int = Query(ge=0, ),
     ):
         return await seek_stat(db, id_distribution, )
@@ -815,11 +847,10 @@ try:
     @app.get("/admin/loop", include_in_schema=False, )
     async def check_loop():
         loop = get_running_loop()
-        loop_type = str(type(loop))
-        if "uvloop" in loop_type.lower():
-            return {"status": "success", "loop": "uvloop (Fast!)", "details": loop_type}
-        else:
-            return {"status": "running", "loop": "standard asyncio", "details": loop_type}
+        loop_class_name = f"{loop.__class__.__module__}.{loop.__class__.__name__}"
+        if "winloop" in loop_class_name.lower(): status_message = "winloop (libuv)"
+        if "uvloop" in loop_class_name.lower(): status_message = "uvloop"
+        return {"current_loop_class": loop_class_name, "message": status_message, }
 
     @app.get("/admin/protocol", include_in_schema=False, )
     async def get_protocol(request: Request):
@@ -830,25 +861,8 @@ try:
     async def favicon():
         return
 
-    async def get_streamer(db):
-        async with db.transaction():
-            query = """
-                SELECT json_build_object(
-                    'id', id, 
-                    'start_date', start_date,
-                    'text', text,
-                    'mob', mob,
-                    'teg', teg,
-                    'end_date', end_date,
-                    'interval', interval                    
-                )::text 
-                FROM distribution
-            """
-            async for row in db.cursor(query):
-                yield row[0] + "\n"
-
     @app.get("/stream_distribution")
-    async def stream_ndjson(db=Depends(conn.connection), ):
+    async def stream_ndjson(db=Depends(get_db_connection), ):
         return StreamingResponse(
             seek_stream(db),
             media_type="application/x-ndjson",
@@ -863,8 +877,14 @@ finally:
 if __name__ == "__main__":
     try:
         jit_question()
-        run('mod:app', host='0.0.0.0', port=80, use_colors=True, access_log=False, )  # reload=True, )
-        pass
+        print("platform: ", platform)
+        run('mod:app', 
+            host='0.0.0.0', 
+            port=80, 
+            use_colors=True, 
+            access_log=False,
+            workers=1,
+            )
     except KeyboardInterrupt:
         logging.info("KeyboardInterrupt: the end of task")
     finally:
