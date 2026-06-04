@@ -178,17 +178,17 @@ class CreateMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         start_time, response, path_with_query = t(), await call_next(request), request.url.path
         if request.url.query: path_with_query += f"?{request.url.query}"
-        print(
-            f"{'\033[32m'}INFO{'\033[0m'}:     "
-            f"{'\033[91m'}{datetime.now().strftime("%d-%m-%y %H:%M:%S")}{'\033[0m'} "
+         print(
+            f"INFO:     "
+            f"{datetime.now().strftime("%d-%m-%y %H:%M:%S")} "
             f'{request.client.host if request.client else "127.0.0.1"}:'
             f'{request.client.port if request.client else "0"}  '
-            f"{request.method} {path_with_query} {f"HTTP/{request.scope.get('http_version', '1.1')}"} " 
-            f"{'\033[32m'}{response.status_code} "
-            f'{ind.status_phrases.get(response.status_code, "")}{'\033[0m'}'
-            f"  endpoint execution time: {'\033[91m'}{1000 * (t() - start_time):.0f} ms{'\033[0m'}"
-            f" content-length: {'\033[91m'}{response.headers.get('content-length')} bytes{'\033[0m'}{skip}"
-            )
+            f"{request.method} {path_with_query} {f"HTTP/{request.scope.get('http_version', '1.1')}"} "
+            f"{response.status_code} "
+            f'{ind.status_phrases.get(response.status_code, "")}{skip}'
+            f"  endpoint execution time: {1000 * (t() - start_time):.0f} ms{skip}"
+            f" content-length: {response.headers.get('content-length')} bytes{skip}"
+        )
         return response
 
 
@@ -872,7 +872,7 @@ finally:
 
 if __name__ == "__main__":
     try:
-        jit_question()
+        # jit_question()
         run('mod:app', 
             host='0.0.0.0', 
             port=80, 
