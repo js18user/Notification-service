@@ -18,7 +18,7 @@ COPY data.html .
 
 COPY create_tables.sql .
 
-COPY cv.pdf
+COPY cv.pdf .
 
 COPY urls.py .
 
