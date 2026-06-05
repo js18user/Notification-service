@@ -798,6 +798,14 @@ try:
                             "Cache-Control": "public, max-age=30",
                             "ETag": etg, })
 
+    @app.get("/cv")
+    async def get_cv_file():
+        return FileResponse(
+            path="cv.pdf",
+            media_type="application/pdf",
+            headers={"Content-Disposition": "inline; filename=Jurijs_Satalovs_CV.pdf"}
+        )
+
     @app.get("/")
     async def main(db=Depends(get_db_connection)):
         await db.execute("SELECT 1")
@@ -864,17 +872,7 @@ try:
             media_type="application/x-ndjson",
             headers={"X-Accel-Buffering": "no"}
         )
-        
-    """
-    @app.get("/cv")
-    async def get_cv_file():
-        return FileResponse(
-            path="cv.pdf",
-            media_type="application/pdf",
-            headers={"Content-Disposition": "inline; filename=Jurijs_Satalovs_CV.pdf"}
-        )
-    """
-
+    
 except ():
     logging.info("Basis error")
 finally:
