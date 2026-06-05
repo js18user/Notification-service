@@ -5,12 +5,16 @@ LABEL maintainer="Jurij <js18.user@gmail.com>"
 WORKDIR /app
 
 ENV PYTHONDONTWRITEBYTECODE=1
-
 ENV PYTHONUNBUFFERED=1
-
-COPY requirements.txt .
-
 ENV PIP_ROOT_USER_ACTION=ignore
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    debian-keyring debian-archive-keyring apt-transport-https curl ca-certificates \
+    && curl -1sLf 'https://cloudsmith.io' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg \
+    && curl -1sLf 'https://cloudsmith.io' | tee /etc/apt/sources.list.p/caddy-stable.list \
+    && apt-get update && apt-get install -y --no-install-recommends caddy \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    
+COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
@@ -26,9 +30,10 @@ COPY jit.py .
 
 COPY mod.py .
 
-RUN useradd -u 8888 appuser && chown -R appuser:appuser /app
-USER appuser
+COPY Caddyfile .
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
 
 EXPOSE 80
 
-CMD ["python", "mod.py"]
+CMD ["./entrypoint.sh"]
