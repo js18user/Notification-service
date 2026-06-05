@@ -43,6 +43,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from uvicorn import run
+from prometheus_fastapi_instrumentator import Instrumentator
 # from granian import Granian
 # from granian.constants import Interfaces
 # from pure_asgi import PureASGILoggingMiddleware
@@ -614,7 +615,9 @@ try:
     app.add_middleware(cast(Any, BrotliMiddleware), quality=5,  minimum_size=1024)
     app.add_middleware(cast(Any, CreateMiddleware))
     # app.add_middleware(PureASGILoggingMiddleware)
-    # app.mount("/static", StaticFiles(directory="static"), name="static") """
+    # app.mount("/static", StaticFiles(directory="static"), name="static") 
+
+    Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request: Request, exc: RequestValidationError):
