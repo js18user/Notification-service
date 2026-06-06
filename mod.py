@@ -816,9 +816,9 @@ try:
             return FileResponse(path="cv.pdf", media_type="application/pdf", )
         return FileResponse("data.html")
         
-   @app.get('/admin/speed', status_code=200, description="Speed Api", )
-    async def speed_api():
-        return []
+    @app.get('/admin/speed', status_code=200, description="Speed Api", )
+        async def speed_api():
+            return []
 
 
     @app.get('/admin/ratio', status_code=200, description="", )
