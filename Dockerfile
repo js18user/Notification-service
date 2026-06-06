@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED=1
 ENV PIP_ROOT_USER_ACTION=ignore
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    debian-keyring debian-archive-keyring apt-transport-https curl ca-certificates gnupg \
+    debian-keyring debian-archive-keyring apt-transport-https curl ca-certificates gnupg2 \
     && curl -1sLf 'https://cloudsmith.io' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg \
     && curl -1sLf 'https://cloudsmith.io' | tee /etc/apt/sources.list.d/caddy-stable.list \
     && apt-get update && apt-get install -y --no-install-recommends caddy \
