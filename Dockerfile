@@ -7,6 +7,7 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PIP_ROOT_USER_ACTION=ignore
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     debian-keyring debian-archive-keyring apt-transport-https curl ca-certificates \
     && curl -1sLf 'https://cloudsmith.io' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg \
@@ -30,10 +31,28 @@ COPY jit.py .
 
 COPY mod.py .
 
-COPY Caddyfile .
+RUN printf "msp.mcp-service.eu {\n\
+    reverse_proxy localhost:8000\n\
+}\n\n\
+grafana.mcp-service.eu {\n\
+    reverse_proxy localhost:8000\n\
+}\n\n\
+cv.mcp-service.eu {\n\
+    root * /app\n\
+    rewrite * /cv.pdf\n\
+    file_server\n\
+}\n\n\
+resume.mcp-service.eu {\n\
+    root * /app\n\
+    rewrite * /cv.pdf\n\
+    file_server\n\
+}\n" > /app/Caddyfile
+
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
+# Открываем порты для обычного трафика (80) и SSL (443)
 EXPOSE 80
+EXPOSE 443
 
 CMD ["./entrypoint.sh"]
