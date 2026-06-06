@@ -26,8 +26,6 @@ COPY cv.pdf .
 
 COPY urls.py .
 
-COPY jit.py .
-
 COPY mod.py .
 
 RUN printf "msp.mcp-service.eu {\n\
