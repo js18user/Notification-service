@@ -809,11 +809,16 @@ try:
         )
 
     @app.get("/")
-    async def main(db=Depends(get_db_connection)):
+    async def main(db=Depends(get_db_connection), (request: Request, ):
         await db.execute("SELECT 1")
+        if "resume.mcp-service.eu" in host or "cv.mcp-service.eu" in  requesheaders.get("host", ""):
+            return FileResponse("cv.pdf", 
+                                media_type="application/pdf",
+                                headers={"Content-Disposition": "inline; filename=Jurijs_Satalovs_CV.pdf"},
+                               )
         return FileResponse("data.html")
-
-    @app.get('/admin/speed', status_code=200, description="Speed Api", )
+        
+   @app.get('/admin/speed', status_code=200, description="Speed Api", )
     async def speed_api():
         return []
 
