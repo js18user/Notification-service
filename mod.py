@@ -883,7 +883,7 @@ finally:
 if __name__ == "__main__":
     try:
         run('mod:app', 
-            host='127.0.0.1', 
+            host='0.0.0.0', 
             port=80, 
             use_colors=True, 
             access_log=False,
