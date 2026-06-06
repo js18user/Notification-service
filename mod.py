@@ -815,7 +815,7 @@ try:
         if "resume.mcp-service.eu" in host or "cv.mcp-service.eu" in host:
             return FileResponse("cv.pdf", 
                                 media_type="application/pdf",
-                                headers={"Content-Disposition": "inline; filename=Jurijs_Satalovs_CV.pdf"},
+                                # headers={"Content-Disposition": "inline; filename=Jurijs_Satalovs_CV.pdf"},
                                )
         return FileResponse("data.html")
         
