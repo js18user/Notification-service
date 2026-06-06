@@ -8,47 +8,33 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PIP_ROOT_USER_ACTION=ignore
 
-# Скачиваем готовый бинарник Caddy напрямую — без gpg ключей и сторонних репозиториев
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates \
-    && curl -sLf "https://caddyserver.com" -o /usr/bin/caddy \
-    && chmod +x /usr/bin/caddy \
+# Устанавливаем системные зависимости для Caddy и curl
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    debian-keyring debian-archive-keyring apt-transport-https curl ca-certificates \
+    && curl -1sLf 'https://cloudsmith.io' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg \
+    && curl -1sLf 'https://cloudsmith.io' | tee /etc/apt/sources.list.p/caddy-stable.list \
+    && apt-get update && apt-get install -y --no-install-recommends caddy \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-    
-COPY requirements.txt .
 
+# Копируем и устанавливаем Python зависимости
+COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+# Копируем файлы вашего проекта
 COPY data.html .
-
 COPY create_tables.sql .
-
 COPY cv.pdf .
-
 COPY urls.py .
-
+COPY jit.py .
 COPY mod.py .
 
-RUN printf "msp.mcp-service.eu {\n\
-    reverse_proxy localhost:8000\n\
-}\n\n\
-grafana.mcp-service.eu {\n\
-    reverse_proxy localhost:8000\n\
-}\n\n\
-cv.mcp-service.eu {\n\
-    root * /app\n\
-    rewrite * /cv.pdf\n\
-    file_server\n\
-}\n\n\
-resume.mcp-service.eu {\n\
-    root * /app\n\
-    rewrite * /cv.pdf\n\
-    file_server\n\
-}\n" > /app/Caddyfile
-
+# Копируем настройки Caddy и скрипт запуска
+COPY Caddyfile .
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
+# Caddy требует права на порты (80/443), поэтому запускаем от root, 
+# но Caddy и процессы внутри будут изолированы контейнером Timeweb
 EXPOSE 80
-EXPOSE 443
 
 CMD ["./entrypoint.sh"]
