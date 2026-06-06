@@ -812,13 +812,13 @@ try:
     async def main(request: Request, db=Depends(get_db_connection), ):
         await db.execute("SELECT 1")
         host = request.headers.get("host", "")
-        if ("resume.mcp-service.eu" in host or "cv.mcp-service.eu" in host):
+        if ("resume.mcp-service.eu" in host) or ("cv.mcp-service.eu" in host):
             return FileResponse(path="cv.pdf", media_type="application/pdf", )
         return FileResponse("data.html")
         
     @app.get('/admin/speed', status_code=200, description="Speed Api", )
-        async def speed_api():
-            return []
+    async def speed_api():
+        return []
 
 
     @app.get('/admin/ratio', status_code=200, description="", )
