@@ -16,7 +16,9 @@ COPY create_tables.sql .
 COPY cv.pdf .
 COPY urls.py .
 COPY mod.py .
+RUN useradd -u 8888 appuser && chown -R appuser:appuser /app
+USER appuser
 
 EXPOSE 80
 
-CMD ["python", mod.py]
+CMD ["python", "mod.py"]
