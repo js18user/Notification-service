@@ -809,7 +809,7 @@ try:
         )
 
     @app.get("/")
-    async def main(db=Depends(get_db_connection), (request: Request, ):
+    async def main(db=Depends(get_db_connection), request: Request, ):
         await db.execute("SELECT 1")
         if "resume.mcp-service.eu"  or "cv.mcp-service.eu" in  requesheaders.get("host", ""):
             return FileResponse("cv.pdf", 
