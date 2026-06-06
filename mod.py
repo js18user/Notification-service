@@ -51,7 +51,6 @@ from urls import query_many
 from urls import query_ratio
 from urls import url_azure as url
 from urls import url_rabbit_google as url_rabbitmq
-from jit import jit_question
 json = __import__('orjson')
 
 
@@ -883,7 +882,6 @@ finally:
 
 if __name__ == "__main__":
     try:
-        # jit_question()
         run('mod:app', 
             host='127.0.0.1', 
             port=8000, 
