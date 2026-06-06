@@ -51,7 +51,6 @@ resume.mcp-service.eu {\n\
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
-# Открываем порты для обычного трафика (80) и SSL (443)
 EXPOSE 80
 EXPOSE 443
 
