@@ -1,0 +1,6 @@
+FROM grafana/grafana:latest
+USER root
+COPY grafana_datasource.yaml /etc/grafana/provisioning/datasources/prometheus.yaml
+COPY grafana_provider.yaml /etc/grafana/provisioning/dashboards/dashboards.yaml
+COPY fastapi_dashboard.json /etc/grafana/dashboards/fastapi.json
+USER grafana
