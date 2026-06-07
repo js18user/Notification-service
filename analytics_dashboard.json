@@ -1,0 +1,75 @@
+{
+  "id": null,
+  "title": "Advanced Traffic Analytics",
+  "style": "dark",
+  "timezone": "browser",
+  "editable": true,
+  "panels": [
+    {
+      "type": "piechart",
+      "title": "🍕 Распределение ответов (HTTP Статусы)",
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false },
+        "pieType": "donut",
+        "legend": { "showLegend": true, "displayMode": "list", "placement": "right" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "sum(http_requests_total) by (status)",
+          "refId": "A",
+          "legendFormat": "Статус {{status}}"
+        }
+      ]
+    },
+    {
+      "type": "bargauge",
+      "title": "📊 Типы запросов (HTTP Методы)",
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 0 },
+      "id": 2,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "sum(http_requests_total) by (method)",
+          "refId": "B",
+          "legendFormat": "Метод {{method}}"
+            }
+          ]
+        },
+    {
+      "type": "timeseries",
+      "title": "🌈 Многоцветный поток запросов по эндпоинтам",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 10 },
+      "id": 3,
+      "options": {
+        "legend": { "showLegend": true, "displayMode": "table", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 20
+          }
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "sum(rate(http_requests_total[5m])) by (handler)",
+          "refId": "C",
+          "legendFormat": "Путь: {{handler}}"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 38,
+  "version": 1
+}
