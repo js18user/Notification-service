@@ -33,3 +33,11 @@ services:
        GF_LOG_LEVEL: "warn"
       GF_ANALYTICS_REPORTING_ENABLED: "false"
     restart: unless-stopped
+    
+  postgres_exporter:
+    image: prometheus/postgres_exporter:latest
+    environment:
+      DATA_SOURCE_NAME: "${POSTGRES_MONITOR_URL}"
+    restart: unless-stopped
+
+  
