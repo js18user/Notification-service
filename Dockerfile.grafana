@@ -3,4 +3,9 @@ USER root
 COPY grafana_datasource.yaml /etc/grafana/provisioning/datasources/prometheus.yaml
 COPY grafana_provider.yaml /etc/grafana/provisioning/dashboards/dashboards.yaml
 COPY fastapi_dashboard.json /etc/grafana/dashboards/fastapi.json
+
+# Новая строка для второго дашборда
+COPY server_dashboard.json /etc/grafana/dashboards/server_dashboard.json
+
 USER grafana
+
