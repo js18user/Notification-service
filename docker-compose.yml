@@ -22,6 +22,12 @@ services:
       dockerfile: Dockerfile.prometheus
     restart: unless-stopped
 
+  postgres_exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:latest
+    environment:
+      DATA_SOURCE_NAME: "${POSTGRES_MONITOR_URL}"
+    restart: unless-stopped
+
   grafana:
     build:
       context: .
@@ -32,4 +38,5 @@ services:
       GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: "/etc/grafana/dashboards/fastapi.json"
       GF_LOG_LEVEL: "warn"
       GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_USERS_DEFAULT_LANGUAGE: "en-US"
     restart: unless-stopped
