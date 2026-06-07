@@ -1,0 +1,37 @@
+{
+  "id": null,
+  "title": "FastAPI Auto Dashboard",
+  "style": "dark",
+  "timezone": "browser",
+  "editable": true,
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Количество запросов в секунду (RPS)",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "sum(rate(http_requests_total[5m]))",
+          "refId": "A"
+        }
+      ]
+    }
+    {
+      "type": "timeseries",
+      "title": "Длительность обработки запросов",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+      "id": 2,
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "sum(rate(http_request_duration_seconds_sum[5m])) / sum(rate(http_request_duration_seconds_count[5m]))",
+          "refId": "B"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 38,
+  "version": 1
+}
