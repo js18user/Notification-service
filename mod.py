@@ -631,8 +631,8 @@ try:
     async def http_exception_handler(request: Request, exc):
         _, _ = request, exc
         # logging.info(f"StarletteHTTPException  {request.url}")
-        return JSONResponse(status_code=400,
-                            content=([]),
+        return JSONResponse(status_code=200,
+                            content={},
                             )
 
 
