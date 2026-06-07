@@ -35,7 +35,7 @@ services:
     restart: unless-stopped
     
   postgres_exporter:
-    image: prometheus/postgres_exporter:latest
+    image: prometheuscommunity/postgres-exporter:latest
     environment:
       DATA_SOURCE_NAME: "${POSTGRES_MONITOR_URL}"
     restart: unless-stopped
