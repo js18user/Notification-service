@@ -25,7 +25,7 @@ services:
   postgres_exporter:
     image: quay.io/prometheuscommunity/postgres-exporter:latest
     environment:
-      DATA_SOURCE_NAME: "${POSTGRES_MONITOR_URL}"
+      DATA_SOURCE_NAME: "postgres://neondb_owner:npg_GoPNxHe0pzm4@72.144.105.10/neondb?options=endpoint%3Dep-rapid-glitter-a9y5kqy5&sslmode=require"
     restart: unless-stopped
 
   grafana:
@@ -40,3 +40,4 @@ services:
       GF_ANALYTICS_REPORTING_ENABLED: "false"
       GF_USERS_DEFAULT_LANGUAGE: "en-US"
     restart: unless-stopped
+
