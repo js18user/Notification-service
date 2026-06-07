@@ -630,7 +630,7 @@ try:
     @app.exception_handler(StarletteHTTPException)
     async def http_exception_handler(request: Request, exc):
         _, _ = request, exc
-        logging.info(f"StarletteHTTPException  {request.url}")
+        # logging.info(f"StarletteHTTPException  {request.url}")
         return JSONResponse(status_code=400,
                             content=([]),
                             )
@@ -852,7 +852,8 @@ try:
             id_distribution: int = Query(ge=0, ),
     ):
         return await seek_stat(db, id_distribution, )
-
+        
+    """
     @app.get("/admin/loop", include_in_schema=False, )
     async def check_loop():
         loop = get_running_loop()
@@ -860,6 +861,7 @@ try:
         if "winloop" in loop_class_name.lower(): status_message = "winloop (libuv)"
         if "uvloop" in loop_class_name.lower(): status_message = "uvloop"
         return {"current_loop_class": loop_class_name, "message": status_message, }
+    """
 
     @app.get("/admin/protocol", include_in_schema=False, )
     async def get_protocol(request: Request):
