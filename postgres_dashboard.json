@@ -7,32 +7,58 @@
   "panels": [
     {
       "type": "stat",
-      "title": "🔌 Активные соединения",
-      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 0 },
+      "title": "🔌 Активные соединения (neondb)",
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 0 },
       "id": 1,
+      "options": {
+        "textMode": "value",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 50 },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        }
+      },
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
-          "expr": "pg_stat_database_numbackends",
+          "expr": "pg_stat_database_numbackends{datname=\"neondb\"}",
           "refId": "A"
         }
       ]
     },
     {
-      "type": "timeseries",
-      "title": "📊 Размер базы данных (Байт)",
-      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 0 },
+      "type": "stat",
+      "title": " Bars Размер базы данных (neondb)",
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 0 },
       "id": 2,
-      "fieldConfig": { "defaults": { "unit": "bytes" } },
+      "options": {
+        "textMode": "value",
+        "colorMode": "none",
+        "graphMode": "area",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": { "unit": "bytes" }
+      },
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
-          "expr": "pg_database_size_bytes",
+          "expr": "pg_database_size_bytes{datname=\"neondb\"}",
           "refId": "A"
         }
       ]
     }
   ],
   "schemaVersion": 38,
-  "version": 1
+  "version": 2
 }
