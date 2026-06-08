@@ -75,7 +75,8 @@ The database and Rabbitmq are relevant, you can work
 
 This is an alternative way For a quick start:
 
-- https://msp.mcp-service.eu              for WEB UI(admin panel)
-- https://msp.mcp-service.eu/docs         forAPI documentation Swagger      
+- https://msp.mcp-service.eu/             for WEB UI(admin panel)
+- https://msp.mcp-service.eu/docs         forAPI documentation Swagger
+- https://resume.mcp-service.eu/          CV     
 
 Write me for help: @js18user  telegram 
