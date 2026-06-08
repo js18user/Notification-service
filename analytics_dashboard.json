@@ -65,7 +65,7 @@
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(rate(http_requests_total[5m])) by (handler)",
           "refId": "C",
-          "legendFormat": "Путь: {{handler}}"
+          "legendFormat": "Path: {{handler}}"
         }
       ]
     }
