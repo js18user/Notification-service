@@ -20,7 +20,7 @@
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(http_requests_total) by (status)",
           "refId": "A",
-          "legendFormat": "Статус {{status}}"
+          "legendFormat": "Status {{status}}"
         }
       ]
     },
@@ -39,7 +39,7 @@
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "sum(http_requests_total) by (method)",
           "refId": "B",
-          "legendFormat": "Метод {{method}}"
+          "legendFormat": "Method {{method}}"
             }
           ]
         },
