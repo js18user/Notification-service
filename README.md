@@ -77,6 +77,7 @@ This is an alternative way For a quick start:
 
 - https://msp.mcp-service.eu/             for WEB UI(admin panel)
 - https://msp.mcp-service.eu/docs         forAPI documentation Swagger
-- https://resume.mcp-service.eu/          CV     
+- https://resume.mcp-service.eu/
+- https://grafana.mcp-service.eu/               
 
 Write me for help: @js18user  telegram 
