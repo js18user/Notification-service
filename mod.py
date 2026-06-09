@@ -853,7 +853,6 @@ try:
     ):
         return await seek_stat(db, id_distribution, )
         
-    """
     @app.get("/admin/loop", include_in_schema=False, )
     async def check_loop():
         loop = get_running_loop()
@@ -861,14 +860,13 @@ try:
         if "winloop" in loop_class_name.lower(): status_message = "winloop (libuv)"
         if "uvloop" in loop_class_name.lower(): status_message = "uvloop"
         return {"current_loop_class": loop_class_name, "message": status_message, }
-    """
 
     @app.get("/admin/protocol", include_in_schema=False, )
     async def get_protocol(request: Request):
         protocol = request.scope.get("http_version")
         return {"protocol": protocol}
 
-    @app.get('/favicon.ico', status_code=200, include_in_schema=False)
+    @app.get('/favicon.ico', status_code=200, include_in_schema=False, )
     async def favicon():
         return
 
@@ -892,7 +890,6 @@ if __name__ == "__main__":
             port=80, 
             use_colors=True, 
             access_log=False,
-            loop='uvloop',
             )
     except KeyboardInterrupt:
         logging.info("KeyboardInterrupt: the end of task")
