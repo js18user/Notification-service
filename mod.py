@@ -2,7 +2,7 @@
 # script by js18user
 
 import asyncpg
-
+import uvloop
 from contextlib import asynccontextmanager
 from hashlib import md5
 from asyncpg import PostgresError
@@ -800,7 +800,7 @@ try:
                             "Cache-Control": "public, max-age=30",
                             "ETag": etg, })
 
-    @app.get("/cv")
+    @app.get("/cv", include_in_schema=False, )
     async def get_cv_file():
         return FileResponse(
             path="cv.pdf",
@@ -808,7 +808,7 @@ try:
             headers={"Content-Disposition": "inline; filename=Jurijs_Satalovs_CV.pdf"}
         )
 
-    @app.get("/")
+    @app.get("/", include_in_schema=False, )
     async def main(request: Request, db=Depends(get_db_connection), ):
         await db.execute("SELECT 1")
         host = request.headers.get("host", "")
@@ -816,12 +816,12 @@ try:
             return FileResponse(path="cv.pdf", media_type="application/pdf", )
         return FileResponse("data.html")
         
-    @app.get('/admin/speed', status_code=200, description="Speed Api", )
+    @app.get('/admin/speed', status_code=200, description="Speed Api", include_in_schema=False, )
     async def speed_api():
         return []
 
 
-    @app.get('/admin/ratio', status_code=200, description="", )
+    @app.get('/admin/ratio', status_code=200, description="", include_in_schema=False, )
     async def select_ratio(db=Depends(get_db_connection), ):
         return await db.fetch(query_ratio, )
 
@@ -892,6 +892,7 @@ if __name__ == "__main__":
             port=80, 
             use_colors=True, 
             access_log=False,
+            loop='uvloop',
             )
     except KeyboardInterrupt:
         logging.info("KeyboardInterrupt: the end of task")
