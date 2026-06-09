@@ -2,7 +2,7 @@
 # script by js18user
 
 import asyncpg
-# import uvloop
+import uvloop
 from contextlib import asynccontextmanager
 from hashlib import md5
 from asyncpg import PostgresError
