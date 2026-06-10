@@ -26,4 +26,3 @@ h3==4.4.2
 brotli==1.1.0
 brotli-asgi==1.6.0
 prometheus-fastapi-instrumentator>=6.0.0
-uvloop>=0.22.1
