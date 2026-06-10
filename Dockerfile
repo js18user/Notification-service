@@ -1,8 +1,8 @@
-FROM python:3.13.3-alpine
+FROM python:3.13.3-slim
 
 LABEL maintainer="Jurij <js18.user@gmail.com>" 
 
-# WORKDIR /app
+WORKDIR /app
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -16,8 +16,8 @@ COPY create_tables.sql .
 COPY cv.pdf .
 COPY urls.py .
 COPY mod.py .
-# RUN useradd -u 8888 appuser && chown -R appuser:appuser /app
-# USER appuser
+RUN useradd -u 8888 appuser && chown -R appuser:appuser /app
+USER appuser
 
 EXPOSE 80
 
