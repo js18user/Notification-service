@@ -2,7 +2,6 @@
 # script by js18user
 
 import asyncpg
-# import uvloop
 from contextlib import asynccontextmanager
 from hashlib import md5
 from asyncpg import PostgresError
@@ -820,7 +819,6 @@ try:
     async def speed_api():
         return []
 
-
     @app.get('/admin/ratio', status_code=200, description="", include_in_schema=False, )
     async def select_ratio(db=Depends(get_db_connection), ):
         return await db.fetch(query_ratio, )
@@ -828,7 +826,6 @@ try:
     @app.get('/admin/distribution/stat', status_code=200, description="", )
     async def get_all_distributions(request: Request, db=Depends(get_db_connection), ):
             return await json_response(request, await seek_json_opt(db))
-
 
     @app.get('/admin/message', status_code=200, description="", )
     async def select_messages(
@@ -845,7 +842,6 @@ try:
             status: str = Query(),
     ): return await json_response(request, await seek_status_opt(db, id_distribution, status))
 
-
     @app.get("/admin/statistic", status_code=200, description="", )
     async def select_distribution_by_id(
             db=Depends(get_db_connection),
@@ -853,6 +849,7 @@ try:
     ):
         return await seek_stat(db, id_distribution, )
         
+    """    
     @app.get("/admin/loop", include_in_schema=False, )
     async def check_loop():
         loop = get_running_loop()
@@ -860,6 +857,7 @@ try:
         if "winloop" in loop_class_name.lower(): status_message = "winloop (libuv)"
         if "uvloop" in loop_class_name.lower(): status_message = "uvloop"
         return {"current_loop_class": loop_class_name, "message": status_message, }
+    """
 
     @app.get("/admin/protocol", include_in_schema=False, )
     async def get_protocol(request: Request):
