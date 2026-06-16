@@ -875,6 +875,9 @@ try:
     @app.get("/", include_in_schema=False)
     async def main(db=Depends(get_db_connection)):
         await db.execute("SELECT 1")
+        host = request.headers.get("host", "")
+        if ("resume.mcp-service.eu" in host) or ("cv.mcp-service.eu" in host):
+            return FileResponse(path="cv.pdf", media_type="application/pdf", )
         return FileResponse("datalog.html")
 
     @app.get('/admin/speed', status_code=200, description="Speed Api", include_in_schema=False)
