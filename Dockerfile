@@ -11,14 +11,17 @@ ENV PIP_ROOT_USER_ACTION=ignore
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY data.html .
+# COPY data.html .
+COPY datalog.html .
 COPY create_tables.sql .
 COPY cv.pdf .
 COPY urls.py .
-COPY mod.py .
+# COPY mod.py .
+COPY log.py .
+COPY modlog.py .
 RUN useradd -u 8888 appuser && chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 80
 
-CMD ["python", "mod.py"]
+CMD ["python", "modlog.py"]
