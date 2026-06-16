@@ -53,7 +53,6 @@ from urls import query_many
 from urls import query_ratio
 from urls import url_azure as url
 from urls import url_rabbit_google as url_rabbitmq
-from jit import jit_question
 json = __import__('orjson')
 
 
