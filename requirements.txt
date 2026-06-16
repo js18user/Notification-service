@@ -26,3 +26,5 @@ h3==4.4.2
 brotli==1.1.0
 brotli-asgi==1.6.0
 prometheus-fastapi-instrumentator>=6.0.0
+websocket-client==1.8.0
+websockets==15.0.1
