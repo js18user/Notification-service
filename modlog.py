@@ -873,7 +873,7 @@ try:
         )
 
     @app.get("/", include_in_schema=False)
-    async def main(db=Depends(get_db_connection)):
+    async def main(request: Request, db=Depends(get_db_connection)):
         await db.execute("SELECT 1")
         host = request.headers.get("host", "")
         if ("resume.mcp-service.eu" in host) or ("cv.mcp-service.eu" in host):
