@@ -15,7 +15,6 @@ from datetime import timedelta
 from datetime import timezone as tzs
 from enum import Enum
 from functools import wraps
-from locale import setlocale, LC_ALL
 from time import time as t
 from typing import Union, Optional, Any, cast
 from aio_pika import DeliveryMode
@@ -619,7 +618,7 @@ try:
 
 
     """    Begin    """
-    setlocale(LC_ALL, "de")
+  
     ind, skip = Ind(), '\n'
     app = FastAPI(
         debug=False,
