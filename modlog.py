@@ -213,7 +213,7 @@ class CreateMiddleware(BaseHTTPMiddleware):
             )
         """
         print(
-            f"{INFO:     "
+            f"INFO:     "
             f"{datetime.now().strftime("%d-%m-%y %H:%M:%S")} "
             f'{request.client.host if request.client else "127.0.0.1"}:'
             f'{request.client.port if request.client else "0"}  '
