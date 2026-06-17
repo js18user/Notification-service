@@ -212,7 +212,7 @@ class CreateMiddleware(BaseHTTPMiddleware):
             f"          content-length: {'\033[91m'}{response.headers.get('content-length')} bytes{'\033[0m'}{skip}"
             )
         """
-         print(
+        print(
             f"{INFO:     "
             f"{datetime.now().strftime("%d-%m-%y %H:%M:%S")} "
             f'{request.client.host if request.client else "127.0.0.1"}:'
@@ -222,9 +222,7 @@ class CreateMiddleware(BaseHTTPMiddleware):
             f'{ind.status_phrases.get(response.status_code, "")}{skip}'
             f"          endpoint execution time: {1000 * (t() - start_time):.0f} ms{skip}"
             f"          content-length: {response.headers.get('content-length')} bytes{skip}"
-        )
-        return response
-
+            )
         logger.info(
             f'{request.client.host if request.client else "127.0.0.1"}:'
             f'{request.client.port if request.client else "0"}  '
