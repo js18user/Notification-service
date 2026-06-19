@@ -891,7 +891,7 @@ try:
         host = request.headers.get("host", "")
         if ("resume.mcp-service.eu" in host) or ("cv.mcp-service.eu" in host):
             return FileResponse(path="cv.pdf", media_type="application/pdf", )
-        return FileResponse("dataLog.html.br", 
+        return FileResponse("dataLog.html.br",
                             headers={"Content-Encoding": "br"}, media_type="text/html"
                             )
 
