@@ -43,6 +43,7 @@ db_port_twp: int = 5432
 db_host_twp: str = f"147.45.239.120"
 
 url_azure: str = "postgresql://neondb_owner:npg_GoPNxHe0pzm4@72.144.105.10/neondb?options=endpoint%3Dep-rapid-glitter-a9y5kqy5&sslmode=require"
+url_tw: str = postgresql://gen_user:aaa4401&&@be0e7a1be0b94e2cb95f4fc9.twc1.net:5432/default_db?sslmode=verify-full'
 
 # Postgresql 15  on Local Timeweb
 
