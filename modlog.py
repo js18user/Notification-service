@@ -45,14 +45,12 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from uvicorn import run
-# from granian import Granian
-# from granian.constants import Interfaces
-# from pure_asgi import PureASGILoggingMiddleware
 from urls import query_many
 from urls import query_ratio
-from urls import url_azure as url
+from urls import url_tw as url
 from urls import url_rabbit_google as url_rabbitmq
 json = __import__('orjson')
+import uvloop
 
 
 @dataclass
@@ -113,7 +111,7 @@ class Table(str, Enum):
 class Client(BaseModel, ):
     model_config = {"slots": True, "strict": False, "validate_assignment": False, }
     id: Optional[int] = Field(default=None, ge=0, )
-    phone: Optional[int] = Field(default=None, ge=70000000000, le=79999999999, )
+    phone: Optional[int] = Field(default=None, )
     mob: Optional[int] = Field(default=None, ge=900, le=999, )
     teg: Optional[str] = Field(default=None, min_length=1, )
     timezone: Optional[int] = Field(default=None, ge=-11, le=11, )
@@ -121,7 +119,7 @@ class Client(BaseModel, ):
 
 class ClientUpdate(BaseModel, ):
     model_config = {"slots": True, "strict": False, "validate_assignment": False, }
-    phone: Optional[int] = Field(default=None, ge=70000000000, le=79999999999, )
+    phone: Optional[int] = Field(default=None, )
     mob: Optional[int] = Field(default=None, ge=900, le=999, )
     teg: Optional[str] = Field(default=None, min_length=1, )
     timezone: Optional[int] = Field(default=None, ge=-11, le=11)
@@ -129,7 +127,7 @@ class ClientUpdate(BaseModel, ):
 
 class ClientInsert(BaseModel):
     model_config = {"slots": True, }
-    phone: Optional[int] = Field(ge=70000000000, le=79999999999, )
+    phone: Optional[int] = Field()
     mob: Optional[int] = Field(ge=900, le=999)
     teg: Optional[str] = Field(min_length=1)
     timezone: Optional[int] = Field(ge=-11, le=11)
@@ -688,7 +686,6 @@ try:
     )
     app.add_middleware(cast(Any, BrotliMiddleware), quality=5,  minimum_size=1024)
     app.add_middleware(cast(Any, CreateMiddleware))
-    # app.add_middleware(PureASGILoggingMiddleware)
     # app.mount("/static", StaticFiles(directory="static"), name="static") """
 
     Instrumentator().instrument(app).expose(app, endpoint="/metrics")
