@@ -1,8 +1,8 @@
 :80 {
-    # Перенаправляем поддомен на Grafana
+    # Redirecting a subdomain to Grafana
     @grafana host grafana.mcp-service.eu
     reverse_proxy @grafana grafana:3000
 
-    # Весь остальной трафик отдаем Python-приложению
+    # We give all other traffic to the Python application.
     reverse_proxy app:80
 }
