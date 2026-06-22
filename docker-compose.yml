@@ -27,8 +27,9 @@ services:
     environment:
       DATA_SOURCE_NAME: 'postgresql://gen_user:aaa4401%26%26@192.168.0.5:5432/default_db?sslmode=disable'
     command:
-      - '--disable-default-metrics'
-      - '--disable-settings-metrics' 
+      - '--no-collector.wal'       # check out pg_ls_waldir()
+      - '--no-collector.database'  # check out into DB
+    
     restart: unless-stopped
 
 
