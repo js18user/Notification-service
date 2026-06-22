@@ -1,5 +1,5 @@
 global:
-  scrape_interval: 14s
+  scrape_interval: 60s
 
 scrape_configs:
   - job_name: 'fastapi-app'
