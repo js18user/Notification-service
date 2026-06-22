@@ -20,22 +20,7 @@
       "id": 3,
       "options": { "textMode": "value", "colorMode": "value", "graphMode": "area", "justifyMode": "center" },
       "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100 } },
-      "targets": [
-        {
-          "datasource": { "type": "prometheus", "uid": "Prometheus" },
-          "expr": "100 * (sum(rate(pg_stat_database_blks_hit_total{datname=\"default_db\"}[5m])) / (sum(rate(pg_stat_database_blks_hit_total{datname=\"default_db\"}[5m])) + sum(rate(pg_stat_database_blks_read_total{datname=\"default_db\"}[5m])) > 0 or 1))",
-          "refId": "A"
-          "targets": [
-        {
-          "datasource": { "type": "prometheus", "uid": "Prometheus" },
-          "expr": "100 * (sum(rate(pg_stat_database_blks_hit_total{datname=\"default_db\"}[5m])) / (sum(rate(pg_stat_database_blks_hit_total{datname=\"default_db\"}[5m]) + rate(pg_stat_database_blks_read_total{datname=\"default_db\"}[5m]))))",
-          "refId": "A"
-        }
-      ]
-
-        }
-      ]
-
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "100 * (sum(rate(pg_stat_database_blks_hit_total{datname=\"default_db\"}[5m])) / (sum(rate(pg_stat_database_blks_hit_total{datname=\"default_db\"}[5m])) + sum(rate(pg_stat_database_blks_read_total{datname=\"default_db\"}[5m])) > 0 or 1))", "refId": "A" }]
     },
     {
       "type": "stat",
@@ -57,7 +42,7 @@
     },
     {
       "type": "timeseries",
-      "title": "📥 Row Operations (Inserts / Updates / Deletes)",
+      "title": "📥 Row Operations (Inserts / Updates)",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
       "id": 5,
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "right" } },
@@ -76,6 +61,5 @@
     }
   ],
   "schemaVersion": 38,
-  "version": 4
+  "version": 5
 }
-
