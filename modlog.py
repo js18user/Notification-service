@@ -258,10 +258,7 @@ def except_db_errors(func):
 
 try:
     async def init_db():
-        conn = await asyncpg.connect(host="192.168.0.5",
-                                     database="default_db",
-                                     user="gen_user",
-                                     password="aaa4401")
+        conn = await asyncpg.connect(url)
         try:
                 with open('create_tables.sql', 'r') as sql:
                     await conn.execute(sql.read(), )
@@ -274,10 +271,7 @@ try:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         await init_db()
-        app.state.db_pool = await asyncpg.create_pool(host="192.168.0.5",
-                                                      database="default_db",
-                                                      user="gen_user",
-                                                      password="aaa4401&&", 
+        app.state.db_pool = await asyncpg.create_pool(url,
                                                       min_size=5, 
                                                       max_size=20)
         polling_task = create_task(polling_worker(app.state.db_pool, ))
