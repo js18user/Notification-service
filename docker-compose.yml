@@ -25,7 +25,7 @@ services:
   postgres_exporter:
     image: quay.io/prometheuscommunity/postgres-exporter:latest
     environment:
-      DATA_SOURCE_NAME: 'postgresql://gen_user:aaa4401&&@192.168.0.5:5432/default_db'
+      DATA_SOURCE_NAME: 'postgresql://gen_user:aaa4401&&@81.200.157.191:5432/default_db'
     restart: unless-stopped
 
   grafana:
