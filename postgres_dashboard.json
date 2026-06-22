@@ -25,6 +25,14 @@
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "expr": "100 * (sum(rate(pg_stat_database_blks_hit_total{datname=\"default_db\"}[5m])) / (sum(rate(pg_stat_database_blks_hit_total{datname=\"default_db\"}[5m])) + sum(rate(pg_stat_database_blks_read_total{datname=\"default_db\"}[5m])) > 0 or 1))",
           "refId": "A"
+          "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "100 * (sum(rate(pg_stat_database_blks_hit_total{datname=\"default_db\"}[5m])) / (sum(rate(pg_stat_database_blks_hit_total{datname=\"default_db\"}[5m]) + rate(pg_stat_database_blks_read_total{datname=\"default_db\"}[5m]))))",
+          "refId": "A"
+        }
+      ]
+
         }
       ]
 
