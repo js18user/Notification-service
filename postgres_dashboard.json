@@ -20,7 +20,14 @@
       "id": 3,
       "options": { "textMode": "value", "colorMode": "value", "graphMode": "area", "justifyMode": "center" },
       "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100 } },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "100 * sum(rate(pg_stat_database_blks_hit{datname=\"default_db\"}[5m])) / (sum(rate(pg_stat_database_blks_hit{datname=\"default_db\"}[5m])) + sum(rate(pg_stat_database_blks_read{datname=\"default_db\"}[5m])) > 0 or 1)", "refId": "A" }]
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "100 * (sum(rate(pg_stat_database_blks_hit_total{datname=\"default_db\"}[5m])) / (sum(rate(pg_stat_database_blks_hit_total{datname=\"default_db\"}[5m])) + sum(rate(pg_stat_database_blks_read_total{datname=\"default_db\"}[5m])) > 0 or 1))",
+          "refId": "A"
+        }
+      ]
+
     },
     {
       "type": "stat",
