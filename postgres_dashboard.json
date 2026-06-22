@@ -7,58 +7,60 @@
   "panels": [
     {
       "type": "stat",
-      "title": "🔌 Active connections (default_db)",
-      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 0 },
+      "title": "🔌 Active connections",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
       "id": 1,
-      "options": {
-        "textMode": "value",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "center"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "orange", "value": 15 },
-              { "color": "red", "value": 30 }
-            ]
-          }
-        }
-      },
-      "targets": [
-        {
-          "datasource": { "type": "prometheus", "uid": "Prometheus" },
-          "expr": "sum(pg_stat_activity_count{datname=\"default_db\"})",
-          "refId": "A"
-        }
-      ]
+      "options": { "textMode": "value", "colorMode": "value", "graphMode": "area", "justifyMode": "center" },
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "sum(pg_stat_activity_count{datname=\"default_db\"})", "refId": "A" }]
     },
     {
       "type": "stat",
-      "title": "📊 Transactions Committed (default_db)",
-      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 0 },
+      "title": "🧠 Buffer Cache Hit Rate",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+      "id": 3,
+      "options": { "textMode": "value", "colorMode": "value", "graphMode": "area", "justifyMode": "center" },
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100 } },
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "100 * sum(rate(pg_stat_database_blks_hit{datname=\"default_db\"}[5m])) / (sum(rate(pg_stat_database_blks_hit{datname=\"default_db\"}[5m])) + sum(rate(pg_stat_database_blks_read{datname=\"default_db\"}[5m])) > 0 or 1)", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "📊 Transactions Committed",
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
       "id": 2,
-      "options": {
-        "textMode": "value",
-        "colorMode": "none",
-        "graphMode": "area",
-        "justifyMode": "center"
-      },
-      "fieldConfig": {
-        "defaults": { "unit": "ops" }
-      },
+      "options": { "textMode": "value", "colorMode": "none", "graphMode": "area", "justifyMode": "center" },
+      "fieldConfig": { "defaults": { "unit": "ops" } },
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "rate(pg_stat_database_xact_commit{datname=\"default_db\"}[5m])", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "⚠️ Transaction Rollbacks",
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "options": { "textMode": "value", "colorMode": "value", "graphMode": "area", "justifyMode": "center" },
+      "fieldConfig": { "defaults": { "unit": "ops" } },
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "rate(pg_stat_database_xact_rollback{datname=\"default_db\"}[5m])", "refId": "A" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "📥 Row Operations (Inserts / Updates / Deletes)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "id": 5,
+      "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "right" } },
       "targets": [
-        {
-          "datasource": { "type": "prometheus", "uid": "Prometheus" },
-          "expr": "rate(pg_stat_database_xact_commit{datname=\"default_db\"}[5m])",
-          "refId": "A"
-        }
+        { "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "sum(rate(pg_stat_user_tables_n_tup_ins{datname=\"default_db\"}[5m])) by (relname)", "legendFormat": "Inserts: {{relname}}", "refId": "A" },
+        { "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "sum(rate(pg_stat_user_tables_n_tup_upd{datname=\"default_db\"}[5m])) by (relname)", "legendFormat": "Updates: {{relname}}", "refId": "B" }
       ]
+    },
+    {
+      "type": "barchart",
+      "title": "💾 Rows Live count by Table",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "id": 6,
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "pg_stat_user_tables_n_live_tup{datname=\"default_db\"}", "legendFormat": "{{relname}}", "refId": "A" }]
     }
   ],
   "schemaVersion": 38,
-  "version": 3
+  "version": 4
 }
+
