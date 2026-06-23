@@ -8,6 +8,7 @@
   "time": {
     "from": "now-30m",
     "to": "now"
+  },
   "panels": [
     {
       "type": "piechart",
