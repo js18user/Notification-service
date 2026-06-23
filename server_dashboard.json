@@ -5,10 +5,6 @@
   "timezone": "browser",
   "editable": true,
   "refresh": "30s",
-  "time": {
-    "from": "now-30m",
-    "to": "now"
-  },
   "panels": [
     {
       "type": "timeseries",
