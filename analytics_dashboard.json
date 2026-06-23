@@ -4,14 +4,10 @@
   "style": "dark",
   "timezone": "browser",
   "editable": true,
-  "refresh": "30s",
-  "time": {
-    "from": "now-30m",
-    "to": "now"
-  },
+  "refresh": "30s"
   "panels": [
     {
-      "type": "piechart",
+       type": "piechart",
       "title": "🍕 Response Distribution (HTTP Statuses)",
       "gridPos": { "h": 10, "w": 12, "x": 0, "y": 0 },
       "id": 1,
