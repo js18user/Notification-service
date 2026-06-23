@@ -24,8 +24,8 @@ CREATE TABLE IF NOT EXISTS message (
         id_distribution INTEGER REFERENCES distribution (Id) ON DELETE CASCADE,
         id_client INTEGER REFERENCES client (id) ON DELETE CASCADE
 );
---CREATE INDEX IF NOT EXISTS idx_client_id_phone_tz ON client (id) INCLUDE (phone, timezone);
---CREATE INDEX IF NOT EXISTS idx_perf_message ON message (id_distribution, status) INCLUDE (id, start_date, id_client);
+CREATE INDEX IF NOT EXISTS idx_client_id_phone_tz ON client (id) INCLUDE (phone, timezone);
+CREATE INDEX IF NOT EXISTS idx_perf_message ON message (id_distribution, status) INCLUDE (id, start_date, id_client);
 --SELECT pg_prewarm('message_pkey'),pg_prewarm('mcds'),pg_prewarm('client_phone_teg_key'),pg_prewarm('cpt');
 --SELECT pg_prewarm('message_pkey'),pg_prewarm('distribution_pkey'),pg_prewarm('client_pkey'),
 --       pg_prewarm('idx_client_id_phone_tz'),pg_prewarm('idx_perf_message');
