@@ -4,7 +4,7 @@
   "style": "dark",
   "timezone": "browser",
   "editable": true,
-  "refresh": "30s"
+  "refresh": "30s",
   "panels": [
     {
        type": "piechart",
