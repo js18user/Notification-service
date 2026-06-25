@@ -40,7 +40,10 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 logger.remove()
-logger.add("app.json", serialize=Trueб rotation="10 MB", retention="1 day", )
+logger.add("app.json", 
+           serialize=True, 
+           rotation="10 MB", 
+           retention="1 day", )
 
 def websocket_log_sink(message):
     record = message.record
