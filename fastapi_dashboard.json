@@ -8,7 +8,7 @@
   "panels": [
     {
       "type": "timeseries",
-      "title": "📈 Number of requests per second (RPS)",
+      "title": " Number of requests per second (RPS)",
       "gridPos": { "h": 8, "w": 16, "x": 0, "y": 0 },
       "id": 1,
       "targets": [
@@ -21,7 +21,7 @@
     },
     {
       "type": "gauge",
-      "title": "🎯 Request success rate (SLO)",
+      "title": " Request success rate (SLO)",
       "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
       "id": 3,
       "options": {
@@ -56,7 +56,7 @@
     },
     {
       "type": "timeseries",
-      "title": "⏱️ Application response speed",
+      "title": " Application response speed",
       "gridPos": { "h": 8, "w": 16, "x": 0, "y": 8 },
       "id": 2,
       "targets": [
@@ -69,7 +69,7 @@
     },
     {
       "type": "bargauge",
-      "title": "🔥 Top endpoints by traffic",
+      "title": " Top endpoints by traffic",
       "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
       "id": 4,
       "options": {
