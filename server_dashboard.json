@@ -8,7 +8,7 @@
   "panels": [
     {
       "type": "timeseries",
-      "title": "💻 CPU load of the application (%)",
+      "title": " CPU load of the application (%)",
       "gridPos": { "h": 10, "w": 12, "x": 0, "y": 0 },
       "id": 1,
       "targets": [
@@ -21,7 +21,7 @@
     },
     {
       "type": "timeseries",
-      "title": "🧠 RAM consumption (RAM)",
+      "title": " RAM consumption (RAM)",
       "gridPos": { "h": 10, "w": 12, "x": 12, "y": 0 },
       "id": 2,
       "fieldConfig": {
