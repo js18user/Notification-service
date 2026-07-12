@@ -47,7 +47,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from uvicorn import run
 from urls import query_many
 from urls import query_ratio
-from urls import url_tw as url
+from urls import url_azure as url
 from urls import url_rabbit_google as url_rabbitmq
 json = __import__('orjson')
 import uvloop
