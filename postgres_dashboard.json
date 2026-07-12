@@ -22,7 +22,7 @@
       "options": { "textMode": "value", "colorMode": "value", "graphMode": "area", "justifyMode": "center" },
       "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100 } },
       "targets": [{ "datasource": { "type": "prometheus", "uid": "Prometheus" }, 
-        "expr": "100 * (sum(pg_stat_database_blks_hit{datname=\"default_db\"}) / clamp_min(sum(pg_stat_database_blks_hit{datname=\"default_db\"}) + sum(pg_stat_database_blks_read{datname=\"neondb\"}), 1))",
+        "expr": "100 * (sum(pg_stat_database_blks_hit{datname=\"neondb\"}) / clamp_min(sum(pg_stat_database_blks_hit{datname=\"neondb\"}) + sum(pg_stat_database_blks_read{datname=\"neondb\"}), 1))",
         "refId": "A" }]
     },
     {
