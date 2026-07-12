@@ -12,7 +12,7 @@
       "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
       "id": 1,
       "options": { "textMode": "value", "colorMode": "value", "graphMode": "area", "justifyMode": "center" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "sum(pg_stat_activity_count{datname=\"default_db\"})", "refId": "A" }]
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "sum(pg_stat_activity_count{datname=\"neondb\"})", "refId": "A" }]
     },
     {
       "type": "stat",
@@ -22,7 +22,7 @@
       "options": { "textMode": "value", "colorMode": "value", "graphMode": "area", "justifyMode": "center" },
       "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100 } },
       "targets": [{ "datasource": { "type": "prometheus", "uid": "Prometheus" }, 
-        "expr": "100 * (sum(pg_stat_database_blks_hit{datname=\"default_db\"}) / clamp_min(sum(pg_stat_database_blks_hit{datname=\"default_db\"}) + sum(pg_stat_database_blks_read{datname=\"default_db\"}), 1))",
+        "expr": "100 * (sum(pg_stat_database_blks_hit{datname=\"default_db\"}) / clamp_min(sum(pg_stat_database_blks_hit{datname=\"default_db\"}) + sum(pg_stat_database_blks_read{datname=\"neondb\"}), 1))",
         "refId": "A" }]
     },
     {
@@ -32,7 +32,7 @@
       "id": 2,
       "options": { "textMode": "value", "colorMode": "none", "graphMode": "area", "justifyMode": "center" },
       "fieldConfig": { "defaults": { "unit": "ops" } },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "rate(pg_stat_database_xact_commit{datname=\"default_db\"}[5m])", "refId": "A" }]
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "rate(pg_stat_database_xact_commit{datname=\"neondb\"}[5m])", "refId": "A" }]
     },
     {
       "type": "stat",
@@ -41,7 +41,7 @@
       "id": 4,
       "options": { "textMode": "value", "colorMode": "value", "graphMode": "area", "justifyMode": "center" },
       "fieldConfig": { "defaults": { "unit": "ops" } },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "rate(pg_stat_database_xact_rollback{datname=\"default_db\"}[5m])", "refId": "A" }]
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "rate(pg_stat_database_xact_rollback{datname=\"neondb\"}[5m])", "refId": "A" }]
     },
     {
       "type": "timeseries",
@@ -50,8 +50,8 @@
       "id": 5,
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "right" } },
       "targets": [
-        { "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "sum(rate(pg_stat_user_tables_n_tup_ins{datname=\"default_db\"}[5m])) by (relname)", "legendFormat": "Inserts: {{relname}}", "refId": "A" },
-        { "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "sum(rate(pg_stat_user_tables_n_tup_upd{datname=\"default_db\"}[5m])) by (relname)", "legendFormat": "Updates: {{relname}}", "refId": "B" }
+        { "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "sum(rate(pg_stat_user_tables_n_tup_ins{datname=\"neondb\"}[5m])) by (relname)", "legendFormat": "Inserts: {{relname}}", "refId": "A" },
+        { "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "sum(rate(pg_stat_user_tables_n_tup_upd{datname=\"neondb\"}[5m])) by (relname)", "legendFormat": "Updates: {{relname}}", "refId": "B" }
       ]
     },
     {
