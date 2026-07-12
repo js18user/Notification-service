@@ -25,7 +25,7 @@ services:
   postgres_exporter:
     image: quay.io/prometheuscommunity/postgres-exporter:latest
     environment:
-      DATA_SOURCE_NAME: 'postgresql://gen_user:aaa4401%26%26@192.168.0.5:5432/default_db?sslmode=disable'
+      DATA_SOURCE_NAME: 'postgresql://neondb_owner:npg_GoPNxHe0pzm4@72.144.105.10/neondb?options=endpoint%3Dep-rapid-glitter-a9y5kqy5&sslmode=require'
     command:
       - '--no-collector.wal'       # check out pg_ls_waldir()
       - '--no-collector.database'  # check out into DB
