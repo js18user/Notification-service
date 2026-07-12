@@ -287,7 +287,7 @@ try:
                 if single := await db.fetch("SELECT start_date FROM message WHERE status='formed' LIMIT 1;"):
                     if datetime.now() > next(iter(dict(single[0]).values())):
                         await create_queue_release(db, )
-            await sl(119)
+            await sl(1800)
         return
 
 
