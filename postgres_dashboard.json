@@ -60,7 +60,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
       "id": 6,
       "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "pg_stat_user_tables_n_live_tup{datname=\"default_db\"}", "legendFormat": "{{relname}}", "refId": "A" }]
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "Prometheus" }, "expr": "pg_stat_user_tables_n_live_tup{datname=\"neondb\"}", "legendFormat": "{{relname}}", "refId": "A" }]
     }
   ],
   "schemaVersion": 38,
