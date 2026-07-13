@@ -9,7 +9,7 @@
     {
       "type": "piechart",
       "title": "Response Distribution (HTTP Statuses)",
-      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 0 },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 0 },
       "id": 1,
       "options": {
         "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false },
@@ -28,7 +28,7 @@
     {
       "type": "bargauge",
       "title": "Request Types (HTTP Methods)",
-      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 0 },
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 0 },
       "id": 2,
       "options": {
         "displayMode": "gradient",
@@ -47,7 +47,7 @@
     {
       "type": "timeseries",
       "title": "Multicolored endpoint request flow",
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 10 },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 9 },
       "id": 3,
       "options": {
         "legend": { "showLegend": true, "displayMode": "table", "placement": "bottom" }
@@ -58,19 +58,47 @@
             "drawStyle": "line",
             "lineInterpolation": "smooth",
             "fillOpacity": 20
-          }
+          },
+          "unit": "reqps"
         }
       },
       "targets": [
         {
           "datasource": { "type": "prometheus" },
-          "expr": "sum(rate(http_requests_total[1m])) by (handler)",
+          "expr": "sum(rate(http_requests_total[1m])) by (path)",
           "refId": "C",
-          "legendFormat": "Path: {{handler}}"
+          "legendFormat": "Path: {{path}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Endpoint Latency p95 (Time response)",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 18 },
+      "id": 4,
+      "options": {
+        "legend": { "showLegend": true, "displayMode": "table", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10
+          },
+          "unit": "s"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[1m])) by (le, path))",
+          "refId": "D",
+          "legendFormat": "p95 Latency: {{path}}"
         }
       ]
     }
   ],
   "schemaVersion": 38,
-  "version": 1
+  "version": 2
 }
