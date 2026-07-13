@@ -65,9 +65,9 @@
       "targets": [
         {
           "datasource": { "type": "prometheus" },
-          "expr": "sum(rate(http_requests_total[1m])) by (path)",
+          "expr": "sum(rate(http_requests_total[1m])) by (endpoint)",
           "refId": "C",
-          "legendFormat": "Path: {{path}}"
+          "legendFormat": "Path: {{endpoint}}"
         }
       ]
     },
@@ -92,13 +92,14 @@
       "targets": [
         {
           "datasource": { "type": "prometheus" },
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[1m])) by (le, path))",
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[1m])) by (le, endpoint))",
           "refId": "D",
-          "legendFormat": "p95 Latency: {{path}}"
+          "legendFormat": "p95 Latency: {{endpoint}}"
         }
       ]
     }
   ],
   "schemaVersion": 38,
-  "version": 2
+  "version": 3
 }
+
