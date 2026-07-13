@@ -560,6 +560,44 @@ try:
             id_distribution, status
         )
 
+        async def seek_json_opt_col(db):
+        # Метод fetchval вернет готовую строку JSON (строковый тип в Python)
+        return await db.fetchval(
+            """
+            SELECT coalesce(json_agg(t), json_build_array()) 
+            FROM (
+                SELECT 
+                    d.id AS a1, 
+                    d.start_date AS a2, 
+                    d.text AS a3, 
+                    d.mob AS a4, 
+                    d.teg AS a5, 
+                    d.end_date AS a6, 
+                    d.interval AS a7,
+                    coalesce(m.a8, 0) AS a8,
+                    coalesce(m.a9, 0) AS a9,
+                    coalesce(m.a10, 0) AS a10,
+                    coalesce(m.a11, 0) AS a11,
+                    coalesce(m.a12, 0) AS a12,
+                    coalesce(m.a13, 0) AS a13
+                FROM distribution AS d
+                LEFT JOIN (
+                    SELECT 
+                        id_distribution,
+                        COUNT(id) AS a8,
+                        COUNT(id) FILTER (WHERE status = 'sent') AS a9,
+                        COUNT(id) FILTER (WHERE status = 'queue') AS a10,
+                        COUNT(id) FILTER (WHERE status = 'formed') AS a11,
+                        COUNT(id) FILTER (WHERE status = 'failure') AS a12,
+                        COUNT(id) FILTER (WHERE status = 'expired') AS a13
+                    FROM message
+                    GROUP BY id_distribution
+                ) AS m ON m.id_distribution = d.id
+                ORDER BY d.id DESC
+            ) t;
+            """
+        )
+
     async def seek_messages(db, id_distribution):
         return await db.fetchval(
             "SELECT coalesce(json_agg(t), '[]'::json) FROM ("
@@ -905,7 +943,7 @@ try:
 
     @app.get('/admin/distribution/stat', status_code=200, description="", )
     async def get_all_distributions(request: Request, db=Depends(get_db_connection), ):
-            return await json_response(request, await seek_json_opt(db))
+            return await json_response(request, await seek_json_opt_col(db))
 
 
     @app.get('/admin/message', status_code=200, description="", )
