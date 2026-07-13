@@ -36,7 +36,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse
 from fastapi.responses import JSONResponse
 from fastapi.responses import StreamingResponse
-from prometheus_fastapi_instrumentator import Instrumentator
+from prometheus_fastapi_instrumentator import Instrumentator, metrics
 from loguru import logger
 from pydantic import BaseModel
 from pydantic import Field
@@ -730,7 +730,18 @@ try:
     app.add_middleware(cast(Any, CreateMiddleware))
     # app.mount("/static", StaticFiles(directory="static"), name="static") """
 
-    Instrumentator().instrument(app).expose(app, endpoint="/metrics")
+    instrumentator = Instrumentator(
+        should_group_status_codes=False,  
+        should_round_latency_decimals=True,
+    )
+
+    instrumentator.add(
+        metrics.latency(
+            buckets=(0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0)
+        )
+    )
+
+    instrumentator.instrument(app).expose(app, endpoint="/metrics")
 
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -740,7 +751,6 @@ try:
                             content=([]),
                             )
 
-
     @app.exception_handler(StarletteHTTPException)
     async def http_exception_handler(request: Request, exc):
         _, _ = request, exc
@@ -748,9 +758,6 @@ try:
         return JSONResponse(status_code=200,
                             content={},
                             )
-
-
-
 
     @app.exception_handler(PostgresError)
     async def postgres_exception_handler(request: Request, exc: PostgresError):
