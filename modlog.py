@@ -284,7 +284,7 @@ try:
     async def polling_worker(db_pool, ):
         while True:
             async with db_pool.acquire() as db:
-                if single := await db.fetch("SELECT start_date FROM message WHERE status='formed' LIMIT 1;"):
+                if single := await db.fetch("SELECT start_date FROM message WHERE status='queue' LIMIT 1;"):
                     if datetime.now() > next(iter(dict(single[0]).values())):
                         await create_queue_release(db, )
             await sl(1800)
