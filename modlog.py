@@ -560,8 +560,7 @@ try:
             id_distribution, status
         )
 
-        async def seek_json_opt_col(db):
-        # Метод fetchval вернет готовую строку JSON (строковый тип в Python)
+    async def seek_json_opt_col(db):
         return await db.fetchval(
             """
             SELECT coalesce(json_agg(t), json_build_array()) 
