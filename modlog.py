@@ -728,9 +728,8 @@ try:
     )
     app.add_middleware(cast(Any, BrotliMiddleware), quality=5,  minimum_size=1024)
     app.add_middleware(cast(Any, CreateMiddleware))
-    # app.mount("/static", StaticFiles(directory="static"), name="static") 
-
-    instrumentator.instrument(app).expose(app, endpoint="/metrics")
+     
+    Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request: Request, exc: RequestValidationError):
