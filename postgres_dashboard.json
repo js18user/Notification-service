@@ -4,7 +4,7 @@
   "style": "dark",
   "timezone": "browser",
   "editable": true,
-  "refresh": "300s",
+  "refresh": "400s",
   "panels": [
     {
       "type": "stat",
