@@ -6,5 +6,4 @@ COPY fastapi_dashboard.json /etc/grafana/dashboards/fastapi.json
 COPY server_dashboard.json /etc/grafana/dashboards/server_dashboard.json
 COPY analytics_dashboard.json /etc/grafana/dashboards/analytics_dashboard.json
 COPY postgres_dashboard.json /etc/grafana/dashboards/postgres_dashboard.json
-COPY analytics_fastapi_dashboard.json /etc/grafana/dashboards/analytics_fastapi_dashboard.json
 USER grafana
