@@ -4,7 +4,7 @@
   "style": "dark",
   "timezone": "browser",
   "editable": true,
-  "refresh": "5s",
+  "refresh": "120s",
   "panels": [
     {
       "type": "piechart",
@@ -65,15 +65,15 @@
       "targets": [
         {
           "datasource": { "type": "prometheus" },
-          "expr": "sum(rate(http_requests_total[1m])) by (endpoint)",
+          "expr": "sum(rate(http_requests_total[1m])) by (handler)",
           "refId": "C",
-          "legendFormat": "Path: {{endpoint}}"
+          "legendFormat": "Path: {{handler}}"
         }
       ]
     },
     {
       "type": "timeseries",
-      "title": "Endpoint Latency p95 (Time response)",
+      "title": "Global System Latency p95",
       "gridPos": { "h": 10, "w": 24, "x": 0, "y": 18 },
       "id": 4,
       "options": {
@@ -92,14 +92,13 @@
       "targets": [
         {
           "datasource": { "type": "prometheus" },
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[1m])) by (le, endpoint))",
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_highr_seconds_bucket[1m])) by (le))",
           "refId": "D",
-          "legendFormat": "p95 Latency: {{endpoint}}"
+          "legendFormat": "Global API p95 Latency"
         }
       ]
     }
   ],
   "schemaVersion": 38,
-  "version": 3
+  "version": 6
 }
-
