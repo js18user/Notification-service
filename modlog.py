@@ -36,7 +36,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse
 from fastapi.responses import JSONResponse
 from fastapi.responses import StreamingResponse
-from prometheus_fastapi_instrumentator import Instrumentator, metrics
+from prometheus_fastapi_instrumentator import Instrumentator
 from loguru import logger
 from pydantic import BaseModel
 from pydantic import Field
@@ -728,18 +728,7 @@ try:
     )
     app.add_middleware(cast(Any, BrotliMiddleware), quality=5,  minimum_size=1024)
     app.add_middleware(cast(Any, CreateMiddleware))
-    # app.mount("/static", StaticFiles(directory="static"), name="static") """
-
-    instrumentator = Instrumentator(
-        should_group_status_codes=False,  
-        should_round_latency_decimals=True,
-    )
-
-    instrumentator.add(
-        metrics.latency(
-            buckets=(0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0)
-        )
-    )
+    # app.mount("/static", StaticFiles(directory="static"), name="static") 
 
     instrumentator.instrument(app).expose(app, endpoint="/metrics")
 
